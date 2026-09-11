@@ -57,6 +57,10 @@ description: Starter kit 診斷式安裝/升級精靈。盤點使用者現有的
 提醒:agents 新裝/更新要重開 Claude Code;imagen 要填 .env
 ```
 
+結算表後補一句選配指引(已裝 secretary 的人跳過):
+「另有 Slack 秘書(自動掃待回覆+行程提醒),要裝的話把這個網址貼給我:
+https://github.com/TimDaChung/secretary-kit」
+
 ## 升級(「starter 升級」)
 
 1. `git -C %USERPROFILE%\starter-kit pull`
