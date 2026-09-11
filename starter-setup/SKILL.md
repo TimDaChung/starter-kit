@@ -61,6 +61,8 @@ description: Starter kit 診斷式安裝/升級精靈。盤點使用者現有的
 「另有 Slack 秘書(自動掃待回覆+行程提醒),要裝的話把這個網址貼給我:
 https://github.com/TimDaChung/secretary-kit」
 
+**zip 備援**:沒有 git 也能裝——跟 Tim 拿最新 zip,解壓後把 `skills/` 內要用的資料夾複製到 `~/.claude/skills/`、agents 照拷,CLAUDE.md 合併流程相同;差別是不能「starter 升級」,更新要重新拿 zip。
+
 ## 升級(「starter 升級」)
 
 1. `git -C %USERPROFILE%\starter-kit pull`
