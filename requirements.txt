@@ -1,0 +1,6 @@
+# starter-kit 的 Python 第三方依賴。安裝：pip install -r requirements.txt
+# Pillow：generate2dsprite / generate2dmap 的後製腳本、imagen 的 magenta 去背
+# playwright：webapp-testing（裝完還要跑 python -m playwright install chromium）
+# imagen 的 generate.py 只用標準庫 urllib 打 Gemini API，不需要 google SDK
+Pillow>=10
+playwright>=1.45

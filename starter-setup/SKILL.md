@@ -31,6 +31,11 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 - `%USERPROFILE%\starter-kit` 已 clone？（已有就 `git pull`，記 CHANGELOG 新增段落）
 - secretary(skills/secretary)→ 歸「自有」，本精靈完全不碰
 - `skills/imagen/.env` 存在？（影響生圖類能不能用）
+- **環境依賴**（企劃 / 原型類 7 支不需要，只影響生圖、測試、試玩迴圈）：
+  - `python --version` 有 3.10+？
+  - `python -c "import PIL"`、`python -c "import playwright"` 各自過不過？
+  - Playwright 的 Chromium：`%LOCALAPPDATA%\ms-playwright\chromium*` 目錄存在？
+  - `claude mcp list` 有 `chrome-devtools`？`npx --version` 有 Node？
 
 ## 2. 分類（kit `skills/` 目錄內的每一支 skill + `agents/` 內每支 agent 逐一比對）
 
@@ -56,6 +61,13 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 3. **Agents 用拷貝**（散檔無法 junction）：複製「沒有」的 `agents/*.md` 到 `~/.claude/agents/`。`templates/my-voice.example.md` 是範本不是 agent，不裝，結算表提示一句。升級時 agents 有 diff → 歸「自改過」進最終健檢
 4. **imagen 設定**：`.env` 不存在就把 `.env.example` 複製成 `.env`，結算表提醒去 https://aistudio.google.com/apikey 拿 key 填入
 5. **略過清單**：使用者說「X 不要裝」「不要 X」→ 把 X 的名字寫進 `~/.claude/starter-skip.md`（一行一個，可加一句原因），之後安裝與升級都跳過它；說「裝回 X」→ 從檔案移除該行並立即裝。沒有這個檔就代表沒有略過任何東西
+6. **環境依賴**（開場健檢有缺才做）：列一張「缺什麼 → 影響哪些 skill → 指令」的表，**問一次**「要不要我順手裝？」。這是 kit 檔案以外唯一會動到使用者環境（Python 套件、MCP 設定）的動作，所以不套「新增不問」；同意才依序執行，不同意或失敗就結算表列「未裝，影響 X」，不重試第三次。指令固定用這幾條：
+   ```
+   pip install -r %USERPROFILE%\starter-kit\requirements.txt
+   python -m playwright install chromium
+   claude mcp add --scope user chrome-devtools -- cmd /c npx chrome-devtools-mcp@latest --browser-url http://127.0.0.1:9222
+   ```
+   沒有 Python / Node 的人給 `winget install Python.Python.3.12` / `winget install OpenJS.NodeJS.LTS`，裝完請他重開終端再叫一次「starter 升級」，本精靈不自己裝 runtime。裝了 MCP 要提醒：Chrome 需以 `--remote-debugging-port=9222` 啟動 playtest-loop 才讀得到玩家分頁，且新 MCP 要重開 Claude Code 才生效
 
 ## 4. CLAUDE.md 併入
 
@@ -81,6 +93,11 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 - **舊版 starter**：使用者的 CLAUDE.md 整份或大段是舊版 `CLAUDE.starter.md` 的複本 → 列出 kit 後續改動的 diff 摘要，進「換版評估」
 - **死規則**：引用不存在的工具 / MCP / skill / 路徑 → 列出
 - **瘦身的邊界**：只建議動重複、死引用、過時路徑；使用者的角色定位句、原則句、meta 規則一律不列為瘦身對象，「這個工具他還沒接上」不是刪句子的理由
+
+### 環境
+
+- **仍缺的依賴**：第 3 節第 6 步沒裝或裝失敗的 → 逐項列「缺 X → Y skill 不能跑 / 退到 Z fallback」（例：缺 chrome-devtools MCP → playtest-loop 退到手貼 `exportDevNotes()`；缺 playwright → webapp-testing 不能跑，game-develop 的玩法 QA 走 chrome-devtools fallback）
+- **僅健檢模式**（第 1 節 + 第 5 節）：一樣列出來，附指令，不裝
 
 ### skills
 
@@ -117,6 +134,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 
 ```
 🩺 開場健檢:CLAUDE.md 96 行 / skills 0 / agents 0 / secretary 無
+🧰 環境:Python 3.13 ✔ / Pillow ✔ / Playwright ✔(本次裝) / chrome-devtools MCP ✘(你說先不裝→playtest-loop 退手貼模式) / Gemini key ✘(.env 待填)
 ✅ 新裝 skills(N,junction):product-planning、imagen …
 ✅ 新裝 agents(3):dialogue-writer、game-balance-auditor、planning-doc-auditor
 ⬆️ 升級:game-prototype(舊版→v1.1,原版備份於 skills-backup/)
@@ -159,5 +177,5 @@ https://github.com/TimDaChung/secretary-kit」
 - **刪改必問**：刪除、覆蓋、衝突處理、自改過的合併，列建議等使用者說了才動
 - 任何刪除/覆蓋前先備份到 `~/.claude/skills-backup/`
 - CLAUDE.md 原有內容一字不刪、不改寫、不重排
-- 不碰 settings.json、memory、與 kit 無關的任何檔案
+- 不碰 settings.json、memory、與 kit 無關的任何檔案；Python 套件與 MCP 設定是唯一例外，且**問過才裝**（第 3 節第 6 步）
 - 同一步卡兩次 → 停止重試，整理錯誤請使用者找 Tim

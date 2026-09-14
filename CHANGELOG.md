@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v1.8.0 (2026-09-15)
+
+環境依賴補齊：乾淨機器裝完能立刻跑的原本只有企劃 / 原型類 7 支，其餘要 Python 套件或 MCP 卻沒寫、沒檢查。
+
+- **新增 `requirements.txt`**（Pillow、playwright）；imagen 的 generate.py 只用標準庫，不需 google SDK
+- **安裝說明前置表**：Python 3.10+、pip 套件、Playwright Chromium、Node + chrome-devtools MCP、Gemini key 各影響哪些 skill 與安裝指令；常見卡點加 ModuleNotFoundError 與 playtest-loop 找不到分頁兩條
+- **安裝精靈加環境健檢**：開場健檢查 Python / Pillow / playwright / Chromium / chrome-devtools MCP；缺的列表**問一次**要不要順手裝，同意才動使用者的 Python 環境與 MCP 設定（kit 檔案以外唯一例外，鐵則補寫）；最終健檢加「環境」節列仍缺的依賴與 fallback；結算表加 🧰 一行
+- **playtest-loop 加前置節**：需 chrome-devtools MCP + Chrome 以 `--remote-debugging-port=9222` 啟動，缺就退手貼 `exportDevNotes()` 模式
+- README 測試列標註需 Python + Playwright，升級節前補一句誰需要額外依賴
+
 ## v1.7.0 (2026-09-14)
 
 健檢第四批：一致性收尾。

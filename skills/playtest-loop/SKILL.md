@@ -11,6 +11,10 @@ description: 遊戲 demo 試玩迭代迴圈。Use when 使用者說「重開 ser
 
 使用者只做兩件事：**玩**、**在遊戲內打「開發者表示：」**。其餘全部（起 server、開頁、收筆記、歸類、批次修正、清空、重開）由本 skill 一條龍完成，使用者不需要手動貼 JSON、不需要重複下「重開 server」指令。
 
+## 前置
+
+需要 chrome-devtools MCP 已接、且玩家的 Chrome 以 `--remote-debugging-port=9222` 啟動（MCP 才能連進玩家原本的分頁讀 localStorage）。缺任一項 → 開場說一句，退到「請使用者在主控台跑 `exportDevNotes()` 貼回來」模式，不要硬開新 browser。安裝方式見 kit 的 `安裝說明.md` 前置表。
+
 ## 專案偵測
 
 1. 目標 = 使用者指名的專案，否則取對話中最近的遊戲專案（下稱 `<project-dir>/`）。
