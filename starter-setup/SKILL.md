@@ -41,6 +41,7 @@ description: Starter kit 健檢式安裝/升級精靈:盤點→直接裝缺的�
 | **自改過** | 有同名但內容與 kit 新舊版都不同 | 不動;進最終健檢的「換版評估」 | 問 |
 | **近似** | 名稱不同但功能高度重疊(description / 觸發詞 / 流程相近) | 不動;進最終健檢的「換版評估」 | 問 |
 | **自有** | kit 沒有的資產 | 不動 | 不問,結算表列「保留」 |
+| **使用者略過** | 名字列在 `~/.claude/starter-skip.md` | 不裝、不升級 | 不問,結算表列「略過」,附「要裝就說『裝回 X』」 |
 
 ## 3. 自動安裝
 
@@ -54,6 +55,7 @@ description: Starter kit 健檢式安裝/升級精靈:盤點→直接裝缺的�
    ```
 3. **Agents 用拷貝**(散檔無法 junction):複製「沒有」的 `agents/*.md` 到 `~/.claude/agents/`。`templates/my-voice.example.md` 是範本不是 agent,不裝,結算表提示一句。升級時 agents 有 diff → 歸「自改過」進最終健檢
 4. **imagen 設定**:`.env` 不存在就把 `.env.example` 複製成 `.env`,結算表提醒去 https://aistudio.google.com/apikey 拿 key 填入
+5. **略過清單**:使用者說「X 不要裝」「不要 X」→ 把 X 的名字寫進 `~/.claude/starter-skip.md`(一行一個,可加一句原因),之後安裝與升級都跳過它;說「裝回 X」→ 從檔案移除該行並立即裝。沒有這個檔就代表沒有略過任何東西
 
 ## 4. CLAUDE.md 併入
 
@@ -120,6 +122,7 @@ description: Starter kit 健檢式安裝/升級精靈:盤點→直接裝缺的�
 📝 CLAUDE.md:併入 5 條(meta 規則、UI 繁中 …),原內容未動,備份於 skills-backup/
 ✋ 保留不動:你的 my-analyzer、secretary
 ⏭️ 未裝:templates/my-voice.example.md(想要個人分身就複製成 ~/.claude/agents/my-voice.md 再客製)
+⛔ 略過(依 starter-skip.md):generate2dmap、imagen-ui(要裝就說「裝回 X」)
 
 🩺 最終健檢建議(不動手,你決定):
   1. CLAUDE.md「資料分析」段 12 行只在統計任務用到 → 可搬成 skill,省 12 行
@@ -140,7 +143,7 @@ https://github.com/TimDaChung/secretary-kit」
 
 1. `git -C %USERPROFILE%\starter-kit pull`
 2. 摘要 CHANGELOG 新增段落
-3. 重跑第 1 到 6 節:junction 裝的自動生效;新出現的 skills/agents 直接裝;CLAUDE.starter.md 新增的規則直接併;agents 有 diff 進最終健檢
+3. 重跑第 1 到 6 節:junction 裝的自動生效;新出現的、以及使用者先前沒裝的 skills/agents 直接補裝(`starter-skip.md` 內的除外);CLAUDE.starter.md 新增的規則直接併;agents 有 diff 進最終健檢
 4. **kit 已移除的 skill**(junction 目標消失,例:v1.3.0 把 generate2dsprite-chibi 併入 generate2dsprite)→ 歸「失效」進最終健檢,建議刪 junction 並說明併去哪裡;使用者同意才刪
 
 ## 健檢(「starter 健檢」/「新手包健檢」)
