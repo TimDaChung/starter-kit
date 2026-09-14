@@ -27,9 +27,10 @@ Choose the art style from the user request, project context, map context, or ref
 - `clean_hd`: clean hand-painted HD 2D game asset style, crisp silhouettes, smooth surfaces, low texture noise, controlled lighting, no chunky pixels.
 - `pixel_inspired`: clean modern pixel-art-inspired style without 16-bit wording, heavy dithering, or noisy microtexture.
 - `retro_pixel`: 16-bit pixel art or retro JRPG pixel art, only when explicitly requested.
+- `cel_shaded_chibi`: anime cel-shaded chibi sprite, 2.5-head proportions, clean bold black outlines, flat fills, two-tone shading (base + one shadow), no gradients, no painterly brushwork. Reference look: Eversoul / Idle Heroes / Disgaea / AFK Arena. Use when the user says chibi / Q版 / cel-shaded / gacha-style, or the project roster is already chibi.
 - `map_style` or `project-native`: match the visible reference, existing game, or `$generate2dmap` selected art style.
 
-Do not write `16-bit`, `retro JRPG`, or `chunky pixel-art` unless the user asks for that look. For clean HD map props, explicitly say `Do not make pixel art`.
+Do not write `16-bit`, `retro JRPG`, or `chunky pixel-art` unless the user asks for that look (never in a `cel_shaded_chibi` prompt). For clean HD map props, explicitly say `Do not make pixel art`.
 
 ## Reference Rules
 
@@ -75,6 +76,14 @@ For `player` and `npc` when the request does not specify another style:
 - full body visible
 - chunky readable pixel-art with crisp dark outlines
 - enough margin for clean engine rendering
+
+For `player` and `npc` when `art_style = cel_shaded_chibi`:
+
+- anime cel-shaded chibi sprite, 2.5-head proportions
+- full body visible, dynamic readable pose
+- bold black outlines, flat fills, two-tone shading (base + one shadow)
+- mobile gacha RPG aesthetic (Eversoul / Idle Heroes / Disgaea)
+- enough magenta margin around silhouette for clean engine rendering
 
 ## Map Prop Style
 

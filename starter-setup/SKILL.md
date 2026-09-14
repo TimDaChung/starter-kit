@@ -30,7 +30,7 @@ description: Starter kit 健檢式安裝/升級精靈。開場先健檢(盤點 C
 - secretary(skills/secretary)→ 歸「自有」,本精靈完全不碰
 - `skills/imagen/.env` 存在?(影響生圖類能不能用)
 
-## 2. 分類(kit 的 15 支 skills + 3 支 agents 逐一比對)
+## 2. 分類(kit 的 14 支 skills + 3 支 agents 逐一比對)
 
 | 分類 | 判定 | 動作 | 問不問 |
 |---|---|---|---|
@@ -120,6 +120,7 @@ https://github.com/TimDaChung/secretary-kit」
 1. `git -C %USERPROFILE%\starter-kit pull`
 2. 摘要 CHANGELOG 新增段落
 3. 重跑第 1 到 6 節:junction 裝的自動生效;新出現的 skills/agents 直接裝;CLAUDE.starter.md 新增的規則直接併;agents 有 diff 進最終健檢
+4. **kit 已移除的 skill**(junction 目標消失,例:v1.3.0 把 generate2dsprite-chibi 併入 generate2dsprite)→ 歸「失效」進最終健檢,建議刪 junction 並說明併去哪裡;使用者同意才刪
 
 ## 健檢(「starter 健檢」/「新手包健檢」)
 
