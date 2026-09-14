@@ -1,9 +1,11 @@
 ---
 name: starter-setup
-description: Starter kit 健檢式安裝/升級精靈。開場先健檢(盤點 CLAUDE.md/skills/agents),沒有的 skills/agents 直接裝、CLAUDE.md 缺的規則直接併入;裝完做最終健檢(CLAUDE.md 肥胖/重複/衝突、近似 skills/agents),只列建議不刪。觸發詞:「裝 starter kit」「starter 安裝」「starter 升級」「檢查 starter」「starter 健檢」。
+description: Starter kit 健檢式安裝/升級精靈。開場先健檢(盤點 CLAUDE.md/skills/agents),沒有的 skills/agents 直接裝、CLAUDE.md 缺的規則直接併入;裝完做最終健檢(CLAUDE.md 肥胖/重複/衝突、近似 skills/agents),只列建議不刪。觸發詞(「starter」與「新手包」互通):「裝 starter kit」「裝新手包」「starter 安裝」「新手包安裝」「starter 升級」「新手包升級」「starter 健檢」「新手包健檢」「檢查 starter」「檢查新手包」。
 ---
 
 # Starter Kit 安裝/升級精靈
+
+口令中的「starter」與「新手包」完全互通,使用者用哪個都認。
 
 核心原則:**新增不問、刪改必問。** 沒有的直接裝、缺的規則直接併,全程不打斷;任何刪除、覆蓋、衝突處理一律列出來等使用者決定。**絕不刪除使用者自己的東西。**
 
@@ -113,13 +115,13 @@ https://github.com/TimDaChung/secretary-kit」
 
 ---
 
-## 升級(「starter 升級」)
+## 升級(「starter 升級」/「新手包升級」)
 
 1. `git -C %USERPROFILE%\starter-kit pull`
 2. 摘要 CHANGELOG 新增段落
 3. 重跑第 1 到 6 節:junction 裝的自動生效;新出現的 skills/agents 直接裝;CLAUDE.starter.md 新增的規則直接併;agents 有 diff 進最終健檢
 
-## 健檢(「starter 健檢」)
+## 健檢(「starter 健檢」/「新手包健檢」)
 
 只跑第 1 節與第 5 節,不裝任何東西。給已裝完一陣子的人定期整理用。
 

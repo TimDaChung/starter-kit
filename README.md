@@ -34,6 +34,7 @@
 
 對 Claude 說「**starter 升級**」= git pull + 摘要更新內容 + 重跑健檢式流程(新 skill 直接裝、新規則直接併)。
 對 Claude 說「**starter 健檢**」= 只健檢不安裝,定期整理 CLAUDE.md 與 skills 用。
+口令裡的「starter」都可以換成「**新手包**」(「新手包升級」「新手包健檢」)。
 你的 CLAUDE.md 原有內容、imagen 的 .env、你自己加的 skills/agents 永遠不會被升級動到。
 
 ## 已經拿過舊版 skills 的人
