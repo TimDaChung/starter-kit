@@ -31,7 +31,7 @@ If the user wants a pixel-adjacent look, use `clean modern pixel-art-inspired` a
 
 ## Prop Generation
 
-Use `$generate2dsprite` when the map needs reusable transparent props. Choose one of two approaches:
+Use `generate2dsprite` when the map needs reusable transparent props. Choose one of two approaches:
 
 - One-by-one props: safest for large, important, irregular, animated, or identity-critical props.
 - Prop packs: faster for sets of small/medium static environmental props.
@@ -43,7 +43,7 @@ Read [prop-pack-contract.md](prop-pack-contract.md) before batching props.
 For generated layered raster maps, use a dressed reference pass before final prop extraction:
 
 1. Generate the base as ground-only terrain.
-2. Make the base visible to yourself first by Read-ing it, then pass the same path to `lib/gen_image.py` with `--ref`. Do not expect a filesystem path inside the text prompt to work as a visual reference.
+2. Make the base visible to yourself first by Read-ing it, then pass the same path to `~/.claude/skills/imagen/bin/generate.py` with `--ref`. Do not expect a filesystem path inside the text prompt to work as a visual reference.
 3. Ask for a dressed-reference version of the same map by adding props only.
 4. Preserve exact camera, framing, dimensions, terrain, paths, water, anchor pads, collision-relevant boundaries, and map edges.
 5. Use the dressed reference to choose prop identities and placement coordinates, but compose the final runtime preview from the original base plus extracted transparent props.
@@ -74,28 +74,26 @@ No text, labels, UI, or watermark.
 Entire prop must fit fully inside the image with generous magenta margin on all sides; no part may touch or cross the image edge.
 ```
 
-Recommended processing:
+Recommended processing (a single prop is a `1x1` prop pack, so the output lands at `assets/props/<prop>/prop.png`):
 
 ```bash
-python /path/to/generate2dsprite.py process \
+python ~/.claude/skills/generate2dmap/scripts/extract_prop_pack.py \
   --input <raw.png> \
-  --target asset \
-  --mode single \
   --rows 1 \
   --cols 1 \
-  --cell-size 256 \
-  --output-dir assets/props/<prop> \
-  --fit-scale 0.9 \
-  --align feet \
+  --labels <prop> \
+  --output-dir assets/props \
+  --manifest assets/props/<prop>/prop-pack.json \
   --component-mode largest \
   --component-padding 8 \
   --min-component-area 200 \
   --threshold 100 \
   --edge-threshold 150 \
-  --edge-clean-depth 2
+  --edge-clean-depth 2 \
+  --reject-edge-touch
 ```
 
-Use a larger `--cell-size` for buildings, trees, gates, statues, or large signs.
+The extractor crops to the prop's alpha bounds and does not rescale; size the prop in the generation step (`--size`) or in placement JSON (`w` / `h`) for buildings, trees, gates, statues, or large signs.
 
 ## Prop Metadata
 
@@ -174,10 +172,10 @@ Guidelines:
 
 ## Preview Composition
 
-Use `scripts/compose_layered_preview.py` to flatten a base map and placement JSON:
+Use `~/.claude/skills/generate2dmap/scripts/compose_layered_preview.py` to flatten a base map and placement JSON:
 
 ```bash
-python skills/generate2dmap/scripts/compose_layered_preview.py \
+python ~/.claude/skills/generate2dmap/scripts/compose_layered_preview.py \
   --base assets/map/shrine-base.png \
   --placements data/shrine-props.json \
   --output assets/map/shrine-layered-preview.png

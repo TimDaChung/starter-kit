@@ -10,7 +10,7 @@
 - ☐ 視覺主題決定
   └ 理由：（填）
 - ☐ CSS variables 內嵌（HTML 內 `/* === SECTION: CSS-VARIABLES === */`）
-- ☐ DESIGN.md 完成（design-consultation 跑過）
+- ☐ DESIGN.md 完成（風格代號 / 色票 / 字級階 / 元件規則）
   └ 跳過理由（如選擇）：（填）
 
 ## Phase 2: 素材清單規劃
@@ -51,17 +51,17 @@
 - ☐ UI 元件整合
 - ☐ sprite 整合
 - ☐ 地圖 / 背景整合
-- ☐ browse 跑一輪確認 layout 沒破
+- ☐ chrome-devtools MCP 跑一輪確認 layout 沒破
 
-## Phase 5: Polish（順序：balance → dialogue → design-review → qa）
+## Phase 5: Polish（順序：balance → dialogue → design review → qa）
 
 - ☐ Balance simulation（呼叫 game-balance-auditor agent）
   └ 結果摘要：（填）
 - ☐ 對白文案（呼叫 dialogue-writer agent）
   └ 完成範圍：（填）
-- ☐ 視覺 QA（呼叫 design-review skill）
+- ☐ 視覺 QA（自行 self-walkthrough：chrome-devtools MCP 截圖逐畫面檢查）
   └ 修正項數：（填）
-- ☐ 玩法 QA（呼叫 qa skill）
+- ☐ 玩法 QA（呼叫 webapp-testing skill，Playwright 腳本存 tests/）
   └ 修正項數：（填）
 
 ---

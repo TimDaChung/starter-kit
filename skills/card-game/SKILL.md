@@ -3,6 +3,8 @@ name: card-game
 description: >
   Build a card game: card data, deck/hand/discard zones, draw/shuffle/reshuffle, a turn structure,
   costs, and effect resolution. Use for a deckbuilder, TCG/CCG, or roguelike deckbuilder.
+  觸發詞：卡牌、抽卡、牌組、卡牌遊戲、deckbuilder。搭配 /game-prototype 使用（規則設計在此，
+  單檔 HTML 實作走 game-prototype）。
 ---
 
 # Card Game
@@ -20,9 +22,14 @@ machinery, and the effect-resolution rules that keep a card game correct and bug
   (deck → hand → play → discard): deckbuilder, TCG/CCG, solitaire, roguelike deckbuilder.
 - Use when designing draw/shuffle/reshuffle, turn structure, card costs, or how effects resolve.
 
-**When *not* to use:** board/tile state with matching rules → `puzzle`. RPG with an
-incidental card battler → start from `rpg`. For defining cards as assets, use `godot-resources`
-/ `unity-scriptableobjects`; for the hand/drag UI, use `godot-ui-control`.
+**When *not* to use:** the game is not card-centric (board/tile matching, RPG with an
+incidental card battler) → start from `game-prototype` directly and only borrow the zone /
+effect patterns below if a card sub-system appears. This skill defines rules and data shape;
+it does not build the HTML — implementation always goes through `game-prototype`.
+
+**Implementation path (kit default):** single-file HTML. 實作走 `game-prototype` 的
+`JS-STATE`（zones、deck、hand、discard、resources 放在 `state`）/ `JS-LOGIC`（draw、shuffle、
+play、resolve_effect、phase machine）section；UI 走 `JS-RENDER` / `JS-EVENTS`。No Godot / Unity.
 
 ## Core loop
 
@@ -67,7 +74,7 @@ def draw(n):
                 on_deck_out(); return
             deck.extend(discard)     # reshuffle discard into deck
             discard.clear()
-            shuffle(deck, rng)       # use a seeded RNG (see save-systems for replays)
+            shuffle(deck, rng)       # use a seeded RNG so runs can be replayed
         hand.append(deck.pop())
 ```
 
@@ -118,14 +125,19 @@ def take_turn(player):
 - **Targeting state leaks** → a cancelled play leaves the board mid-targeting. Make play
   atomic: validate cost + targets first, then commit.
 
-## Composition (build it from these skills)
+## Composition (build it from these kit skills / agents)
 
-- **Card content:** `godot-resources` / `unity-scriptableobjects` — define each card as a data asset.
-- **UI:** `game-ui-ux` for layout, scaling, and focus navigation; `godot-ui-control` for hand layout, drag/drop, zone counts, and targeting prompts.
-- **Persistence/replays:** `save-systems` for collection, run state (roguelike deckbuilder), and seeded replays.
-- **Opponent AI:** `game-ai` for an AI that evaluates playable cards and picks targets.
-- **Animation/feedback:** the engine animation skill for card movement; `audio-design` for cues.
-- **Scripting:** `godot-gdscript` / `unity-csharp-scripting` for the effect interpreter.
+- **Card state + logic:** `game-prototype` — cards as plain JS objects in `JS-STATE`; draw /
+  shuffle / play / effect interpreter / phase machine in `JS-LOGIC`; hand layout, tap-to-play,
+  zone counts, and targeting prompts in `JS-RENDER` / `JS-EVENTS`. Emoji stand in for art.
+- **Polish:** `game-develop` — card art (`imagen-portrait` / `imagen-ui` via its Phase 3),
+  animation for card movement (CSS animation / Canvas), audio cues (Web Audio API), QA.
+- **Balance:** `game-balance-auditor` agent — simulate draw odds, resource curve, win rates
+  across archetypes; feeds back into the design knobs above.
+- **Persistence / replays:** `localStorage` + seeded RNG inside the single file; no external
+  save system.
+- **Opponent AI:** write it in `JS-LOGIC` — score each playable card by its effect list and
+  pick targets; keep it data-driven like the cards.
 
 ## References
 

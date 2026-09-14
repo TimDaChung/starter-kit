@@ -5,16 +5,16 @@ description: "Generate + postprocess 2D game sprites/animation sheets via Nano B
 
 # Generate2dsprite
 
-> **執行角色：美術**——關注風格一致、動作可讀性、sprite 規格（尺寸 / 幀數 / 透明背景 / 命名）。
+> **執行角色：美術**——關注風格一致、動作可讀性、sprite 規格（尺寸 / 幀數 / 透明背景 / 命名）；完成後切**企劃**視角複核規格對齊。
 
-Use this skill for self-contained 2D sprite or animation assets, in any of two families:
+Use this skill for self-contained 2D sprite or animation assets, in either of two families:
 
 - **Pixel / HD family** (`pixel_art`, `retro_pixel`, `clean_hd`, `pixel_inspired`): classic 2D game actors, 16-bit RPG sprites, HD map props. Default when the user says nothing about style.
-- **Cel-shaded chibi** (`cel_shaded_chibi`): Q版 2.5-head, bold black outlines, two-tone shading, Eversoul / Disgaea / AFK Arena look. Pick it when the user says chibi / Q版 / cel-shaded / gacha-style, or when the project's existing sprites are chibi.
+- **Cel-shaded chibi** (`cel_shaded_chibi`): Q版 2.5-head, bold black outlines, two-tone shading, Eversoul / Idle Heroes / Disgaea / AFK Arena look. Pick it when the user says chibi / Q版 / cel-shaded / gacha-style, or when the project's existing sprites are chibi.
 
 Both families share the same processor, workflow, and bundle structure. Sections marked **[chibi]** apply only when `art_style = cel_shaded_chibi`.
 
-If the user wants a whole playable content pack, map, story, slideshow, or pack assembly, use `generate2dgamepack`.
+If the user wants a whole playable content pack, map, story, slideshow, or pack assembly, use `game-develop`.
 
 ## Parameters
 
@@ -42,11 +42,9 @@ Read [references/modes.md](references/modes.md) when the request is ambiguous.
 When the user has NOT specified the following, apply these defaults:
 
 1. **Female characters: fair luminous skin** (avoid sun-kissed / tanned / olive / bronzed / dark). Override only when the user explicitly requests a darker skin tone.
-2. **All characters: refined attractive features** (mobile gacha aesthetic — beautiful face, well-proportioned; **[chibi]** big expressive eyes, well-proportioned chibi). **Avoid** western cartoon / Disney / Pixar / caricature drift. Banana Pro can be biased toward western-cartoon style by certain prompt words (e.g. "manic", "wild flying outward", "battle-tested"); explicitly exclude these styles in the EXCLUSION section when needed.
+2. **[HD / chibi] All characters: refined attractive features** (mobile gacha aesthetic — beautiful face, well-proportioned; **[chibi]** big expressive eyes, well-proportioned chibi). **Avoid** western cartoon / Disney / Pixar / caricature drift. Banana Pro can be biased toward western-cartoon style by certain prompt words (e.g. "manic", "wild flying outward", "battle-tested"); explicitly exclude these styles in the EXCLUSION section when needed.
 3. **Background / canvas must extend full-bleed to all four edges** — NO white margins, NO letterbox bars, NO painting-style frame, NO gallery framing. Use **positive instruction** in the composition section ("background extends full-bleed to all four edges"); pure negation in EXCLUSION can paradoxically trigger frame design.
 4. Any user explicit request overrides these defaults.
-
-See feedback memory `feedback_default_fair_skin.md` and `feedback_same_category_unified_style.md`.
 
 ---
 
@@ -72,7 +70,7 @@ Before generating, scan the project directory for existing same-category sprite 
 
 **When the user requests 2+ same-category assets in one go** (e.g. 4 character sprites, 6 monster sprites, a full enemy roster), switch into batch mode:
 
-1. **Define a unified spec FIRST** before any generation: art style, sheet shape, head/body proportion (e.g. 2.5-head for chibi, 4-head for semi-chibi, true-scale for HD), view angle (top-down / 3/4 / side), lighting direction, **facing direction (left/right)** for non-symmetric idle, anchor (bottom/center/feet), margin policy.
+1. **Define a unified spec FIRST** before any generation: art style, sheet shape, head/body proportion (e.g. 2.5-head for chibi, true-scale for HD), view angle (top-down / 3/4 / side), lighting direction, **facing direction (left/right)** for non-symmetric idle, anchor (bottom/center/feet), margin policy.
 2. **Distinguish "locked" vs "variable"**: locked = style / proportion / view / facing / sheet shape / anchor; variable = colors / weapons / costume / FX color.
 3. **Write the locked rules into the Strict Rules section of EVERY prompt in the batch** — same wording across all assets, AI flexibility confined to variable parts. Sprites especially need explicit facing direction lock — without it, even `3/4 view` lets AI mirror frames left/right. **[chibi]** Also lock head-to-body ratio explicitly (head ≈ 40% of total height, body ≥ 1.5× head height) — AI tends to enlarge the head and shrink the body, and flips symmetric costumes to front-facing.
 4. **After generation, verify**: per-asset (check before applying) or batch-end (check uniformity + spec compliance before applying any). The confirmation step is mandatory.
@@ -80,7 +78,7 @@ Before generating, scan the project directory for existing same-category sprite 
 
 **Single-asset generation skips this mode** — go straight to the regular workflow.
 
-**Why**: Same-category sprites must visually rhyme on a shared roster screen / battle field. Without locking spec into every prompt, AI drifts (different head ratios, mixed views, mirrored facings, varying outline weight). See feedback memory `feedback_same_category_unified_style.md`.
+**Why**: Same-category sprites must visually rhyme on a shared roster screen / battle field. Without locking spec into every prompt, AI drifts (different head ratios, mixed views, mirrored facings, varying outline weight).
 
 ---
 
@@ -88,9 +86,9 @@ Before generating, scan the project directory for existing same-category sprite 
 
 - Decide the asset plan yourself. Do not force the user to spell out sheet size, frame count, or bundle structure when the request already implies them.
 - Write the art prompt yourself. Do not default to the prompt-builder script.
-- Use `~/.claude/skills/imagen/bin/generate.py` (Nano Banana Pro / gemini-3-pro-image-preview) for every raw image. The wrapper resolves the API key from `GEMINI_API_KEY` env, then `~/.claude/skills/imagen/.env`. There is no `lib/gen_image.py` and no `sprite-forge-claude/` folder — those are legacy doc references.
+- Use `~/.claude/skills/imagen/bin/generate.py` (Nano Banana Pro / gemini-3-pro-image-preview) for every raw image. The wrapper resolves the API key from `GEMINI_API_KEY` env, then `~/.claude/skills/imagen/.env`.
 - When the user provides or implies a visual reference, first Read the reference image with the Read tool so you can see it, then pass the same path to `imagen/bin/generate.py` via one or more `--ref <path>` flags. Banana embeds the reference as inline_data and uses it as the visual anchor — do not rely on a filesystem path string inside the text prompt.
-- Do not force pixel art when the asset is a map prop for `$generate2dmap` or when the user/project requests a different style. Match the map or reference style first.
+- Do not force pixel art when the asset is a map prop for `generate2dmap` or when the user/project requests a different style. Match the map or reference style first.
 - Use the script only as a deterministic processor: magenta cleanup, frame splitting, component filtering, scaling, alignment, QC metadata, transparent sheet export, and GIF export.
 - Do not use scripts to generate the creative image prompt. If a legacy prompt-builder command exists, treat it as historical compatibility only, not the normal skill workflow.
 - Treat script flags as execution primitives chosen by the agent, not user-facing hardcoded workflow.
@@ -133,7 +131,7 @@ Choose `art_style` before writing the prompt:
 ```
 Style: anime cel-shaded chibi sprite, 2.5-head proportions, clean bold black outlines,
 flat color fills with two-tone shading only (base color + one shadow tone), no gradients,
-no painterly brushwork, no soft edges. Reference style: Eversoul / Idle Heroes / Disgaea sprite art.
+no painterly brushwork, no soft edges. Reference style: Eversoul / Idle Heroes / Disgaea / AFK Arena sprite art.
 ```
 
 Why chibi is worth its own style: flat fills + bold outlines give the most stable frame-to-frame consistency on Banana Pro; exaggerated proportions make poses read with few frames; effects render as cleanly separated elements for layered compositing; and it is the industry-standard look for animation-heavy gacha / mobile games. Do not write `16-bit`, `retro JRPG`, or `chunky pixel-art` in a chibi prompt.

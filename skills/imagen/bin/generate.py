@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Nano Banana Pro (gemini-3-pro-image-preview) 圖片生成腳本
-用法：
+Nano Banana Pro (gemini-3-pro-image-preview) image generation script.
+
+Usage:
   python generate.py --prompt "..." --output "./output.png"
   python generate.py --prompt "..." --ratio "16:9" --size "2K" --output "./output.png"
   python generate.py --prompt "..." --ref "style.jpg" --ref "char.png" --output "./output.png"
@@ -16,40 +17,45 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 
-# === 設定 ===
+# === Config ===
 MODEL = "gemini-3-pro-image-preview"
 ENDPOINT = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent"
 
+# Officially supported values for the Pro image model
+# (https://ai.google.dev/gemini-api/docs/image-generation).
 VALID_RATIOS = [
-    "1:1", "1:4", "1:8", "2:3", "3:2", "3:4", "4:1",
-    "4:3", "4:5", "5:4", "8:1", "9:16", "16:9", "21:9"
+    "1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"
 ]
-VALID_SIZES = ["512", "1K", "2K", "4K"]
+VALID_SIZES = ["1K", "2K", "4K"]
 
 
-def load_api_key():
-    """從環境變數或 .env 檔案讀取 API Key"""
+def load_api_key() -> str:
+    """Load the API key from the environment variable or the skill's .env file."""
     key = os.environ.get("GEMINI_API_KEY")
     if key:
         return key
 
-    # 嘗試從 skill 目錄的 .env 讀取
+    # Fall back to the .env file in the skill directory
     env_path = Path(__file__).parent.parent / ".env"
     if env_path.exists():
         for line in env_path.read_text(encoding="utf-8").splitlines():
             line = line.strip()
             if line.startswith("GEMINI_API_KEY="):
-                return line.split("=", 1)[1].strip()
+                value = line.split("=", 1)[1].strip()
+                # Strip matching surrounding single or double quotes
+                if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+                    value = value[1:-1]
+                return value
 
-    print("ERROR: 找不到 GEMINI_API_KEY。請設定環境變數或在 .env 檔案中提供。", file=sys.stderr)
+    print("ERROR: GEMINI_API_KEY not found. Set the environment variable or add it to the .env file.", file=sys.stderr)
     sys.exit(1)
 
 
 def encode_image(image_path: str) -> dict:
-    """將圖片檔案轉為 base64 inline_data"""
+    """Encode an image file as a base64 inline_data part."""
     path = Path(image_path)
     if not path.exists():
-        print(f"ERROR: 找不到參考圖: {image_path}", file=sys.stderr)
+        print(f"ERROR: Reference image not found: {image_path}", file=sys.stderr)
         sys.exit(1)
 
     suffix = path.suffix.lower()
@@ -60,7 +66,15 @@ def encode_image(image_path: str) -> dict:
         ".webp": "image/webp",
         ".gif": "image/gif",
     }
-    mime_type = mime_map.get(suffix, "image/png")
+    mime_type = mime_map.get(suffix)
+    if mime_type is None:
+        supported = ", ".join(sorted(mime_map))
+        print(
+            f"ERROR: Unsupported reference image extension '{suffix}' for {image_path}. "
+            f"Supported: {supported}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     data = base64.b64encode(path.read_bytes()).decode("utf-8")
     return {
@@ -71,15 +85,15 @@ def encode_image(image_path: str) -> dict:
     }
 
 
-def build_request(prompt: str, ratio: str, size: str, ref_images: list) -> dict:
-    """組裝 API 請求 payload"""
+def build_request(prompt: str, ratio: str, size: str, ref_images: list[str]) -> dict:
+    """Build the API request payload."""
     parts = []
 
-    # 加入參考圖（放在 prompt 之前）
+    # Reference images go before the prompt
     for img_path in ref_images:
         parts.append(encode_image(img_path))
 
-    # 加入文字 prompt
+    # Text prompt
     parts.append({"text": prompt})
 
     payload = {
@@ -97,14 +111,16 @@ def build_request(prompt: str, ratio: str, size: str, ref_images: list) -> dict:
 
 
 def call_api(payload: dict, api_key: str) -> dict:
-    """呼叫 Gemini API"""
-    url = f"{ENDPOINT}?key={api_key}"
+    """Call the Gemini API and return the parsed JSON response."""
     data = json.dumps(payload).encode("utf-8")
 
     req = urllib.request.Request(
-        url,
+        ENDPOINT,
         data=data,
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "x-goog-api-key": api_key,
+        },
         method="POST"
     )
 
@@ -113,19 +129,19 @@ def call_api(payload: dict, api_key: str) -> dict:
             return json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         error_body = e.read().decode("utf-8")
-        print(f"ERROR: API 回傳 {e.code}", file=sys.stderr)
+        print(f"ERROR: API returned HTTP {e.code}", file=sys.stderr)
         print(error_body, file=sys.stderr)
         sys.exit(1)
     except urllib.error.URLError as e:
-        print(f"ERROR: 連線失敗 - {e.reason}", file=sys.stderr)
+        print(f"ERROR: Connection failed - {e.reason}", file=sys.stderr)
         sys.exit(1)
 
 
 def extract_and_save(response: dict, output_path: str) -> str:
-    """從回應中提取圖片並儲存，回傳文字回應（如有）"""
+    """Extract images from the response and save them; return the text response (if any)."""
     candidates = response.get("candidates", [])
     if not candidates:
-        print("ERROR: API 回應中沒有 candidates", file=sys.stderr)
+        print("ERROR: No candidates in API response", file=sys.stderr)
         print(json.dumps(response, indent=2, ensure_ascii=False), file=sys.stderr)
         sys.exit(1)
 
@@ -136,11 +152,11 @@ def extract_and_save(response: dict, output_path: str) -> str:
     for candidate in candidates:
         content = candidate.get("content", {})
         for part in content.get("parts", []):
-            # 文字部分
+            # Text part
             if "text" in part:
                 text_response += part["text"]
 
-            # 圖片部分
+            # Image part
             if "inline_data" in part or "inlineData" in part:
                 img_data = part.get("inline_data") or part.get("inlineData", {})
                 b64_data = img_data.get("data", "")
@@ -149,59 +165,54 @@ def extract_and_save(response: dict, output_path: str) -> str:
                     if image_count == 1:
                         save_path = output_path
                     else:
-                        # 多張圖時加編號
+                        # Number additional images
                         p = Path(output_path)
                         save_path = str(p.parent / f"{p.stem}_{image_count}{p.suffix}")
 
                     img_bytes = base64.b64decode(b64_data)
                     Path(save_path).write_bytes(img_bytes)
-                    print(f"OK: 圖片已儲存至 {save_path} ({len(img_bytes)} bytes)")
+                    print(f"OK: Image saved to {save_path} ({len(img_bytes)} bytes)")
                     image_saved = True
 
     if not image_saved:
-        print("WARNING: 回應中沒有找到圖片資料", file=sys.stderr)
-        print(f"回應內容: {json.dumps(response, indent=2, ensure_ascii=False)[:2000]}", file=sys.stderr)
+        print("WARNING: No image data found in response", file=sys.stderr)
+        print(f"Response: {json.dumps(response, indent=2, ensure_ascii=False)[:2000]}", file=sys.stderr)
 
     return text_response
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Nano Banana Pro 圖片生成")
-    parser.add_argument("--prompt", required=True, help="生成 prompt")
-    parser.add_argument("--ratio", default="1:1", choices=VALID_RATIOS, help="長寬比 (預設: 1:1)")
-    parser.add_argument("--size", default="1K", choices=VALID_SIZES, help="解析度 (預設: 1K)")
-    parser.add_argument("--output", required=True, help="輸出圖片路徑")
-    parser.add_argument("--ref", action="append", default=[], help="參考圖路徑（可多次指定）")
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Nano Banana Pro image generation")
+    parser.add_argument("--prompt", required=True, help="Generation prompt")
+    parser.add_argument("--ratio", default="1:1", choices=VALID_RATIOS, help="Aspect ratio (default: 1:1)")
+    parser.add_argument("--size", default="1K", choices=VALID_SIZES, help="Image size (default: 1K)")
+    parser.add_argument("--output", required=True, help="Output image path")
+    parser.add_argument("--ref", action="append", default=[], help="Reference image path (repeatable)")
     args = parser.parse_args()
 
-    # 驗證
-    if args.ratio not in VALID_RATIOS:
-        print(f"ERROR: 不支援的長寬比 {args.ratio}，可用: {', '.join(VALID_RATIOS)}", file=sys.stderr)
-        sys.exit(1)
-
-    # 確保輸出目錄存在
+    # Ensure the output directory exists
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
 
-    # 載入 API Key
+    # Load API key
     api_key = load_api_key()
 
-    # 組裝請求
-    print(f"模型: {MODEL}")
-    print(f"長寬比: {args.ratio} | 解析度: {args.size}")
+    # Build request
+    print(f"Model: {MODEL}")
+    print(f"Aspect ratio: {args.ratio} | Size: {args.size}")
     if args.ref:
-        print(f"參考圖: {len(args.ref)} 張")
+        print(f"Reference images: {len(args.ref)}")
     print(f"Prompt: {args.prompt[:100]}{'...' if len(args.prompt) > 100 else ''}")
-    print("生成中...")
+    print("Generating...")
 
     payload = build_request(args.prompt, args.ratio, args.size, args.ref)
     response = call_api(payload, api_key)
 
-    # 提取並儲存
+    # Extract and save
     text = extract_and_save(response, args.output)
     if text:
-        print(f"\n模型回應文字: {text}")
+        print(f"\nModel text response: {text}")
 
-    print("\n完成！")
+    print("\nDone.")
 
 
 if __name__ == "__main__":

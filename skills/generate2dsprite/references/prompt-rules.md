@@ -23,12 +23,12 @@ Always keep these constraints:
 
 Choose the art style from the user request, project context, map context, or reference:
 
-- `pixel_art`: general sprite default for classic 2D game actors and animation sheets.
+- `pixel_art`: general sprite default for classic 2D game actors and animation sheets. Prompt wording: clean top-down 2D pixel-art sprite for an RPG overworld, crisp dark outlines, readable silhouette, flat readable colors.
 - `clean_hd`: clean hand-painted HD 2D game asset style, crisp silhouettes, smooth surfaces, low texture noise, controlled lighting, no chunky pixels.
 - `pixel_inspired`: clean modern pixel-art-inspired style without 16-bit wording, heavy dithering, or noisy microtexture.
 - `retro_pixel`: 16-bit pixel art or retro JRPG pixel art, only when explicitly requested.
 - `cel_shaded_chibi`: anime cel-shaded chibi sprite, 2.5-head proportions, clean bold black outlines, flat fills, two-tone shading (base + one shadow), no gradients, no painterly brushwork. Reference look: Eversoul / Idle Heroes / Disgaea / AFK Arena. Use when the user says chibi / Q版 / cel-shaded / gacha-style, or the project roster is already chibi.
-- `map_style` or `project-native`: match the visible reference, existing game, or `$generate2dmap` selected art style.
+- `map_style` or `project-native`: match the visible reference, existing game, or `generate2dmap` selected art style.
 
 Do not write `16-bit`, `retro JRPG`, or `chunky pixel-art` unless the user asks for that look (never in a `cel_shaded_chibi` prompt). For clean HD map props, explicitly say `Do not make pixel art`.
 
@@ -36,7 +36,7 @@ Do not write `16-bit`, `retro JRPG`, or `chunky pixel-art` unless the user asks 
 
 Use these rules when the user attaches a reference, points to a local image, asks for consistency with an earlier generated image, or asks for an evolution/variant of an existing sprite:
 
-- Make the reference image visible to yourself first by Read-ing it (Claude Code can see images directly), then pass the same path to `lib/gen_image.py` via `--ref <path>`. The wrapper embeds the file as inline_data so banana sees it. Do not assume a path string in the text prompt is a visual input.
+- Make the reference image visible to yourself first by Read-ing it (Claude Code can see images directly), then pass the same path to `~/.claude/skills/imagen/bin/generate.py` via `--ref <path>`. The wrapper embeds the file as inline_data so banana sees it. Do not assume a path string in the text prompt is a visual input.
 - In the prompt, say `use the image just shown as the visual reference`.
 - State what must stay fixed: silhouette family, palette, face/eyes, costume or markings, accessories, material language, and art style.
 - State what may change: pose, animation phase, action energy, size progression, evolution traits, or FX intensity.
@@ -71,10 +71,10 @@ If detached FX are required, say:
 
 For `player` and `npc` when the request does not specify another style:
 
-- top-down 2D pixel art for a 16-bit RPG overworld
+- clean top-down 2D pixel-art sprite for an RPG overworld
 - 3/4 view from slightly above
 - full body visible
-- chunky readable pixel-art with crisp dark outlines
+- crisp dark outlines, readable silhouette
 - enough margin for clean engine rendering
 
 For `player` and `npc` when `art_style = cel_shaded_chibi`:
@@ -82,12 +82,12 @@ For `player` and `npc` when `art_style = cel_shaded_chibi`:
 - anime cel-shaded chibi sprite, 2.5-head proportions
 - full body visible, dynamic readable pose
 - bold black outlines, flat fills, two-tone shading (base + one shadow)
-- mobile gacha RPG aesthetic (Eversoul / Idle Heroes / Disgaea)
+- mobile gacha RPG aesthetic (Eversoul / Idle Heroes / Disgaea / AFK Arena)
 - enough magenta margin around silhouette for clean engine rendering
 
 ## Map Prop Style
 
-For `prop` assets requested by `$generate2dmap`, match the selected map art style:
+For `prop` assets requested by `generate2dmap`, match the selected map art style:
 
 - `clean_hd`: clean hand-painted HD 2D game asset style, crisp silhouettes, smooth painted surfaces, low texture noise, controlled accent lighting, no chunky pixels.
 - `pixel_inspired`: clean modern pixel-art-inspired prop, crisp readable shape, no 16-bit wording, no heavy dithering.

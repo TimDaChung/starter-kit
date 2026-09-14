@@ -3,7 +3,7 @@ name: game-prototype
 version: 1.0.0
 description: |
   快速建立可玩單檔 HTML 遊戲原型，emoji 代替美術，速度優先。
-  目的：testing 玩法 / 互動 / state machine。
+  目的：驗證玩法 / 互動 / state machine。
   完成標準：玩法閉環 + 可邀人試玩。
   美術升級請改用 /game-develop。
   MANUAL TRIGGER ONLY：使用者輸入 /game-prototype 才啟動。
@@ -35,7 +35,7 @@ allowed-tools:
 | 狀態 | 動作 |
 |------|------|
 | 都沒有 `GAME_SPEC.md` / `GAME_TODO.md` | 新專案，從 Phase 0 開始 |
-| 有 SPEC、無 TODO | 接 develop 之前產出，跳到 Phase 5 補建 TODO |
+| 有 SPEC、無 TODO | 使用者手寫 SPEC：讀 SPEC 取代 Phase 0 / 1，直接跳 Phase 2 建 HTML；Phase 5 再補建 TODO |
 | 兩者都有 | 列未完成項，問 user 本次推進什麼；或重新跑 playtest |
 
 給 user 一句話狀態摘要：「上次做到 X，建議下次推進 Y / Z」。
@@ -47,8 +47,8 @@ allowed-tools:
 1. **整套 5 phases 連續跑完才回報**：phase 之間自動推進，不對 user check-in。**唯一例外**：玩法核心 / 規則明顯模糊到無法下筆才停下來一次性問清楚。Phase 5 完才一次性給總結摘要
 2. **絕不呼叫任何生圖 skill**——一旦 user 要求換真圖，立刻提醒：「請改用 `/game-develop`，prototype 階段不做美術」
 3. **單檔、無外部 asset、無 build step**——複製到別人電腦 double click 能玩
-4. **一個 phase 完成後 checkpoint**（更新 TODO + Edit HTML），允許隨時中斷恢復；但**不暫停等 user 看**
-5. **修改檔案 100% 用 Edit**（依既有 memory `feedback_no_sed.md`），不重寫整檔
+4. **一個 phase 完成後 checkpoint**（更新 TODO + Edit HTML），允許隨時中斷恢復；但**不暫停等 user 看**。中斷＝session 斷線或使用者主動停，不是 Claude 自行暫停——與紀律 1 不衝突
+5. **修改檔案 100% 用 Edit**：一律用 Edit 改檔，不用 sed / 整檔重寫
 6. **沒對應工具時自己做**：音效 / 動效 / 特殊互動 → 用原生 JS / CSS animation / Web Audio API
 7. **section marker 強制**：HTML 內必須有 8 個 `<!-- === SECTION: NAME === -->` 標記（見 Phase 2）
 

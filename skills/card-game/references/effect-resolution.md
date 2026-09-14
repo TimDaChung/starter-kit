@@ -71,10 +71,11 @@ on("creature_died", lambda ev: [push_effect(t, ctx_for(t)) for t in triggers_for
 | Deck built | Before the game, from a collection | During play (draft/buy cards) |
 | Variance | Mulligans, draw order | Reshuffle of a growing deck each "shuffle" |
 | Power growth | Fixed deck | Deck thins/grows; combos emerge mid-run |
-| Persistence | Collection + decklists | Run state (often roguelike: see `roguelike`) |
+| Persistence | Collection + decklists | Run state (often roguelike: run-scoped, reset on death) |
 
 In a roguelike deckbuilder, the deck *is* the build: adding/removing cards mid-run is the core
-progression. Keep run state separate from any meta-collection (see `save-systems`).
+progression. Keep run state separate from any meta-collection (two `localStorage` keys in the
+single-file HTML: `run_state` vs `collection`).
 
 ## 6. Shuffle fairness and consistency
 

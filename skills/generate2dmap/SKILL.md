@@ -28,8 +28,6 @@ When the user has NOT specified the following, apply these defaults:
 2. **Any character or NPC in the map: refined attractive features by default** (mobile gacha aesthetic), and **female characters default to fair luminous skin** unless the user explicitly specifies otherwise. Avoid western cartoon / Disney / Pixar drift.
 3. Any user explicit request overrides these defaults.
 
-See feedback memory `feedback_default_fair_skin.md` and `feedback_same_category_unified_style.md`.
-
 ---
 
 ## Project asset inheritance (pre-flight, REQUIRED)
@@ -45,7 +43,7 @@ Before generating, scan the project directory for existing same-category map / b
 3. Embed in Strict Rules: "the new map asset must visually rhyme with the existing project maps — same perspective, same palette family, same lighting direction, same scale; props from this asset must sit on the existing maps without scale or palette clash"
 4. Confirm with the user: "the project already has N same-category map assets (perspective / palette / lighting = ...). Generate the new one with the same lock? Tell me if you want to deviate."
 
-**Why**: User explicit requirement (2026-05-07): existing project assets define the visual lock for new ones. Map assets sit together on a single rendered scene — drift is visible at first glance and breaks immersion.
+**Why**: Existing project assets define the visual lock for new ones. Map assets sit together on a single rendered scene — drift is visible at first glance and breaks immersion.
 
 ---
 
@@ -60,7 +58,7 @@ Before generating, scan the project directory for existing same-category map / b
 
 **Single-asset generation skips this mode** — go straight to the regular workflow.
 
-**Why**: Map assets sit together on a single rendered scene, so any spec drift is visible at first glance (mismatched lighting on adjacent props, palette clashes, scale jumps). Without locking spec into every prompt, AI drifts. See feedback memory `feedback_same_category_unified_style.md`.
+**Why**: Map assets sit together on a single rendered scene, so any spec drift is visible at first glance (mismatched lighting on adjacent props, palette clashes, scale jumps). Without locking spec into every prompt, AI drifts.
 
 ---
 
@@ -92,15 +90,15 @@ User-facing parameters may be stated in natural language:
 - `visual_model`: baked raster | layered raster | tilemap | layered tilemap | parallax
 - `size`: pixel dimensions, tile dimensions, or camera-relative size
 - `perspective`: top-down | 3/4 top-down | side-view | isometric-like
-- `art_style`: clean_hd | pixel_inspired | retro_pixel | hand_painted | project-native
-- `visual_asset_source`: image_gen | existing_assets | procedural_placeholder
+- `art_style`: clean_hd | pixel_inspired | retro_pixel | project-native
+- `visual_asset_source`: banana_pro | existing_assets | procedural_placeholder
 - `collision_precision`: none | coarse | precise | tile | walkmesh
 - `prop_generation`: none | one_by_one | prop_pack_2x2 | prop_pack_3x3 | prop_pack_4x4
 - `output_format`: PNG only | layered preview | manifest JSON | engine-native map data
 
 When unspecified:
 
-- Use `image_gen` as the visual asset source.
+- Use `banana_pro` as the visual asset source.
 - Use `baked_raster + coarse_shapes` for battle backgrounds, title/menu scenes, cutscenes, and fixed arenas.
 - Use `layered_raster + y_sorted_props + precise_shapes` for top-down RPG exploration with tall props, occlusion, interactables, or reusable props.
 - Use `tilemap` or `layered_tilemap` only when the engine/editor already uses tiles or the user asks for editable tiles.
@@ -120,12 +118,12 @@ When unspecified:
 2. Choose the pipeline axes.
    - Select `visual_model`, `runtime_object_model`, `collision_model`, and `engine_target`.
    - Select `art_style`. Prefer readable gameplay shapes over decorative texture density.
-   - Select `visual_asset_source`. Default to `image_gen`; use `existing_assets` only when the project already has suitable art; use `procedural_placeholder` only when explicitly requested.
+   - Select `visual_asset_source`. Default to `banana_pro`; use `existing_assets` only when the project already has suitable art; use `procedural_placeholder` only when explicitly requested.
    - Treat `hybrid` as a result of combining axes, not as a primary category.
 
 3. Produce assets.
-   - Write the creative prompts manually and use `lib/gen_image.py` for visible map art unless the user explicitly chose existing assets or procedural placeholders.
-   - For baked raster maps, generate one background with `lib/gen_image.py`, or edit/use an existing image when supplied, then add optional collision/zones metadata.
+   - Write the creative prompts manually and use `~/.claude/skills/imagen/bin/generate.py` for visible map art unless the user explicitly chose existing assets or procedural placeholders.
+   - For baked raster maps, generate one background with `~/.claude/skills/imagen/bin/generate.py`, or edit/use an existing image when supplied, then add optional collision/zones metadata.
    - For layered raster maps, generate a ground-only base map first. Then show that base image in context and generate a dressed reference from the visible base before making final props and placements.
    - For tilemaps, generate or reuse tileset art first, then follow the engine/editor format for layers, objects, collision, and scene files. Do not script-draw the tileset as the final art source.
    - For parallax scenes, generate background/midground/foreground visual layers first, then produce scroll metadata.
@@ -141,7 +139,7 @@ When unspecified:
 
 ## Prop Generation Rules
 
-Use `$generate2dsprite` for reusable transparent props, but the agent must write the prop prompt itself using the selected map `art_style`. Do not use a script to generate the creative prompt. For `clean_hd` maps, explicitly request clean hand-painted HD 2D game assets and explicitly forbid pixel art. For `pixel_inspired`, request clean modern pixel-art-inspired props without retro chunkiness. For `retro_pixel`, request 16-bit or retro JRPG pixel art.
+Use `generate2dsprite` for reusable transparent props, but the agent must write the prop prompt itself using the selected map `art_style`. Do not use a script to generate the creative prompt. For `clean_hd` maps, explicitly request clean hand-painted HD 2D game assets and explicitly forbid pixel art. For `pixel_inspired`, request clean modern pixel-art-inspired props without retro chunkiness. For `retro_pixel`, request 16-bit or retro JRPG pixel art.
 
 Choose the generation shape deliberately:
 
@@ -155,13 +153,13 @@ Prop packs save image-generation calls and prompt overhead, but reduce per-prop 
 For layered maps with generated props, prefer this reference pipeline:
 
 1. Generate `assets/map/<name>-base.png` as ground-only terrain.
-2. Make the base image visible in conversation context. Use the Read tool on the local PNG so you can see it, then pass the same path to `lib/gen_image.py` via `--ref`. Do not rely on a path string inside the text prompt as the reference.
+2. Make the base image visible in conversation context. Use the Read tool on the local PNG so you can see it, then pass the same path to `~/.claude/skills/imagen/bin/generate.py` via `--ref`. Do not rely on a path string inside the text prompt as the reference.
 3. Generate `assets/map/<name>-dressed-reference.png` from the visible base, preserving camera, terrain, size, road/water shapes, anchor pads, and boundaries. Treat this as a planning/reference image, not the final runtime map.
 4. Generate one-by-one props or a prop pack based on the dressed reference.
 5. Place extracted props over the original base and compose a flattened preview.
 6. Validate that base, dressed reference, and preview dimensions match.
 
-Use `scripts/extract_prop_pack.py` after generating a solid-magenta prop sheet. If the sheet has antialiased magenta fringe, run the imagegen chroma-key helper with soft matte and despill before extraction, then extract from the alpha-cleaned sheet. Use `scripts/compose_layered_preview.py` to verify placement over the base map.
+Use `~/.claude/skills/generate2dmap/scripts/extract_prop_pack.py` after generating a solid-magenta prop sheet. If the sheet has antialiased magenta fringe, see [prop-pack-contract.md](references/prop-pack-contract.md) Extraction for the three Claude Code alternatives. Use `~/.claude/skills/generate2dmap/scripts/compose_layered_preview.py` to verify placement over the base map.
 
 ## Expected Deliverables
 

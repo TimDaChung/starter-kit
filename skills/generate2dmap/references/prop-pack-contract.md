@@ -59,10 +59,10 @@ If a cell should stay empty, explicitly say `empty magenta cell`.
 - or generate at a higher `--size` (`2K` or `4K`) so anti-alias pixels are a smaller fraction of each prop;
 - or composite-test against a dark base first and adjust `--edge-clean-depth` upward (3-5).
 
-The previous Codex-only soft-matte despill helper (`$CODEX_HOME/skills/.system/imagegen/scripts/remove_chroma_key.py`) is not available in Claude Code. Use `scripts/extract_prop_pack.py` directly:
+Then run `~/.claude/skills/generate2dmap/scripts/extract_prop_pack.py` directly:
 
 ```bash
-python skills/generate2dmap/scripts/extract_prop_pack.py \
+python ~/.claude/skills/generate2dmap/scripts/extract_prop_pack.py \
   --input assets/props/raw/forest-props-sheet.png \
   --rows 3 \
   --cols 3 \

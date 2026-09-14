@@ -77,7 +77,7 @@ Use this file when the user's wording leaves room for multiple valid asset plans
 - `"make a hit explosion"` -> `impact` + `impact`; prefer `2x2`
 - `"make a summon entrance"` -> `summon` + `cast` or `impact`
 - `"make a full fire samurai creature line"` -> `line_bundle`; plan 1-3 forms, then choose sheets per form
-- `"make a talking / dialogue sprite"` -> not a built-in processor `mode`. Use `--target asset --mode cast --rows 2 --cols 3` (talk shares the `2x3` six-frame layout that `cast` already supports). Same for any custom sequence that fits a known grid — pass `--rows` / `--cols` explicitly.
+- `"make a talking / dialogue sprite"` -> not a built-in processor `mode`. Use `--target asset --mode cast --rows 2 --cols 3 --label-prefix talk` (talk shares the `2x3` six-frame layout that `cast` already supports; without `--label-prefix` the frames are labelled `cast-N`). Same for any custom sequence that fits a known grid — pass `--rows` / `--cols` explicitly.
 
 ## Legacy Compatibility
 

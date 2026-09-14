@@ -1,9 +1,11 @@
 ---
 name: starter-setup
-description: Starter kit 健檢式安裝/升級精靈。開場先健檢(盤點 CLAUDE.md/skills/agents),沒有的 skills/agents 直接裝、CLAUDE.md 缺的規則直接併入;裝完做最終健檢(CLAUDE.md 肥胖/重複/衝突、近似 skills/agents),只列建議不刪。觸發詞(「starter」與「新手包」互通):「裝 starter kit」「裝新手包」「starter 安裝」「新手包安裝」「starter 升級」「新手包升級」「starter 健檢」「新手包健檢」「檢查 starter」「檢查新手包」。
+description: Starter kit 健檢式安裝/升級精靈:盤點→直接裝缺的→併入 CLAUDE.md→最終健檢只建議不刪。觸發詞:(starter|新手包)×(安裝|升級|健檢)。
 ---
 
 # Starter Kit 安裝/升級精靈
+
+> **執行角色：顧問**——盤點、比對、只建議不刪;安裝動作切**工程**視角確認路徑與 junction 正確。
 
 口令中的「starter」與「新手包」完全互通,使用者用哪個都認。
 
@@ -30,7 +32,7 @@ description: Starter kit 健檢式安裝/升級精靈。開場先健檢(盤點 C
 - secretary(skills/secretary)→ 歸「自有」,本精靈完全不碰
 - `skills/imagen/.env` 存在?(影響生圖類能不能用)
 
-## 2. 分類(kit 的 15 支 skills + 3 支 agents 逐一比對)
+## 2. 分類(kit `skills/` 目錄內的每一支 skill + `agents/` 內每支 agent 逐一比對)
 
 | 分類 | 判定 | 動作 | 問不問 |
 |---|---|---|---|
@@ -43,13 +45,13 @@ description: Starter kit 健檢式安裝/升級精靈。開場先健檢(盤點 C
 
 1. **Clone**(未 clone 過才做):
    ```
-   git clone <repo網址> %USERPROFILE%\starter-kit
+   git clone https://github.com/TimDaChung/starter-kit %USERPROFILE%\starter-kit
    ```
 2. **Skills 用 junction**(每支「沒有」與「舊版」各一條;PowerShell):
    ```powershell
    New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\<名>" -Target "$env:USERPROFILE\starter-kit\skills\<名>"
    ```
-3. **Agents 用拷貝**(散檔無法 junction):複製「沒有」的 `agents/*.md` 到 `~/.claude/agents/`。`my-voice.example.md` 不裝,結算表提示一句。升級時 agents 有 diff → 歸「自改過」進最終健檢
+3. **Agents 用拷貝**(散檔無法 junction):複製「沒有」的 `agents/*.md` 到 `~/.claude/agents/`。`templates/my-voice.example.md` 是範本不是 agent,不裝,結算表提示一句。升級時 agents 有 diff → 歸「自改過」進最終健檢
 4. **imagen 設定**:`.env` 不存在就把 `.env.example` 複製成 `.env`,結算表提醒去 https://aistudio.google.com/apikey 拿 key 填入
 
 ## 4. CLAUDE.md 併入
@@ -94,12 +96,12 @@ description: Starter kit 健檢式安裝/升級精靈。開場先健檢(盤點 C
 
 ```
 🩺 開場健檢:CLAUDE.md 96 行 / skills 0 / agents 0 / secretary 無
-✅ 新裝 skills(15,junction):product-planning、imagen …
+✅ 新裝 skills(N,junction):product-planning、imagen …
 ✅ 新裝 agents(3):dialogue-writer、game-balance-auditor、planning-doc-auditor
 ⬆️ 升級:game-prototype(舊版→v1.1,原版備份於 skills-backup/)
 📝 CLAUDE.md:併入 5 條(meta 規則、UI 繁中 …),原內容未動,備份於 skills-backup/
 ✋ 保留不動:你的 my-analyzer、secretary
-⏭️ 未裝:my-voice.example.md(想要個人分身就複製成 agents/my-voice.md 再客製)
+⏭️ 未裝:templates/my-voice.example.md(想要個人分身就複製成 ~/.claude/agents/my-voice.md 再客製)
 
 🩺 最終健檢建議(不動手,你決定):
   1. CLAUDE.md「資料分析」段 12 行只在統計任務用到 → 可搬成 skill,省 12 行

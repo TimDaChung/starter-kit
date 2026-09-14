@@ -26,7 +26,7 @@ allowed-tools:
 
 > **執行角色：工程（主導）**——依階段調度**美術 / 數值 / 敘事**角色對應的 skill 與 agent；每段產出回**顧問**視角整合，不直接轉貼 agent 全文。
 
-把原型升級為高完成度 demo（itch.io / 個人上架等級）。**主動調度** imagen / sprite / map 系列生圖 skill 與 agents（balance / dialogue / QA）。**沒對應工具的部分自己做**（音效 / 自訂特效 / 轉場動畫等）。
+把原型升級為高完成度 demo（itch.io / 個人上架等級）。**主動調度** imagen / sprite / map 系列生圖 skill、agents（balance / dialogue）與 `webapp-testing`（QA）。**沒對應工具的部分自己做**（音效 / 自訂特效 / 轉場動畫等）。
 
 ---
 
@@ -42,7 +42,7 @@ allowed-tools:
 | 狀態 | 動作 |
 |------|------|
 | 沒 HTML、沒 SPEC | **直接從 0 起跑**：先做 SPEC（brainstorm 玩法核心 + 寫 GAME_SPEC.md）→ 建專案目錄 → 建 HTML 骨架 → 進 Phase 1。**不要強迫先跑 `/game-prototype`**（除非 user 主動要求或玩法核心極不明確） |
-| 有 HTML、沒 SPEC | 詢問 user：「要從現有 HTML 反推 SPEC 嗎？（可跑 design-consultation 補完）」 |
+| 有 HTML、沒 SPEC | 詢問 user：「要從現有 HTML 反推 SPEC 嗎？」 |
 | HTML + SPEC，沒 TODO | 從 templates 複製 GAME_TODO.template.md → 進 Phase 1 |
 | HTML + SPEC + TODO，TODO 有未完成 | **自動接續未完成清單，phase 連續推進到全完才回報**（不 AskUserQuestion） |
 | HTML + SPEC + TODO，TODO 全 ✅ | 告訴 user：「develop 流程跑完，可手動 ship / 上架」 |
@@ -57,7 +57,7 @@ allowed-tools:
 2. **不外包就自己做**：遇到對應 sub-skill / agent → invoke；沒對應的（音效 / 自訂特效 / 動效 / 粒子）→ 用原生 web 技術做（Web Audio API / CSS animation / Canvas）
 3. **單檔不拆**：HTML 維持單檔。改動 100% 用 Edit + section marker，不重寫整檔
 4. **每張生圖獨立 checkpoint**：Phase 3 每張生完立即更新 TODO（含路徑、版本、決策註解），但**不打擾 user**
-5. **同類批次一致性**：呼叫生圖 sub-skill 前，把 SPEC 的 style-lock（風格代號 / 比例 / 視角 / 面向 / 光源）一併傳過去（沿用 `feedback_same_category_unified_style.md`）。同類別第 1 張 baseline 自我驗證通過後，剩餘張數**並行 background bash** 一次發完（generate.py 是 IO-bound，並行省時間）
+5. **同類批次一致性**：呼叫生圖 sub-skill 前，把 SPEC 的 style-lock（風格代號 / 比例 / 視角 / 面向 / 光源）一併傳過去（規則：同類別資產 style-lock 一致）。同類別第 1 張 baseline 自我驗證通過後，剩餘張數**並行 background bash** 一次發完（generate.py 是 IO-bound，並行省時間）
 6. **行數監控**：HTML 5000 行→提醒 grep marker；8000 行→提醒瘦身（不強制拆檔）
 7. **section-by-section 整合**：Phase 4 每次 Edit 針對 single section，多 section 改動拆多次 Edit
 
@@ -68,23 +68,21 @@ allowed-tools:
 | Phase | 工作 | 主要外包 | 完成標準 |
 |-------|------|---------|---------|
 | **0** | 診斷 + 對齊（每次 invoke 跑） | — | 讀完兩檔 + 確認本次推進項目 |
-| **1** | Design system 建立 | `design-consultation`（一次性） | CSS variables 內嵌 + DESIGN.md 完成 |
+| **1** | Design system 建立 | —（skill 自己用 CSS variables 規劃） | CSS variables 內嵌 + DESIGN.md 完成 |
 | **2** | 素材清單規劃 | — | TODO「素材」分區建立 |
-| **3** | 批次生圖 | imagen-portrait / imagen-ui / generate2dsprite / -chibi / generate2dmap / imagen | 每張：路徑寫進 TODO，標 ✅ |
-| **4** | 素材整合（emoji → 真圖） | frontend-design（按需） | section-by-section 替換 + 不破 layout |
-| **5** | Polish | game-balance-auditor / dialogue-writer / design-review / qa | 平衡達標 + 對白 + 視覺 + 玩法 QA 全過 |
+| **3** | 批次生圖 | imagen-portrait / imagen-ui / generate2dsprite / generate2dmap / imagen | 每張：路徑寫進 TODO，標 ✅ |
+| **4** | 素材整合（emoji → 真圖） | — | section-by-section 替換 + 不破 layout |
+| **5** | Polish | game-balance-auditor / dialogue-writer / self-walkthrough（chrome-devtools MCP）/ `webapp-testing` | 平衡達標 + 對白 + 視覺 + 玩法 QA 全過 |
 
 ---
 
 ## Phase 1：Design System 建立
 
-**選項**：
-- a. 跑 `/design-consultation`（推薦，第一次跑專案時）—— 產 DESIGN.md
-- b. user 已有設計方向時跳過，skill 自己用 CSS variables 規劃
+**做法**：skill 自己用 CSS variables 規劃（配色 / 字級 / 間距 / 圓角 / 陰影），依 SPEC 風格代號定案；user 已有設計方向時直接沿用。
 
 **產出**：
 - HTML 內 `/* === SECTION: CSS-VARIABLES === */` 區塊更新（用 Edit）
-- DESIGN.md（如果跑了 design-consultation）
+- DESIGN.md（記錄風格代號、色票、字級階、元件規則，供 Phase 3 生圖 style-lock 引用）
 
 完成後標 TODO Phase 1 ✅，並把跳過理由寫進 TODO inline 註解（`└ 理由：...`）。
 
@@ -98,14 +96,14 @@ allowed-tools:
 
 | 素材用途 | 強制使用 | 為什麼 |
 |---------|---------|--------|
-| **角色 / 物件，遊戲中會動或需要狀態切換**（揮棒、投球、走路、待機、被擊中、攻擊…）| **`generate2dsprite`**（chibi 風用 `-chibi`）| 內建 magenta chroma key + processor，產出真透明 PNG + 多 frame sheet |
+| **角色 / 物件，遊戲中會動或需要狀態切換**（揮棒、投球、走路、待機、被擊中、攻擊…）| **`generate2dsprite`**（chibi 風用 `art_style=cel_shaded_chibi`）| 內建 magenta chroma key + processor，產出真透明 PNG + 多 frame sheet |
 | **小物件 sprite**（球、子彈、道具、特效粒子）| **`generate2dsprite`** | 同上，要透明背景才能疊在背景上 |
 | **背景 / 地圖 / 場景**（球場、戰鬥背景、村莊、戰場）| **`generate2dmap`** | 場景專用 pipeline，比例 / 透視 / 圖層處理對 |
-| **UI 元件**（button / icon / frame / banner / popup / coin / chip）| **`imagen-ui`** | 內建 magenta chroma key 後製，產出真透明 PNG |
+| **UI 元件**（button / icon / frame / banner / popup / coin / chip）| **`imagen-ui`** | imagen-ui 產出 magenta 背景，用 generate2dsprite 的 processor 去背，得到真透明 PNG |
 | **靜態角色立繪**（封面圖、選角畫面，純單張無動畫）| `imagen-portrait` | 半身 / 全身大圖，內建後製 |
 | **通用單張插圖**（splash art、敘事插畫、無 alpha 需求）| `imagen` | **僅限**真的不需要透明背景的場合 |
 
-**反模式（這次踩過的坑）**：
+**反模式**：
 - ❌ 用 `imagen` 生「透明背景 PNG」——`imagen` 不跑後製，prompt 寫 transparent 也沒用，會出 RGB 圖
 - ❌ 用 `imagen` 生會動的角色——沒有 frame sheet 邏輯，只能拿到單張靜態
 - ❌ 信任 sub-agent 回報「透明背景 PNG」就算數——必須跑 alpha 驗證（見 Phase 3 驗證步驟）
@@ -169,13 +167,15 @@ for p in sys.argv[1:]:
 
 ### 並行範例
 
-### 並行範例
-
 ```bash
-# 5 張 portrait 並行（各自 cd + python generate.py）
-# 每個 Bash call 設 run_in_background=true
-# 完成通知收齊後一次 Read 4 張
+# Two portraits in parallel: prompts prepared beforehand in prompts/*.txt, Bash call run_in_background=true.
+cd "<project-dir>" && \
+python ~/.claude/skills/imagen/bin/generate.py --prompt "$(cat prompts/hero_a.txt)" --ratio 3:4 --output assets/portrait/hero_a.png & \
+python ~/.claude/skills/imagen/bin/generate.py --prompt "$(cat prompts/hero_b.txt)" --ratio 3:4 --output assets/portrait/hero_b.png & \
+wait
 ```
+
+（sprite / UI / map 類改呼叫對應 sub-skill 的 generate.py，參數以各自 `--help` 為準。）完成通知收齊後一次 Read 所有張數驗證。
 
 generate.py 一次 60–90 秒，並行 5 張 ≈ 串行 1 張的時間。**不要序列跑同類別**。
 
@@ -188,21 +188,21 @@ generate.py 一次 60–90 秒，並行 5 張 ≈ 串行 1 張的時間。**不�
 1. 從 TODO 的「Phase 4 整合」分區找下一個未做項
 2. `grep` HTML 內對應 emoji 的所有出現位置
 3. 用 Edit 把該 section 內的 emoji → `<img src="...">` 或 CSS background
-4. 用 browse 跑一輪確認 layout 沒破
+4. 用 chrome-devtools MCP 跑一輪確認 layout 沒破
 5. TODO 該項標 ✅
 
 ### 遇到 layout 不合（圖太大 / 比例怪）
 
 逐輪嘗試：
 1. 第一輪：調 CSS（width / max-width / object-fit）
-2. 第二輪：載入 `frontend-design` 參考元件樣式建議
+2. 第二輪：調容器 / 元件結構（aspect-ratio 容器、grid 欄寬、圖層順序）
 3. 第三輪：retake 圖（標記 TODO 該項回到 Phase 3）
 
 ---
 
 ## Phase 5：Polish（順序固定）
 
-**強制順序**：balance → dialogue → design-review → qa
+**強制順序**：balance → dialogue → design review（self-walkthrough）→ qa（webapp-testing）
 
 理由：數值不對美化沒意義；對白可能影響 UI 文字長度；視覺 QA 需要對白完成；玩法 QA 是 end-to-end 最後關卡。
 
@@ -238,25 +238,25 @@ generate.py 一次 60–90 秒，並行 5 張 ≈ 串行 1 張的時間。**不�
 
 完成後標 TODO Phase 5.2 ✅。
 
-### 5.3 Design review（呼叫 design-review skill）
+### 5.3 Design review（自行 self-walkthrough）
+
+自行 self-walkthrough：用 chrome-devtools MCP 截圖逐畫面檢查（`navigate_page` 開 HTML → 每個畫面 `take_screenshot` → Read 看圖），對照 DESIGN.md 查邊距 / 對齊 / 字級 / 色票一致性，發現 issue 直接 Edit 修。修完後 TODO 標 ✅，inline 註解列發現的 issue 與修法。
+
+**chrome-devtools 不可用時的 fallback**：grep HTML 逐 section 靜態檢查 CSS variables 是否被 hard-code 色值繞過、字級是否落在 DESIGN.md 階梯內。
+
+### 5.4 QA（呼叫 `webapp-testing` skill，Playwright）
 
 ```
-/design-review
+Skill: webapp-testing
 ```
 
-skill 會自動跑視覺 QA + 修。修完後 grep TODO 標 ✅。
+流程：
+1. 依 SPEC 的 state machine，把每條路徑（Title → Setup → Round → Resolve → End、重玩、異常輸入）列成測試案例
+2. 依 `webapp-testing` 寫 Playwright 腳本（`file://` 開單檔 HTML，見其 `examples/static_html_automation.py`），每案例斷言關鍵 DOM 狀態 + 收 console error（見 `examples/console_logging.py`）
+3. 跑腳本 → 失敗案例逐條 Edit 修 → 重跑到全過
+4. 腳本存 `<project-dir>/tests/`，TODO 標 ✅ 並列 bug 清單 + fix
 
-**沒對應 skill 時的 fallback**：skill 自己跑 self-walkthrough（grep + browse 截圖比對 + 邊距 / 對齊 / 字級檢查）。
-
-### 5.4 QA（呼叫 qa skill）
-
-```
-/qa
-```
-
-skill 跑 end-to-end + 修 bug。修完後標 TODO ✅。
-
-**沒對應 skill 時的 fallback**：skill 自己用 browse 跑互動測試（依 SPEC 的 state machine 路徑逐條走）。
+**Playwright 不可用時的 fallback**：用 chrome-devtools MCP（`navigate_page` / `click` / `evaluate_script`）依 state machine 路徑逐條手動走。
 
 ---
 
@@ -264,9 +264,8 @@ skill 跑 end-to-end + 修 bug。修完後標 TODO ✅。
 
 | 工作 | 外包 | Phase | 沒外包時 fallback |
 |------|------|-------|-------------------|
-| Design system | `design-consultation` | 1 | skill 用 CSS variables 自己規劃 |
-| 元件樣式查表 | `frontend-design` | 4-5 | skill 自己提案 |
-| **角色 / 物件 sprite（含動畫 frame）** | **`generate2dsprite`** / `-chibi`（chibi 風）| 3 | — |
+| Design system | 無外包 | 1 | skill 用 CSS variables 自己規劃 |
+| **角色 / 物件 sprite（含動畫 frame）** | **`generate2dsprite`**（chibi 風用 `art_style=cel_shaded_chibi`）| 3 | — |
 | **小物件 sprite（球、子彈、特效等）** | **`generate2dsprite`** | 3 | — |
 | **背景 / 地圖 / 場景** | **`generate2dmap`** | 3 | — |
 | **UI 元件**（button / icon / frame / banner）| **`imagen-ui`** | 3 | — |
@@ -274,8 +273,8 @@ skill 跑 end-to-end + 修 bug。修完後標 TODO ✅。
 | 通用單張插圖（splash / 不需 alpha）| `imagen` | 3 | **僅限**不需透明背景的場合 |
 | Balance | `game-balance-auditor` agent | 5 | skill 跑簡易 sim（Bash+python） |
 | 對白 | `dialogue-writer` agent | 5 | skill 自己寫 |
-| 視覺 QA | `design-review` | 5 | skill self-walkthrough |
-| 玩法 QA | `qa` | 5 | skill 跑 browse 互動測試 |
+| 視覺 QA | 無外包（self-walkthrough：chrome-devtools MCP 截圖逐畫面檢查） | 5 | grep 靜態檢查 |
+| 玩法 QA | `webapp-testing`（Playwright） | 5 | skill 用 chrome-devtools MCP 跑互動測試 |
 | **動效 / 音效 / 特效 / 粒子** | **無外包** | 任何 | **skill 自己做（CSS animation / Web Audio API / Canvas）** |
 
 ---
@@ -320,7 +319,7 @@ Phase 5.4 ✅ QA：[bug 清單 + fix]
 - [需要 user 主觀決策的項目，例：「破產率 18.7% 偏高，要更友善請說」]
 
 == 已知限制（沒辦法做完的） ==
-- [例：「沒 chrome 權限，視覺 QA 跑 self-walkthrough fallback」]
+- [例：「chrome-devtools MCP 不可用，視覺 QA 改跑 grep 靜態檢查 fallback」]
 
 檔案位置：[專案根目錄]
 建議下一步：[例：「邀人試玩 / ship 上 itch.io」]

@@ -11,10 +11,6 @@ allowed-tools:
   - Glob
   - Agent
   - AskUserQuestion
-  - WebSearch
-  - TaskCreate
-  - TaskUpdate
-  - TaskList
 ---
 
 # /imagen-ui — RPG 手遊 UI 素材生成
@@ -23,11 +19,6 @@ allowed-tools:
 
 使用 Gemini 的 Nano Banana Pro (`gemini-3-pro-image-preview`) 生成 RPG 手遊 UI 元件，預設套用高營收手遊（米哈遊、明日方舟等）的 UI 視覺語言。
 
-姊妹 skill：
-- `/imagen` — 通用生圖（會問你風格）
-- `/imagen-portrait` — 角色立繪
-- `/imagen-ui`（這支）— UI 素材
-
 ---
 
 ## 核心原則
@@ -35,21 +26,19 @@ allowed-tools:
 1. **Prompt 忠於討論結果** — 不擅自加裝飾元素。
 2. **預設手遊高品質 UI 審美** — 金屬質感 / 漸層 / 半透明 / 細節描邊，但**不喧賓奪主**（UI 元件背後通常會放文字或其他內容）。
 3. **每次都問元件類型** — UI 是功能性設計，必須先確定要做哪一類元件。
-4. **透明背景優先** — 大多數 UI 元件都該透明背景，才能融入遊戲畫面。
-5. **記錄偏好** — 寫入 memory `imagen_history.md`。
+4. **去背優先** — 大多數 UI 元件都要去背才能融入遊戲畫面；Gemini 輸出沒有 alpha，所以生成時鎖純品紅 `#FF00FF` 滿版背景，Phase 5 再用 magenta chroma-key 後製去背。
+5. **記錄偏好** — 寫入 `<project-dir>/docs/imagen_history.md`。
 
 ---
 
 ## 預設視覺規則（除非使用者明確要求不同）
 
-生圖時，使用者沒明確指定以下項目就套默認：
+生圖時，使用者沒明確指定以下項目就套預設：
 
 1. **女性角色預設白皮膚**（fair luminous skin / pale skin）— 避免 sun-kissed / tanned / olive / bronzed / dark。使用者明確要求其他膚色才換。
 2. **所有角色預設美型**（refined attractive features，手遊 gacha 美學）— 美容貌、比例好。避免 western cartoon / Disney / Pixar / caricature 漂移。Banana Pro 對某些狂野詞會 bias 到 western 風，需要在 [EXCLUSION] 段明確排除這些風格。
 3. **背景 / 元件背景必須滿版到四個邊緣**（full-bleed edge-to-edge）— UI 元件如果有背景場景，不要意外白邊 / letterbox / painting frame。在 [COMPOSITION] 段用**正向指令**鎖；純粹在 [EXCLUSION] 加 negation 反而可能誘發 frame design。
 4. 使用者明確要求不同就依使用者指示。
-
-詳見 memory `feedback_default_fair_skin.md`、`feedback_same_category_unified_style.md`。
 
 ---
 
@@ -63,7 +52,7 @@ allowed-tools:
 3. Strict Rules 段明寫「the new UI element must visually rhyme with existing project UI — same border weight, same corner radius, same lighting style, same color temperature」
 4. 跟使用者確認：「專案既有 N 個同類 UI（風格 / 邊框 / 光效為...），這次照樣？要改請明說」
 
-**為什麼**：使用者明確要求「專案已有的東西，畫風跟畫面是要默認參照的」(2026-05-07)。UI 元件常組成系列同畫面出現，新做的 1 個風格飄掉直接破壞整個 HUD 視覺。
+**為什麼**：專案已有的東西，畫風、畫面預設要參照。UI 元件常組成系列同畫面出現，新做的 1 個風格飄掉直接破壞整個 HUD 視覺。
 
 ---
 
@@ -71,7 +60,7 @@ allowed-tools:
 
 **當使用者一次要產 ≥ 2 個同類別 UI 元件時**（例：6 個技能 icon、4 種稀有度卡框、活動 banner 系列、多語系 popup），切換到批次模式：
 
-1. **先訂統一規格** — 任何生圖前，先決定：風格代號、元件比例（icon 1:1 / banner 16:9 等）、配色主軸、邊框風格、光效強度、字體 / 文字配置（如有）、透明背景與否、稀有度視覺系統（如有層級）。
+1. **先訂統一規格** — 任何生圖前，先決定：風格代號、元件比例（icon 1:1 / banner 16:9 等）、配色主軸、邊框風格、光效強度、字體 / 文字配置（如有）、是否去背（magenta 底）、稀有度視覺系統（如有層級）。
 2. **區分「鎖死」vs「可變」** — 鎖死 = 風格 / 比例 / 邊框 / 光效系統 / 配色主軸；可變 = 圖標符號 / 主題色 / 文字內容。
 3. **把鎖死規格寫進每張 prompt 的 Strict Rules 段** — 同批次所有 prompt 的 Strict Rules 用同一段文字，AI 變化只能在「可變」項。UI 特別注意：邊框粗細、轉角圓度、光效強度若不寫 Strict 容易飄。
 4. **生完必確認** — 二選一：(a) 每張生完個別確認再套用 (b) 全部生完後一次看統一性 + 符合度（建議組成 grid 或實際擺到模擬 UI 上看）。**確認步驟不能省**。
@@ -79,11 +68,11 @@ allowed-tools:
 
 **單張 UI 元件跳過此模式**，直接走原 Phase 流程。
 
-**為什麼**：UI 元件常組成系列出現在同一畫面（角色卡 + 稀有度框、技能列、活動 banner 牆）。沒鎖規格進 prompt，AI 會飄（光效強度不一、邊框風格亂、配色基準偏移）。詳見 memory `feedback_same_category_unified_style.md`。
+**為什麼**：UI 元件常組成系列出現在同一畫面（角色卡 + 稀有度框、技能列、活動 banner 牆）。沒鎖規格進 prompt，AI 會飄（光效強度不一、邊框風格亂、配色基準偏移）。
 
 ---
 
-## 風格庫（默認從這幾種挑）
+## 風格庫（預設從這幾種挑）
 
 | 風格代號 | 參考遊戲 | UI 視覺特徵 |
 |---------|---------|-----------|
@@ -101,11 +90,11 @@ allowed-tools:
 
 ## UI 元件類型庫
 
-| 元件代號 | 用途 | 默認規格 |
+| 元件代號 | 用途 | 預設規格 |
 |---------|------|---------|
-| `button` | 按鈕（confirm / cancel / 主行動）| 4:1 / 3:1 橫向，透明背景 |
-| `icon_skill` | 技能 / 法術 icon | 1:1，透明背景，預留發光區 |
-| `icon_item` | 道具 / 物品 icon | 1:1，透明背景 |
+| `button` | 按鈕（confirm / cancel / 主行動）| 以 21:9 生成 → 後製裁到 4:1 / 3:1，magenta 底去背 |
+| `icon_skill` | 技能 / 法術 icon | 1:1，magenta 底去背，預留發光區 |
+| `icon_item` | 道具 / 物品 icon | 1:1，magenta 底去背 |
 | `icon_currency` | 貨幣 / 資源 icon | 1:1，金屬光澤強 |
 | `frame_card` | 卡牌 / 角色卡框 | 3:4，中央透空 |
 | `frame_avatar` | 頭像框（圓 / 方）| 1:1，中央透空 |
@@ -113,9 +102,9 @@ allowed-tools:
 | `popup_bg` | 彈窗背景 | 4:3 或 3:4 |
 | `slot_item` | 道具格 / 裝備格 | 1:1，可含發光 |
 | `rarity_glow` | 稀有度光效 / 邊框 | 1:1 或 3:4，多色版本 |
-| `progress_bar` | 進度條 / 血條 | 8:1 細長 |
-| `divider` | 分隔線 / 裝飾元件 | 16:1 細長 |
-| `tab` | 分頁標籤 | 3:1 或 4:1 |
+| `progress_bar` | 進度條 / 血條 | 以 21:9 生成 → 後製裁到 8:1 細長 |
+| `divider` | 分隔線 / 裝飾元件 | 以 21:9 生成 → 後製裁到 16:1 細長 |
+| `tab` | 分頁標籤 | 以 21:9 生成 → 後製裁到 3:1 或 4:1 |
 | `badge` | 徽章 / 成就 / 等級標 | 1:1 |
 | `mission_card` | 任務 / 活動卡 | 4:3 |
 
@@ -138,9 +127,9 @@ allowed-tools:
 
 | 項目 | 選項 | 預設 |
 |------|------|------|
-| **長寬比** | 1:1 / 4:1 / 3:1 / 3:4 / 16:9 等 | 依元件類型自動建議 |
-| **解析度** | 512 / 1K / 2K | **1K**（UI 通常不需 2K）|
-| **背景處理** | 透明 / 純色 / 漸層 | **透明** |
+| **長寬比** | 1:1 / 3:4 / 4:3 / 16:9 / 21:9（寬元件以 21:9 生成後裁切）| 依元件類型自動建議 |
+| **解析度** | 1K / 2K | **1K**（UI 通常不需 2K）|
+| **背景處理** | magenta 底去背 / 純色 / 漸層 | **magenta 底去背** |
 | **變體數量** | 1 / normal+pressed / 多稀有度版本（白藍紫金紅）| 1 |
 | **參考圖** | 是否上傳（既有 UI / 風格 / motif）| 無 |
 
@@ -160,7 +149,7 @@ allowed-tools:
 2. 描述視覺語言（金屬亮度、紋飾密度、色相），確認理解
 3. 轉成 prompt 描述詞
 
-**參考圖限制：** 6 張內最佳。
+**參考圖限制：** 最多 6 張，超過品質下降。
 
 ---
 
@@ -175,7 +164,7 @@ allowed-tools:
 ### 技術規格
 - 長寬比：[ratio]，因為 [元件用途]
 - 解析度：[size]，UI 用途通常 1K 夠
-- 背景：[透明/漸層]
+- 背景：[magenta 底去背/漸層]
 
 ### 視覺重點
 - [must-have 設計元素]
@@ -221,41 +210,41 @@ allowed-tools:
 ```
 mobile RPG game UI asset, Genshin Impact-style, ornate gold metal frame, soft cream
 parchment fill, decorative engraved filigree border, gentle warm gradient, fantasy aesthetic,
-clean readable shape, transparent background, production-quality 2D game UI
+clean readable shape, solid #FF00FF magenta background, edge-to-edge, production-quality 2D game UI
 ```
 
 #### `mihoyo_starrail` UI boilerplate
 ```
 mobile RPG game UI asset, Honkai Star Rail-style, dark glassmorphism panel, neon accent line,
 sharp geometric cut, sci-fi cyber pattern, holographic gradient, clean tech aesthetic,
-transparent background, production-quality 2D game UI
+solid #FF00FF magenta background, edge-to-edge, production-quality 2D game UI
 ```
 
 #### `mihoyo_zzz` UI boilerplate
 ```
 mobile RPG game UI asset, Zenless Zone Zero-style, urban graffiti accent, cyberpunk neon glow,
 asymmetric edgy cut, high-saturation color block, street fashion aesthetic, dynamic energy,
-transparent background, production-quality 2D game UI
+solid #FF00FF magenta background, edge-to-edge, production-quality 2D game UI
 ```
 
 #### `arknights` UI boilerplate
 ```
 mobile strategy game UI asset, Arknights-style, flat geometric shape, industrial military
 aesthetic, black and orange palette with hazard stripe accent, high contrast, sharp clean
-edge, restrained ornamentation, transparent background, production-quality 2D game UI
+edge, restrained ornamentation, solid #FF00FF magenta background, edge-to-edge, production-quality 2D game UI
 ```
 
 #### `nikke` UI boilerplate
 ```
 mobile RPG game UI asset, NIKKE-style, dark military panel, neon accent glow, mechanical
-diagonal cut, tactical HUD aesthetic, sleek metallic surface, transparent background,
+diagonal cut, tactical HUD aesthetic, sleek metallic surface, solid #FF00FF magenta background, edge-to-edge,
 production-quality 2D game UI
 ```
 
 #### `azurlane` UI boilerplate
 ```
 mobile RPG game UI asset, Azur Lane-style, deep navy with gold trim, naval / military motif,
-soft painted gradient, ornate but readable, transparent background, production-quality 2D game UI
+soft painted gradient, ornate but readable, solid #FF00FF magenta background, edge-to-edge, production-quality 2D game UI
 ```
 
 ### Step 3：執行生成或交付 Prompt
@@ -279,12 +268,24 @@ soft painted gradient, ornate but readable, transparent background, production-q
 
 ### 執行生成
 
+先把最終英文 prompt Write 到 `prompt-final.txt`，再執行：
+
 ```bash
 python ~/.claude/skills/imagen/bin/generate.py \
   --prompt "$(cat prompt-final.txt)" \
   --ratio 1:1 --size 1K \
   --ref reference/style.jpg \
   --output {output_path}
+```
+
+寬元件（button / tab / progress_bar / divider）用 `--ratio 21:9` 生成，去背後再裁到目標比例。
+
+### 去背（magenta chroma-key）
+
+imagen-ui 本身沒有去背功能，借用 generate2dsprite 的後製：
+
+```bash
+python ~/.claude/skills/generate2dsprite/scripts/generate2dsprite.py process --target asset --mode single --rows 1 --cols 1 --input <png> --output-dir <dir>
 ```
 
 ### 多稀有度變體（常見需求）
@@ -304,19 +305,20 @@ mythic (red): crimson palette, fiery red aura with flame motif
 ### 生成後
 
 1. Read 看圖
-2. **回報：給完整絕對資料夾路徑**
-3. 詢問：「滿意嗎？要做變體（不同色 / 不同稀有度 / pressed 狀態）嗎？」
+2. 工程視角：尺寸是否為 2 的倍數、是否含安全邊距、檔名是否照 `{元件代號}_{風格代號}_{日期}_{序號}.png`
+3. **回報：給完整絕對資料夾路徑**
+4. 詢問：「滿意嗎？要做變體（不同色 / 不同稀有度 / pressed 狀態）嗎？」
 
 ---
 
 ## Phase 6｜記憶更新
 
-更新 memory `imagen_history.md`：
+更新 `<project-dir>/docs/imagen_history.md`（三支 imagen skill 共用同一檔、同一欄位）：
 
 ```markdown
-| 日期 | 元件 | 風格 | 主題 | 長寬比 | 解析度 | 路徑 | 備註 |
-|------|------|------|------|--------|--------|------|------|
-| 2026-04-30 | icon_skill | mihoyo_genshin | 火球術 | 1:1 | 1K | gemini/ui/ | 五階稀有度變體 |
+| 日期 | skill | 用途 | 最終英文 prompt 摘要 | 輸出檔 | 備註 |
+|------|-------|------|---------------------|--------|------|
+| 2026-04-30 | imagen-ui | 火球術技能 icon | fireball skill icon, mihoyo_genshin, 1:1, 1K | imagen-ui/icon_skill_mihoyo_genshin_20260430_01.png | 五階稀有度變體 |
 ```
 
 ---
@@ -326,7 +328,7 @@ mythic (red): crimson palette, fiery red aura with flame motif
 1. **形狀必須具體**：rounded square / hexagonal / circular / shield-shaped — 不要含糊
 2. **材質明確**：metallic gold / frosted glass / brushed steel / parchment / hologram
 3. **預留 content space**：如果元件背後要放文字 / 數字，加 `clear central area for text/number`
-4. **強調 transparent background**：除非有特殊需求，背景一律透明
+4. **強調 magenta 底**：除非有特殊需求，背景一律 `solid #FF00FF magenta background, edge-to-edge`，後製 chroma-key 去背
 5. **避免實際內容**：icon 描繪「火球能量球」不要寫具體文字 / logo / 角色名
 6. **強調 readable / clean**：UI 必須清楚，加 `clean readable silhouette`、`high contrast against any background`
 7. **避免 photo / 3D render 詞彙**：手遊 UI 通常是 2D 風格化，避免觸發寫實 photo 風
@@ -338,8 +340,8 @@ mythic (red): crimson palette, fiery red aura with flame motif
 | 比例 | 適用元件 |
 |------|---------|
 | 1:1 | icon / avatar / badge / slot / rarity_glow |
-| 4:1 / 3:1 | button / tab |
-| 8:1 / 16:1 | progress_bar / divider |
+| 21:9（生成）→ 後製裁 4:1 / 3:1 | button / tab |
+| 21:9（生成）→ 後製裁 8:1 / 16:1 | progress_bar / divider |
 | 3:4 | frame_card / popup_bg（直）/ rarity_glow（卡型）|
 | 4:3 | popup_bg（橫）/ mission_card |
 | 16:9 | banner（一般）|
@@ -353,7 +355,7 @@ mythic (red): crimson palette, fiery red aura with flame motif
 |------|------|
 | 出來太擁擠 | 強調 `clean readable shape` + `clear negative space` |
 | 元件變插畫不像 UI | 加 `flat 2D game UI element, not an illustration` |
-| 透明背景沒處理乾淨 | 用 chroma key（要求純品紅 #FF00FF 背景）後製去背 |
+| 去背不乾淨（magenta 殘邊）| 確認 prompt 有 `solid #FF00FF magenta background, edge-to-edge`，重跑 generate2dsprite `process` 去背 |
 | 風格融合失敗（看起來像通用 web UI）| 強化 boilerplate，列具體遊戲名 + UI motif 特徵 |
 | 多稀有度色階沒區隔開 | 提高色相對比 + 改光效強度差距 |
 

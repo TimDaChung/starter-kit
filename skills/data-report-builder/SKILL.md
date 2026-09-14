@@ -5,7 +5,7 @@ description: 產生「定期分析某個報表 / 後台 / 指標」的專屬 ski
 
 # Data Report Builder
 
-> **執行角色：企劃**——關注指標定義是否可驗證、比較基準是否公平、結論是否能導出行動；統計方法依 CLAUDE.md「資料分析」段。生成的 skill 跑起來時切**數值 / QA** 視角查資料品質。
+> **執行角色：企劃**——關注指標定義是否可驗證、比較基準是否公平、結論是否能導出行動；統計方法依 `templates/report-skill.template.md` 的「統計規範」小節。生成的 skill 跑起來時切**數值 / QA** 視角查資料品質。
 
 這是一支 **meta skill**:它不分析資料,它產生「會分析某份特定報表」的 skill。每份報表一支,名稱 `report-<slug>`,放在 `~/.claude/skills/`,屬於使用者自有資產,不進任何 kit。
 
@@ -48,6 +48,8 @@ report-<slug>/
 │   └── report.md         # 報告模板(Notion-ready Markdown)
 ├── scripts/              # 選配:資料來源是檔案或 SQL 時才建
 │   └── load.py           # 載入 + 清洗 + 基本驗證;完整 type hints;pytest 測試
+├── state/
+│   └── last_run.md       # 上次分析的日期 / 關鍵數值 / 留給下期的觀察(首次由 skill 建立)
 └── .env.example          # 有憑證時才建;列變數名,不放值
 ```
 
@@ -56,7 +58,7 @@ SKILL.md 必含:
 - 執行角色標頭(企劃;資料品質檢查切數值 / QA)
 - **資料取得**:一步一步,含失敗時怎麼辦
 - **分析 checklist**:總覽 → 趨勢 → 基準比較 → 分群 → 異常 → 結論與行動
-- **統計規範**:引用 CLAUDE.md 資料分析段(檢定前查假設、effect size + p-value、plotnine + 中文字型)
+- **統計規範**:照 `templates/report-skill.template.md` 的「統計規範」小節原樣帶入(四條規則寫在那裡,不在此重複)
 - **產出格式**:指向 templates/report.md
 - **異常門檻**:指向 references/metrics.md
 - **被糾正寫回**:本 skill 的 meta 規則
@@ -93,7 +95,6 @@ SKILL.md 必含:
 - 報告第一段是結論與建議行動,數字放表格,不放進句子
 - 每個異常都附「跟什麼比、差多少、可能原因、建議動作」四項
 - 分群比較先看樣本量,小於 30 的群標「樣本不足」不下結論
-- Python 腳本:4 空格、完整 type hints、f-string、pytest
 
 ## 資源
 

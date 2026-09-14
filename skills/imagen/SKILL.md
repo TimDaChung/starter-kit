@@ -13,10 +13,6 @@ allowed-tools:
   - Glob
   - Agent
   - AskUserQuestion
-  - WebSearch
-  - TaskCreate
-  - TaskUpdate
-  - TaskList
 ---
 
 # /imagen — Nano Banana Pro 圖片生成
@@ -32,20 +28,18 @@ allowed-tools:
 1. **Prompt 忠於討論結果** — 嚴禁擅自添加使用者沒提到的元素、風格或細節。Prompt 內容必須完全基於對話中確認的內容。
 2. **每次都問** — 圖片類型、尺寸、用途不要假設，每次都向使用者確認。
 3. **先建議再執行** — 收集完需求後，先給出專業建議，等使用者確認再產 prompt。
-4. **記錄偏好** — 每次生圖後，將使用情境記錄到 memory 供未來參考。
+4. **記錄偏好** — 每次生圖後，將使用情境記錄到 `<project-dir>/docs/imagen_history.md` 供未來參考。
 
 ---
 
 ## 預設視覺規則（除非使用者明確要求不同）
 
-生圖時，使用者沒明確指定以下項目就套默認：
+生圖時，使用者沒明確指定以下項目就套預設：
 
 1. **女性角色預設白皮膚**（fair luminous skin / pale skin）— 避免 sun-kissed / tanned / olive / bronzed / dark。使用者明確要求其他膚色才換。
 2. **所有角色預設美型**（refined attractive features，手遊 gacha 美學）— 美容貌、比例好。避免 western cartoon / Disney / Pixar / caricature 漂移。Banana Pro 對某些狂野詞（如 "manic"、"wild flying outward"、"battle-tested"）會 bias 到 western 風，需要在 [EXCLUSION] 段明確排除這些風格。
 3. **背景必須滿版到四個邊緣**（full-bleed edge-to-edge）— 不要白邊、letterbox、painting frame、gallery framing。在 [COMPOSITION] 段用**正向指令**鎖（"background extends full-bleed to all four edges"）；純粹在 [EXCLUSION] 加 negation 反而可能誘發 frame design。
 4. 使用者明確要求不同就依使用者指示。
-
-詳見 memory `feedback_default_fair_skin.md`、`feedback_same_category_unified_style.md`。
 
 ---
 
@@ -63,7 +57,7 @@ allowed-tools:
 3. 在 prompt 的 Strict Rules 段明寫「the new asset must visually rhyme with the existing project assets — same head-body proportions, same line weight, same shading style, same view angle」
 4. 跟使用者確認 lock：「專案既有 N 張同類資產（風格 / 比例 / 視角為...），這次照樣生？要改請明說」
 
-**為什麼**：使用者明確要求「專案已有的東西，畫風跟畫面、人物比例等是要默認參照的」(2026-05-07)。違反等於每次重新發想，4 張一組裡有 1 張飄掉就破壞 roster 視覺押韻。
+**為什麼**：專案已有的東西，畫風、畫面、人物比例等預設要參照。違反等於每次重新發想，4 張一組裡有 1 張飄掉就破壞 roster 視覺押韻。
 
 ---
 
@@ -78,7 +72,7 @@ allowed-tools:
 
 **單張生圖跳過此模式**，直接走原 Phase 流程。
 
-**為什麼**：同類別資產要視覺押韻。沒鎖規格進 prompt，AI 會飄（頭身比變、視角混、面向鏡像翻）。詳見 memory `feedback_same_category_unified_style.md`。
+**為什麼**：同類別資產要視覺押韻。沒鎖規格進 prompt，AI 會飄（頭身比變、視角混、面向鏡像翻）。
 
 ---
 
@@ -98,12 +92,12 @@ allowed-tools:
 
 | 項目 | 選項 | 預設 |
 |------|------|------|
-| **長寬比** | 1:1, 2:3, 3:2, 3:4, 4:3, 4:5, 5:4, 9:16, 16:9, 21:9 等 | 依用途建議 |
-| **解析度** | 512, 1K, 2K, 4K | 1K |
+| **長寬比** | 1:1, 2:3, 3:2, 3:4, 4:3, 4:5, 5:4, 9:16, 16:9, 21:9 | 依用途建議 |
+| **解析度** | 1K, 2K, 4K | 1K |
 | **參考圖** | 是否有畫風參考或角色示意圖？ | 無 |
 
 **如果使用者之前用過這個 Skill：**
-先讀取 memory 中的歷史記錄，提示：「上次你做 [情境] 用了 [尺寸] + [風格]，這次要沿用還是重新設定？」
+先讀取 `<project-dir>/docs/imagen_history.md`，提示：「上次你做 [情境] 用了 [尺寸] + [風格]，這次要沿用還是重新設定？」
 
 ---
 
@@ -121,10 +115,7 @@ allowed-tools:
 2. **向使用者確認**：哪些特徵要保留？哪些可以改？
 3. 將確認的特徵納入 prompt
 
-**參考圖限制：**
-- 角色圖：最多 5 張
-- 物件圖：最多 6 張
-- 總計：最多 14 張
+**參考圖限制：** 最多 6 張，超過品質下降。
 
 ---
 
@@ -197,30 +188,39 @@ allowed-tools:
 - **Prompt 模式**：將英文 prompt 連同建議的參數設定（長寬比、解析度）一併提供給使用者，方便直接貼到 Google AI Studio 使用。同時提醒參考圖的使用方式。
 - **API 模式**：直接呼叫 API 生成（見 Phase 5）。
 
-**模式判斷：** 預設使用 Prompt 模式（只產出 prompt）。如果使用者的 API Key 確認可用（曾成功呼叫過），自動切換為 API 模式。
+**模式判斷：** `skills/imagen/.env` 或環境變數 `GEMINI_API_KEY` 存在 → API 模式；否則 Prompt 模式（只產 prompt）。Key 的解析順序：先讀環境變數 `GEMINI_API_KEY`，沒有再讀 `skills/imagen/.env`。
 
 ---
 
 ## Phase 5｜圖片生成（API 模式）
 
-> 此階段僅在 API 模式下執行。如果是 Prompt 模式，跳過此階段直接進入 Phase 6。
+> 此階段僅在 API 模式下執行（模式判斷見 Phase 4 Step 2）。如果是 Prompt 模式，跳過此階段直接進入 Phase 5.5。
 
 ### 檔案命名與存放
 
-- 預設存放位置：`~/.claude/gemini/`
-- 檔名格式：`{簡短描述}_{日期}_{序號}.png`
-- 範例：`fire_monster_20260331_01.png`
+**位置決定**：
+1. 使用者明確指定 → 用指定的
+2. 沒指定 → 先問「要存在哪？」
+3. fallback → 當前工作目錄下 `imagen/`
 
-如果使用者指定了其他路徑，使用指定路徑。
+檔名格式：`{簡短描述}_{日期}_{序號}.png`
+範例：`fire_monster_20260331_01.png`
 
 ### 執行生成
 
-使用 curl 呼叫 Gemini API：
+先把最終英文 prompt Write 到 `prompt-final.txt`，再呼叫 skill 內建的 wrapper（參數詳見 `--help`）：
 
-1. 將參考圖轉為 base64
-2. 組裝 JSON payload（含 prompt、參考圖 inline_data、generationConfig）
-3. POST 到 `https://generativelanguage.googleapis.com/v1beta/models/{模型}:generateContent`
-4. 從回應中提取 base64 圖片資料並儲存為 PNG
+```bash
+python ~/.claude/skills/imagen/bin/generate.py \
+  --prompt "$(cat prompt-final.txt)" \
+  --ratio 3:4 --size 1K \
+  --ref reference/style.jpg \
+  --output {output_path}
+```
+
+- `--ratio` / `--size` 只接受下方速查表列的值
+- `--ref` 可重複多次（最多 6 張）
+- wrapper 會自動讀 API Key、組 payload、存 PNG，不需手動處理 base64 或 curl
 
 ### 生成後
 
@@ -261,27 +261,17 @@ allowed-tools:
 
 ## Phase 6｜記憶更新
 
-每次完成 prompt 產出或成功生成圖片後，更新 memory 記錄。
+每次完成 prompt 產出或成功生成圖片後，更新記錄。
 
 ### 記錄格式
 
-在 memory 目錄中更新或建立 `imagen_history.md`：
+更新或建立 `<project-dir>/docs/imagen_history.md`（三支 imagen skill 共用同一檔、同一欄位）：
 
 ```markdown
----
-name: imagen 使用記錄
-description: /imagen skill 的歷史使用情境、尺寸、風格偏好，用於下次生圖時參考
-type: user
----
-
-## 使用記錄
-
-| 日期 | 主題 | 用途 | 風格 | 長寬比 | 解析度 | 備註 |
-|------|------|------|------|--------|--------|------|
-| 2026-03-31 | 火焰怪物 | 卡牌插圖 | 日系動漫 | 3:4 | 2K | 有參考圖 |
+| 日期 | skill | 用途 | 最終英文 prompt 摘要 | 輸出檔 | 備註 |
+|------|-------|------|---------------------|--------|------|
+| 2026-03-31 | imagen | 卡牌插圖 | fire monster, anime style, 3:4, 2K | imagen/fire_monster_20260331_01.png | 有參考圖 |
 ```
-
-同時確認 `MEMORY.md` 中有對應的索引條目。
 
 ---
 
@@ -317,4 +307,4 @@ type: user
 - 角色立繪／半身像 → `imagen-portrait`
 - UI 素材（icon／卡框／banner） → `imagen-ui`
 - 2D 地圖／場景 → `generate2dmap`
-- 角色 sprite／動畫 → `generate2dsprite`（chibi／Q 版風用 `generate2dsprite-chibi`）
+- 角色 sprite／動畫 → `generate2dsprite`；chibi／Q 版風用 `generate2dsprite`（`art_style=cel_shaded_chibi`）

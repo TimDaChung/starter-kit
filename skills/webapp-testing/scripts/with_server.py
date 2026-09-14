@@ -14,13 +14,14 @@ Usage:
       -- python test.py
 """
 
-import subprocess
-import socket
-import time
-import sys
 import argparse
+import socket
+import subprocess
+import sys
+import time
 
-def is_server_ready(port, timeout=30):
+
+def is_server_ready(port: int, timeout: int = 30) -> bool:
     """Wait for server to be ready by polling the port."""
     start_time = time.time()
     while time.time() - start_time < timeout:
@@ -32,7 +33,7 @@ def is_server_ready(port, timeout=30):
     return False
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description='Run command with one or more servers')
     parser.add_argument('--server', action='append', dest='servers', required=True, help='Server command (can be repeated)')
     parser.add_argument('--port', action='append', dest='ports', type=int, required=True, help='Port for each server (must match --server count)')
@@ -54,11 +55,11 @@ def main():
         print("Error: Number of --server and --port arguments must match")
         sys.exit(1)
 
-    servers = []
+    servers: list[dict[str, str | int]] = []
     for cmd, port in zip(args.servers, args.ports):
         servers.append({'cmd': cmd, 'port': port})
 
-    server_processes = []
+    server_processes: list[subprocess.Popen[bytes]] = []
 
     try:
         # Start all servers

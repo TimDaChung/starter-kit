@@ -4,7 +4,7 @@ Choose maps by combining pipeline axes. Avoid treating `hybrid` as a top-level s
 
 ## Visual Asset Source
 
-Default to Nano Banana Pro via `lib/gen_image.py` for visual assets. Base maps, dressed references, prop sheets, prop sprites, tileset art, parallax layers, and battle backgrounds should come from `gen_image.py` unless the user supplies existing art or explicitly asks for procedural placeholders. The legacy `image_gen` enum value in this skill's parameter contract maps to this wrapper.
+Default to Nano Banana Pro via `~/.claude/skills/imagen/bin/generate.py` for visual assets. Base maps, dressed references, prop sheets, prop sprites, tileset art, parallax layers, and battle backgrounds should come from `~/.claude/skills/imagen/bin/generate.py` unless the user supplies existing art or explicitly asks for procedural placeholders.
 
 Scripts may slice, assemble, chroma-key, validate, compose previews, create metadata, and emit engine files. They must not replace image generation as the creative art source for final map visuals. Engine outputs such as Godot `.tscn`, Tiled JSON, LDtk data, or Unity placement data should wire up image-generated or user-supplied assets.
 

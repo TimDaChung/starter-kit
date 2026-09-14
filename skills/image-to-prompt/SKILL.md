@@ -33,7 +33,7 @@ allowed-tools:
 3. **中性化**：把角色專屬元素改寫成通用敘事語言（見下表）。
 4. 套「整合句式」輸出一段連貫的 prompt（使用者偏好一整段流暢敘述，不是條列 tag）。
 5. 角色名、標題文字一律留 placeholder。
-6. **結尾問使用者要中文還是英文版**（GPT/DALL-E 吃英文較準，且版權角色中文名容易被擋；中文 prompt 適合理解力強的模型）。除非使用者已指定。
+6. **結尾問使用者要中文還是英文版**（外部工具與 Gemini 皆以英文 prompt 較穩，且版權角色中文名容易被擋；中文 prompt 適合理解力強的模型）。除非使用者已指定。
 
 ## 中性化規則（核心）
 
@@ -83,5 +83,5 @@ allowed-tools:
 - 角色立繪／半身像／角色卡 → `imagen-portrait`
 - UI 素材（icon／卡框／頭像框／banner） → `imagen-ui`
 - 2D 地圖／場景／戰鬥背景 → `generate2dmap`
-- 角色 sprite／動畫表 → `generate2dsprite`（cel-shaded chibi／Q 版風改用 `generate2dsprite-chibi`）
+- 角色 sprite／動畫表 → `generate2dsprite`；cel-shaded chibi／Q 版風用 `generate2dsprite`（`art_style=cel_shaded_chibi`）
 - 其他通用生圖需求 → `imagen`

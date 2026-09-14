@@ -11,10 +11,6 @@ allowed-tools:
   - Glob
   - Agent
   - AskUserQuestion
-  - WebSearch
-  - TaskCreate
-  - TaskUpdate
-  - TaskList
 ---
 
 # /imagen-portrait — RPG 手遊角色立繪生成
@@ -23,11 +19,6 @@ allowed-tools:
 
 使用 Gemini 的 Nano Banana Pro (`gemini-3-pro-image-preview`) 生成 RPG 手遊角色立繪，預設套用高營收手遊（米哈遊、明日方舟等）的視覺語言。
 
-姊妹 skill：
-- `/imagen` — 通用生圖（會問你風格）
-- `/imagen-ui` — UI 素材（手遊 UI 元件）
-- `/imagen-portrait`（這支）— 角色立繪
-
 ---
 
 ## 核心原則
@@ -35,20 +26,18 @@ allowed-tools:
 1. **Prompt 忠於討論結果** — 嚴禁擅自添加使用者沒提到的元素或設計細節。
 2. **預設手遊高品質審美** — 厚塗、立體光影、設計密度高、有 silhouette 辨識度。除非使用者要 chibi / 像素 / 寫實扁平等其他風格才切換。
 3. **每次都問角色設定** — 立繪是設計工作，必須先確認角色身份、職業、世界觀基調。
-4. **記錄偏好** — 每次生圖後寫入 memory `imagen_history.md`。
+4. **記錄偏好** — 每次生圖後寫入 `<project-dir>/docs/imagen_history.md`。
 
 ---
 
 ## 預設視覺規則（除非使用者明確要求不同）
 
-生圖時，使用者沒明確指定以下項目就套默認：
+生圖時，使用者沒明確指定以下項目就套預設：
 
 1. **女性角色預設白皮膚**（fair luminous skin / pale skin）— 避免 sun-kissed / tanned / olive / bronzed / dark。使用者明確要求其他膚色才換。
 2. **所有角色預設美型**（refined attractive features，手遊 gacha 美學）— 美容貌、比例好。避免 western cartoon / Disney / Pixar / caricature 漂移。Banana Pro 對某些狂野詞（如 "manic"、"wild flying outward"、"battle-tested"）會 bias 到 western 風，需要在 [EXCLUSION] 段明確排除這些風格。
 3. **背景必須滿版到四個邊緣**（full-bleed edge-to-edge）— 不要白邊、letterbox、painting frame、gallery framing。在 [COMPOSITION] 段用**正向指令**鎖（"background extends full-bleed to all four edges"）；純粹在 [EXCLUSION] 加 negation 反而可能誘發 frame design。
 4. 使用者明確要求不同就依使用者指示。
-
-詳見 memory `feedback_default_fair_skin.md`、`feedback_same_category_unified_style.md`。
 
 ---
 
@@ -62,7 +51,7 @@ allowed-tools:
 3. Strict Rules 段明寫「the new portrait must visually rhyme with existing project portraits — same head-body proportions, same view angle, same lighting」
 4. 跟使用者確認：「專案既有 N 張立繪（畫風 / 頭身比為...），這次照樣？要改風格請明說」
 
-**為什麼**：使用者明確要求「專案已有的東西，畫風跟畫面、人物比例等是要默認參照的」(2026-05-07)。立繪特別容易在頭身比飄（成熟系角色被 Banana 自動拉長身），ref + Strict Rules 雙鎖才穩。
+**為什麼**：專案已有的東西，畫風、畫面、人物比例等預設要參照。立繪特別容易在頭身比飄（成熟系角色被 Banana 自動拉長身），ref + Strict Rules 雙鎖才穩。
 
 ---
 
@@ -78,11 +67,11 @@ allowed-tools:
 
 **單張立繪跳過此模式**，直接走原 Phase 流程。
 
-**為什麼**：同遊戲的角色立繪要視覺押韻。沒鎖規格進 prompt，AI 會飄（頭身比變、視角混、面向鏡像翻、風格漂浮）。詳見 memory `feedback_same_category_unified_style.md`。
+**為什麼**：同遊戲的角色立繪要視覺押韻。沒鎖規格進 prompt，AI 會飄（頭身比變、視角混、面向鏡像翻、風格漂浮）。
 
 ---
 
-## 風格庫（默認從這幾種挑）
+## 風格庫（預設從這幾種挑）
 
 | 風格代號 | 參考遊戲 | 視覺特徵 |
 |---------|---------|---------|
@@ -132,7 +121,7 @@ allowed-tools:
 | **參考圖** | 是否上傳（角色 / 服裝 / 風格）| 無 |
 
 **如果使用者之前用過：**
-讀 memory `imagen_history.md`，提示：「上次做 [角色] 用了 [風格 + 構圖]，這次要沿用嗎？」
+讀 `<project-dir>/docs/imagen_history.md`，提示：「上次做 [角色] 用了 [風格 + 構圖]，這次要沿用嗎？」
 
 ---
 
@@ -153,7 +142,7 @@ allowed-tools:
 2. 確認哪些配件 / 元素要保留
 3. 寫進 prompt 的服裝描述
 
-**參考圖限制：** 角色 5 張 / 物件 6 張 / 總計 14 張。
+**參考圖限制：** 最多 6 張，超過品質下降。
 
 ---
 
@@ -205,6 +194,7 @@ allowed-tools:
 📐 長寬比：[ratio]
 📏 解析度：[size]
 🎨 風格：[風格代號]
+🧩 套用風格 boilerplate：<style_key>
 🖼️ 參考圖：[有/無，幾張]
 
 沒問題的話我就轉英文並開始生成。要修改什麼嗎？
@@ -212,7 +202,7 @@ allowed-tools:
 
 ### Step 2：轉英文 + 套風格 boilerplate
 
-依風格代號加上對應 boilerplate（自動加，不在中文 prompt 顯示）：
+依風格代號加上對應 boilerplate（確認框已用「套用風格 boilerplate：<style_key>」標示，英文 boilerplate 原文不另翻進中文 prompt）：
 
 #### `mihoyo_genshin` boilerplate
 ```
@@ -280,6 +270,8 @@ ornate costume design, vibrant accent colors, refined linework, 2D production-qu
 
 ### 執行生成
 
+先把最終英文 prompt Write 到 `prompt-final.txt`，再執行：
+
 ```bash
 python ~/.claude/skills/imagen/bin/generate.py \
   --prompt "$(cat prompt-final.txt)" \
@@ -302,12 +294,12 @@ python ~/.claude/skills/imagen/bin/generate.py \
 
 ## Phase 6｜記憶更新
 
-更新 memory `imagen_history.md`：
+更新 `<project-dir>/docs/imagen_history.md`（三支 imagen skill 共用同一檔、同一欄位）：
 
 ```markdown
-| 日期 | 角色 / 主題 | 風格 | 構圖 | 長寬比 | 解析度 | 路徑 | 備註 |
-|------|-----------|------|------|--------|--------|------|------|
-| 2026-04-30 | 冰系法師 | mihoyo_genshin | 半身 | 3:4 | 2K | gemini/portraits/ | 有上傳服裝參考 |
+| 日期 | skill | 用途 | 最終英文 prompt 摘要 | 輸出檔 | 備註 |
+|------|-------|------|---------------------|--------|------|
+| 2026-04-30 | imagen-portrait | 冰系法師半身立繪 | ice mage girl, mihoyo_genshin, bust shot, 3:4, 2K | imagen-portrait/ice_mage_mihoyo_genshin_20260430_01.png | 有上傳服裝參考 |
 ```
 
 ---

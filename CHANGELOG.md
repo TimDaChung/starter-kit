@@ -1,5 +1,35 @@
 # CHANGELOG
 
+## v1.5.0 (2026-09-14)
+
+全 kit 健檢後的第一、二批修復(41 檔)。目標:每支 skill 第一次用就能跑。
+
+**首次使用會失敗的問題**
+- `imagen/bin/generate.py`:比例與尺寸依官方文件改為 Pro 模型實際支援的清單(1:1、2:3、3:2、3:4、4:3、4:5、5:4、9:16、16:9、21:9;1K / 2K / 4K),移除 Flash 專用的 512 與 1:4 / 1:8 / 4:1 / 8:1;API key 改走 `x-goog-api-key` header;`.env` 值去引號;未知參考圖副檔名明確報錯;全檔英文化並補齊 type hints
+- `imagen-ui`:boilerplate 從「透明背景」改為 magenta 背景 + generate2dsprite processor 去背(Gemini 輸出本來就沒有 alpha);button / tab / progress_bar / divider 改「生 21:9 再裁」;補工程視角 QC
+- `imagen`:Phase 5 改呼叫 `bin/generate.py`,刪手刻 curl;API / Prompt 模式改以 `.env` 或 `GEMINI_API_KEY` 存在與否判定
+- `generate2dmap` 與 references:6 處 `lib/gen_image.py` 改為 `imagen/bin/generate.py`;單 prop 處理改走 `extract_prop_pack.py --rows 1 --cols 1`(原指令不會產出 `prop.png`)
+- `game-balance-auditor`:模擬腳本從 `/tmp` 改到專案 `.claude/scratch/`
+- `webapp-testing`:examples 硬編的 `/mnt/user-data/outputs` 與 `/tmp` 改相對 `./output/`;`with_server.py` 補 type hints
+- `data-report-builder`:目錄樹補 `state/last_run.md`;統計規範內嵌進 template,不再依賴使用者 CLAUDE.md 有「資料分析」段
+- `starter-setup`:補角色標頭;clone 指令填入實際 URL;skill 數量改以目錄為準
+- `card-game`:刪 12 個不存在的 Godot / Unity skill 引用,實作路徑改指向 game-prototype 的單檔 HTML;description 補中文觸發詞
+- `product-planning`:修鐵則語句;加「有部門專屬企劃 skill 時優先走它」
+- `playtest-loop`:新增 `references/dev-notes-channel.js`(開發者回饋頻道注入碼);工具名統一為 chrome-devtools MCP
+- `my-voice.example.md` 從 `agents/` 搬到 `templates/`,name 改 `my-voice-TEMPLATE`,避免直接 clone 的人多出一支佔位 agent
+
+**死引用清除**
+- `generate2dsprite-chibi` 殘留 6 處、不存在的 memory 檔 9 處、不存在的 skill(design-consultation / frontend-design / design-review / qa / generate2dgamepack)全部改指向 kit 內對應資產;game-develop 的 QA 階段正式接上 webapp-testing
+- 三支 imagen 的 `imagen_history.md` 統一路徑 `<project-dir>/docs/imagen_history.md` 與欄位;參考圖上限統一 6 張;存檔位置統一「先問,fallback `<cwd>/<skill 名>/`」
+- 瀏覽器工具名統一為 chrome-devtools MCP(原 browse / claude-in-chrome / javascript_tool)
+
+**一致性**
+- 三支 agents 的 description 標明角色(【敘事】【數值 / QA】【企劃複核】),balance 與 planning 兩支加分工邊界句
+- generate2dsprite 角色標頭補「完成後切企劃視角複核」;prompt-rules 的像素預設去掉與規則矛盾的 16-bit / chunky 措辭
+- 「默認」→「預設」、歷史註記(2026-05-07 等)清除、imagen 三支 frontmatter 移除未用的 allowed-tools
+- 安裝說明第 21 行藏有兩個 bell 控制字元(`\a` 跳脫),已修
+- `.gitignore` 加 `__pycache__/`
+
 ## v1.4.0 (2026-09-14)
 
 - **新 skill `data-report-builder`**(meta skill):一輪訪談(資料來源 / 指標公式 / 比較基準 / 異常門檻 / 分群 / 產出 / 週期)→ 在 `~/.claude/skills/report-<slug>/` 生成專屬的定期報表分析 skill(SKILL.md + 指標字典 + 報告模板 + 選配 load.py)→ 試跑一次 → 給排程建議。生成的 skill 屬使用者自有,不進 kit。附三個模板
