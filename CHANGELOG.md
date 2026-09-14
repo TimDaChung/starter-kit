@@ -8,6 +8,7 @@
 - **安裝說明前置表**：Python 3.10+、pip 套件、Playwright Chromium、Node + chrome-devtools MCP、Gemini key 各影響哪些 skill 與安裝指令；常見卡點加 ModuleNotFoundError 與 playtest-loop 找不到分頁兩條
 - **安裝精靈加環境健檢**：開場健檢查 Python / Pillow / playwright / Chromium / chrome-devtools MCP；缺的列表**問一次**要不要順手裝，同意才動使用者的 Python 環境與 MCP 設定（kit 檔案以外唯一例外，鐵則補寫）；最終健檢加「環境」節列仍缺的依賴與 fallback；結算表加 🧰 一行
 - **playtest-loop 加前置節**：需 chrome-devtools MCP + Chrome 以 `--remote-debugging-port=9222` 啟動，缺就退手貼 `exportDevNotes()` 模式
+- 安裝說明加「Chrome 開遠端偵錯」四步（改捷徑目標、完全關閉重開、用 `/json/version` 驗證）；維持 `--browser-url 9222` 寫法不改成讓 MCP 自開瀏覽器，因為 playtest-loop 要讀玩家分頁的 localStorage
 - README 測試列標註需 Python + Playwright，升級節前補一句誰需要額外依賴
 
 ## v1.7.0 (2026-09-14)
