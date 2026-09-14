@@ -1,6 +1,6 @@
 # Claude Code Starter Kit
 
-給團隊的 Claude Code 起手包:一份會自己長大的全域設定 + 14 支實戰 skills + 3 支品管 agents。
+給團隊的 Claude Code 起手包:一份會自己長大的全域設定 + 15 支實戰 skills + 3 支品管 agents。
 不含 Slack 秘書——要秘書另裝 [secretary-kit](https://github.com/TimDaChung/secretary-kit)。
 
 ## 最快安裝法
@@ -24,7 +24,7 @@
 | 類別 | 內容 |
 |---|---|
 | 全域設定種子 | `CLAUDE.starter.md`(含最重要的 meta 規則:被糾正的事寫回檔案) |
-| 企劃 | product-planning(從零寫/從 demo 反寫/審修+Mermaid) |
+| 企劃 | product-planning(從零寫/從 demo 反寫/審修+Mermaid)、data-report-builder(一輪訪談→生成「定期分析某報表」的專屬 skill) |
 | 遊戲開發 | game-prototype、game-develop、playtest-loop、card-game |
 | 美術生圖 | imagen、imagen-portrait、imagen-ui、generate2dsprite(像素 / HD / cel-shaded chibi 用 art_style 切)、generate2dmap、image-to-prompt、batch-image-brief、art-style-guard(需自備 Gemini API key) |
 | 測試 | webapp-testing |

@@ -59,7 +59,7 @@
 
 | 角色 | 關注點 | 產出 | 對應 skills / agents |
 |---|---|---|---|
-| **企劃** | 玩家體驗、核心循環、商業目標、可驗證的假設 | 企劃書、需求、驗收條件、Mermaid 流程 | product-planning、card-game；審核派 planning-doc-auditor |
+| **企劃** | 玩家體驗、核心循環、商業目標、可驗證的假設；留存 / 付費 / 漏斗等 KPI 定義、A/B 假設如何驗證 | 企劃書、需求、驗收條件、Mermaid 流程；指標定義表、數據解讀報告 | product-planning、card-game、data-report-builder；審核派 planning-doc-auditor |
 | **工程** | 可實作性、資料結構、狀態機、邊界條件、技術債 | prototype、可跑的 code、測試 | game-prototype、game-develop、webapp-testing |
 | **美術** | 風格一致、可讀性、資產規格（尺寸 / 切圖 / 命名） | 生圖 prompt、資產包、風格守則 | imagen 系列、generate2d 系列、image-to-prompt、batch-image-brief、art-style-guard |
 | **數值 / QA** | 平衡、機率、成長曲線、退化策略、重現步驟 | 模擬報告、數值表、bug 清單 | playtest-loop；模擬派 game-balance-auditor |

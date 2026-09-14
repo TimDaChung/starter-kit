@@ -30,7 +30,7 @@ description: Starter kit 健檢式安裝/升級精靈。開場先健檢(盤點 C
 - secretary(skills/secretary)→ 歸「自有」,本精靈完全不碰
 - `skills/imagen/.env` 存在?(影響生圖類能不能用)
 
-## 2. 分類(kit 的 14 支 skills + 3 支 agents 逐一比對)
+## 2. 分類(kit 的 15 支 skills + 3 支 agents 逐一比對)
 
 | 分類 | 判定 | 動作 | 問不問 |
 |---|---|---|---|
