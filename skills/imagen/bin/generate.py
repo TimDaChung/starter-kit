@@ -182,6 +182,13 @@ def extract_and_save(response: dict, output_path: str) -> str:
 
 
 def main() -> None:
+    # Windows pipes default to the legacy codepage (e.g. cp950); model text
+    # containing emoji or non-Big5 characters would raise UnicodeEncodeError
+    # after the image was already saved, turning a success into exit code 1.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
     parser = argparse.ArgumentParser(description="Nano Banana Pro image generation")
     parser.add_argument("--prompt", required=True, help="Generation prompt")
     parser.add_argument("--ratio", default="1:1", choices=VALID_RATIOS, help="Aspect ratio (default: 1:1)")

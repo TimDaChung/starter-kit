@@ -10,7 +10,7 @@
 ```
 幫我安裝這個 starter kit:https://github.com/TimDaChung/starter-kit
 步驟:1. git clone 到 %USERPROFILE%\starter-kit
-2. 讀 starter-kit\starter-setup\SKILL.md,照裡面的健檢式流程執行:
+2. 讀 starter-kit\skills\starter-setup\SKILL.md,照裡面的健檢式流程執行:
    先健檢我現有的 CLAUDE.md/skills/agents;我沒有的 skills/agents 直接裝、
    CLAUDE.md 缺的規則直接併入(原內容不動);我自己改過的東西不要碰。
    裝完做最終健檢,有重複/衝突/太肥的只列建議給我決定,不要自己刪。

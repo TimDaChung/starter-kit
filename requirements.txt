@@ -2,5 +2,8 @@
 # Pillow：generate2dsprite / generate2dmap 的後製腳本、imagen 的 magenta 去背
 # playwright：webapp-testing（裝完還要跑 python -m playwright install chromium）
 # imagen 的 generate.py 只用標準庫 urllib 打 Gemini API，不需要 google SDK
+#
+# data-report-builder 生成的報表 skill 才需要，用到再裝：pip install pandas plotnine
+# （不列成正式行，避免每個人都裝；plotnine 會一併帶入 matplotlib）
 Pillow>=10
 playwright>=1.45

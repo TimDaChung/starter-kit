@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## v1.9.0 (2026-09-15)
+
+乾淨機器審查修復：模擬同事照安裝說明裝完，找出「裝了但一用就壞」的項目全修。
+
+- **starter-setup 搬進 `skills/`**：原本放 repo 根目錄，永遠不會被 junction 進 `~/.claude/skills/`，連 Tim 本機都沒有，「starter 升級 / 健檢」口令裝完後沒有 skill 可觸發。現在和其他 skill 一起裝；README 貼給 Claude 的路徑同步改
+- **精靈加依賴表**：imagen-ui→generate2dsprite、五支生圖→imagen、game-prototype→game-develop、game-develop→七支、playtest-loop→兩支 agent。略過 X 前先警告連帶影響；最終健檢加「依賴斷裂」一條
+- **with_server.py Windows 修復**：`shell=True` + `terminate()` 只殺 cmd.exe，server 變孤兒繼續占 port，下次測到舊版；stdout/stderr 接 PIPE 不讀，長測試卡死。改 Windows 走 `taskkill /T /F`、POSIX 走 process group；輸出預設 DEVNULL、加 `--log-dir`；啟動前先查 port 被占直接報錯。CLI 介面不變，實測 port 釋放乾淨
+- **generate.py stdout 改 UTF-8**：Windows pipe 下 cp950，模型回傳含 emoji 就 UnicodeEncodeError，圖已存但 exit 非 0 讓 Claude 誤判重跑燒 quota
+- **data-report-builder 不是零依賴**：生成的報表 skill 要 pandas + plotnine。requirements.txt 加註解、SKILL.md 試跑前檢查、安裝說明「7 支免依賴」改 6 支
+- **game-develop 第 188 行**：叫 Claude 呼叫 sub-skill 自己的 generate.py，但那三支沒有這個檔。改成一律呼叫 imagen 的，後製才用各自 scripts/
+- **相對路徑改絕對**：product-planning 的 template 引用、webapp-testing 五處 `scripts/with_server.py`、generate2dsprite 的 process 指令，原本從專案 cwd 都解析不到
+- playtest-loop「殺同 port 舊行程」補 netstat + taskkill；game-balance-auditor tools 加 Write，暫存腳本寫 temp 或 `.tmp/`；安裝說明 Python / Pillow 影響清單補 game-develop
+- 排除：allowed-tools 用 YAML 陣列經官方文件確認合法，不改
+
 ## v1.8.0 (2026-09-15)
 
 環境依賴補齊：乾淨機器裝完能立刻跑的原本只有企劃 / 原型類 7 支，其餘要 Python 套件或 MCP 卻沒寫、沒檢查。

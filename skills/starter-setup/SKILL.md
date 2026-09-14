@@ -31,7 +31,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 - `%USERPROFILE%\starter-kit` 已 clone？（已有就 `git pull`，記 CHANGELOG 新增段落）
 - secretary(skills/secretary)→ 歸「自有」，本精靈完全不碰
 - `skills/imagen/.env` 存在？（影響生圖類能不能用）
-- **環境依賴**（企劃 / 原型類 7 支不需要，只影響生圖、測試、試玩迴圈）：
+- **環境依賴**（企劃 / 原型類 6 支不需要，只影響生圖、測試、試玩迴圈；data-report-builder 生成的報表 skill 另需 pandas + plotnine，用到再裝）：
   - `python --version` 有 3.10+？
   - `python -c "import PIL"`、`python -c "import playwright"` 各自過不過？
   - Playwright 的 Chromium：`%LOCALAPPDATA%\ms-playwright\chromium*` 目錄存在？
@@ -49,6 +49,18 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 | **自有** | kit 沒有的資產 | 不動 | 不問，結算表列「保留」 |
 | **使用者略過** | 名字列在 `~/.claude/starter-skip.md` | 不裝、不升級 | 不問，結算表列「略過」，附「要裝就說『裝回 X』」 |
 
+### 依賴表（固定，略過與健檢時查）
+
+| 這支 | 依賴 | 用到什麼 |
+|---|---|---|
+| imagen-ui | generate2dsprite | 去背腳本 `scripts/generate2dsprite.py` |
+| imagen-portrait、imagen-ui、generate2dsprite、generate2dmap、art-style-guard | imagen | `references/common.md`、`references/consistency-rules.md`、`bin/generate.py` |
+| game-prototype | game-develop | `templates/*.template.md` |
+| game-develop | imagen、imagen-ui、generate2dsprite、generate2dmap、webapp-testing、art-style-guard、image-to-prompt | 生圖 / 後製 / QA 全部轉派這些 sub-skill |
+| playtest-loop | agents dialogue-writer、game-balance-auditor | 收割後的文筆 / 數值修正轉派 |
+
+使用者說「X 不要裝」要進略過清單時，先查這張表：X 若是某一列的「依賴」欄，一句話警告「略過 X 會讓 Y、Z 的某功能壞」（例：略過 generate2dsprite → imagen-ui 的去背不能跑）。使用者仍要略過就照辦，結算表 ⛔ 那行附註連帶影響。
+
 ## 3. 自動安裝
 
 1. **Clone**（未 clone 過才做）：
@@ -59,6 +71,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
    ```powershell
    New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\<名>" -Target "$env:USERPROFILE\starter-kit\skills\<名>"
    ```
+   本精靈自己（`skills/starter-setup/`）也是 skills/ 內的一支，一樣走 junction 裝進 `~/.claude/skills/starter-setup`——這樣之後「starter 升級」「starter 健檢」口令才有 skill 可觸發，不用再手動讀檔
 3. **Agents 用拷貝**（散檔無法 junction）：複製「沒有」的 `agents/*.md` 到 `~/.claude/agents/`。`templates/my-voice.example.md` 是範本不是 agent，不裝，結算表提示一句。升級時 agents 有 diff → 歸「自改過」進最終健檢
 4. **imagen 設定**：`.env` 不存在就把 `.env.example` 複製成 `.env`，結算表提醒去 https://aistudio.google.com/apikey 拿 key 填入
 5. **略過清單**：使用者說「X 不要裝」「不要 X」→ 把 X 的名字寫進 `~/.claude/starter-skip.md`（一行一個，可加一句原因），之後安裝與升級都跳過它；說「裝回 X」→ 從檔案移除該行並立即裝。沒有這個檔就代表沒有略過任何東西
@@ -107,6 +120,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 - **自有對自有近似**：使用者自己兩支功能重疊 → 列出，建議合併或刪其一（不做換版評估，kit 沒有對應版本）
 - **失效**：junction 目標不存在、資料夾沒有 SKILL.md、frontmatter 缺 name/description → 列出
 - **缺角色標頭**：SKILL.md 的 H1 之後沒有 `> **執行角色：X**` 一行 → 列出，建議補（kit 的 skill 不會缺；自有 skill 缺的話附一句建議寫法）
+- **依賴斷裂**：已裝的 skill 在第 2 節依賴表中的目標未裝或在略過清單 → 列出「X 依賴 Y（未裝 / 略過）→ 某功能不能跑」
 
 ### agents
 
@@ -138,13 +152,13 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 🩺 開場健檢:CLAUDE.md 96 行 / skills 0 / agents 0 / secretary 無
 🧰 環境:Python 3.13 ✔ / Pillow ✔ / Playwright ✔(本次裝) / chrome-devtools MCP ✘(你說先不裝→playtest-loop 退手貼模式) / Gemini key ✘(.env 待填)
 🧩 Claude in Chrome:未裝 → 自己點一下 https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn,裝完在 Claude Code 打 /chrome 選 Enabled by default
-✅ 新裝 skills(N,junction):product-planning、imagen …
+✅ 新裝 skills(N,junction):starter-setup、product-planning、imagen …
 ✅ 新裝 agents(3):dialogue-writer、game-balance-auditor、planning-doc-auditor
 ⬆️ 升級:game-prototype(舊版→v1.1,原版備份於 skills-backup/)
 📝 CLAUDE.md:併入 5 條(meta 規則、UI 繁中 …),原內容未動,備份於 skills-backup/
 ✋ 保留不動:你的 my-analyzer、secretary
 ⏭️ 未裝:templates/my-voice.example.md(想要個人分身就複製成 ~/.claude/agents/my-voice.md 再客製)
-⛔ 略過(依 starter-skip.md):generate2dmap、imagen-ui(要裝就說「裝回 X」)
+⛔ 略過(依 starter-skip.md):generate2dmap、imagen-ui(要裝就說「裝回 X」;連帶:game-develop 的地圖 / UI 生圖會跳過)
 
 🩺 最終健檢建議(不動手,你決定):
   1. CLAUDE.md「資料分析」段 12 行只在統計任務用到 → 可搬成 skill,省 12 行
