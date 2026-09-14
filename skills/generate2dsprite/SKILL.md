@@ -134,7 +134,7 @@ Banana's interpretation of "pixel art" / "16-bit" / "retro JRPG" tends to render
 
 ### 4. Postprocess locally
 
-Run `scripts/generate2dsprite.py process` on the raw image.
+Run `python ~/.claude/skills/generate2dsprite/scripts/generate2dsprite.py process` on the raw image (absolute path: the working directory is the user's project, not this skill folder).
 
 The processor is intentionally low-level. The agent chooses:
 

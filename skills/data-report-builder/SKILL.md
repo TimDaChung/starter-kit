@@ -65,6 +65,7 @@ SKILL.md 必含：
 
 ### 3. 試跑一次
 
+- 先確認環境：`python -c "import pandas, plotnine"`，報 `ModuleNotFoundError` 就提示使用者 `pip install pandas plotnine`（kit 的 requirements.txt 不含這兩個，生成的報表 skill 才用到）
 - 有資料就用最近一期真資料跑完整流程；沒有就用使用者給的樣本或自造 10 列假資料跑到報告模板
 - 對照 checklist 逐項確認有產出
 - 圖表確認中文字型沒變方塊

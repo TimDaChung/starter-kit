@@ -185,7 +185,7 @@ python ~/.claude/skills/imagen/bin/generate.py --prompt "$(cat prompts/hero_b.tx
 wait
 ```
 
-（sprite / UI / map 類改呼叫對應 sub-skill 的 generate.py，參數以各自 `--help` 為準。）完成通知收齊後一次 Read 所有張數驗證。
+（sprite / UI / map 類也一律呼叫 `~/.claude/skills/imagen/bin/generate.py` 生圖——那三支 sub-skill 沒有自己的 generate.py；prompt 規範照各自 SKILL.md，後製（去背 / 切格 / 組圖）才用各 sub-skill 的 `scripts/`，參數以 `--help` 為準。）完成通知收齊後一次 Read 所有張數驗證。
 
 generate.py 一次 60–90 秒，並行 5 張 ≈ 串行 1 張的時間。**不要序列跑同類別**。
 

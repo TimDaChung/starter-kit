@@ -29,7 +29,11 @@ description: 遊戲 demo 試玩迭代迴圈。Use when 使用者說「重開 ser
 cd "<project-dir>" && python -m http.server 8000   # run_in_background
 ```
 
-- 先殺同 port 舊行程再起新的。
+- 先殺同 port 舊行程再起新的。Windows 查 PID 與殺法：
+  ```powershell
+  netstat -ano | findstr :8000      # last column is the PID
+  taskkill /PID <pid> /F
+  ```
 - 用 chrome-devtools MCP（`list_pages` / `select_page` / `navigate_page`）在**使用者原本玩的分頁** navigate/reload `http://localhost:8000/index.html`（強制 reload，避免看到舊版）。找不到分頁才開新分頁。
 - 回報一句「可以玩了」即結束，不要多話。
 

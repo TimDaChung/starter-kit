@@ -47,7 +47,7 @@ description: 產品/遊戲企劃書工作流，三模式：A 從零寫企劃（�
 
 ## 模式 B：從 demo 反寫
 
-1. 讀實作（HTML 原始碼、GAME_SPEC.md——格式見 `game-develop/templates/GAME_SPEC.template.md`、專案 memory），反推：機制規則、數值（從 code 常數萃取，標來源行號）、畫面與分鏡（從 UI 結構）
+1. 讀實作（HTML 原始碼、GAME_SPEC.md——格式見 `~/.claude/skills/game-develop/templates/GAME_SPEC.template.md`、專案 memory），反推：機制規則、數值（從 code 常數萃取，標來源行號）、畫面與分鏡（從 UI 結構）
 2. 實作已存在的內容標「已實作驗證」；企劃需要但 demo 沒做的（營運面、防呆、異常流）補寫並標「企劃補充，未實作」
 3. 數值一律以 code 為準，不憑印象；讀不到的問使用者
 4. 產出後建議派 planning-doc-auditor 反向核對一次（企劃 vs 實作雙向一致）

@@ -11,7 +11,7 @@ license: Complete terms in LICENSE.txt
 To test local web applications, write native Python Playwright scripts.
 
 **Helper Scripts Available**:
-- `scripts/with_server.py` - Manages server lifecycle (supports multiple servers)
+- `~/.claude/skills/webapp-testing/scripts/with_server.py` - Manages server lifecycle (supports multiple servers). Always call it by this absolute path; the working directory is the user's project, not this skill folder
 
 **Always run scripts with `--help` first** to see usage. Read the source only if `--help` does not cover your case and a customized solution is absolutely necessary.
 
@@ -24,7 +24,7 @@ User task → Is it static HTML?
     │         └─ Fails/Incomplete → Treat as dynamic (below)
     │
     └─ No (dynamic webapp) → Is the server already running?
-        ├─ No → Run: python scripts/with_server.py --help
+        ├─ No → Run: python ~/.claude/skills/webapp-testing/scripts/with_server.py --help
         │        Then use the helper + write simplified Playwright script
         │
         └─ Yes → Reconnaissance-then-action:
@@ -40,12 +40,12 @@ To start a server, run `--help` first, then use the helper:
 
 **Single server:**
 ```bash
-python scripts/with_server.py --server "npm run dev" --port 5173 -- python your_automation.py
+python ~/.claude/skills/webapp-testing/scripts/with_server.py --server "npm run dev" --port 5173 -- python your_automation.py
 ```
 
 **Multiple servers (e.g., backend + frontend):**
 ```bash
-python scripts/with_server.py \
+python ~/.claude/skills/webapp-testing/scripts/with_server.py \
   --server "cd backend && python server.py" --port 3000 \
   --server "cd frontend && npm run dev" --port 5173 \
   -- python your_automation.py
@@ -84,7 +84,7 @@ with sync_playwright() as p:
 
 ## Best Practices
 
-- **Reuse bundled scripts** - Check whether `scripts/with_server.py` already covers the server lifecycle before writing your own. Use `--help` to see usage, then invoke directly.
+- **Reuse bundled scripts** - Check whether `~/.claude/skills/webapp-testing/scripts/with_server.py` already covers the server lifecycle before writing your own. Use `--help` to see usage, then invoke directly.
 - Save screenshots and logs under `./output/` (relative to the working directory, create it if missing) so results stay with the project
 - Use `sync_playwright()` for synchronous scripts
 - Always close the browser when done
