@@ -37,60 +37,26 @@ Infer these from the user request:
 
 Read [references/modes.md](references/modes.md) when the request is ambiguous.
 
-## Default visual rules (unless user explicitly specifies otherwise)
+## Consistency rules (read before the first generation)
 
-When the user has NOT specified the following, apply these defaults:
+The lock rules shared by all five image skills live in [`../imagen/references/consistency-rules.md`](../imagen/references/consistency-rules.md) — §1 default visual rules, §2 project asset inheritance, §3 batch consistency mode, §4 hand-off to `art-style-guard`. Summary plus the sprite-only deltas:
 
-1. **Female characters: fair luminous skin** (avoid sun-kissed / tanned / olive / bronzed / dark). Override only when the user explicitly requests a darker skin tone.
-2. **[HD / chibi] All characters: refined attractive features** (mobile gacha aesthetic — beautiful face, well-proportioned; **[chibi]** big expressive eyes, well-proportioned chibi). **Avoid** western cartoon / Disney / Pixar / caricature drift. Banana Pro can be biased toward western-cartoon style by certain prompt words (e.g. "manic", "wild flying outward", "battle-tested"); explicitly exclude these styles in the EXCLUSION section when needed.
-3. **Background / canvas must extend full-bleed to all four edges** — NO white margins, NO letterbox bars, NO painting-style frame, NO gallery framing. Use **positive instruction** in the composition section ("background extends full-bleed to all four edges"); pure negation in EXCLUSION can paradoxically trigger frame design.
-4. Any user explicit request overrides these defaults.
-
----
-
-## Project asset inheritance (pre-flight, REQUIRED)
-
-Before generating, scan the project directory for existing same-category sprite assets:
-- character / NPC sprites → `assets/sprites/`, `sprites/`
-- monster sprites → `assets/sprites/monsters/`
-- maps / tilesets → `assets/maps/`, `assets/tiles/`
-
-**If existing same-category assets are found:**
-1. LOCK their visual specs as the default for the new asset: art style, head-body proportions, view angle, anchor (bottom/center), pixel/HD scale, line weight, shading style, facing direction, lighting direction
-2. Pass at least one of the existing assets as a `--ref` to Banana Pro alongside the identity/subject ref — concrete style anchor, not just descriptive words
-3. Embed in Strict Rules: "the new sprite must visually rhyme with the existing project sprites — same head-body proportions, same line weight, same shading style, same view angle"
-4. Confirm with the user: "the project already has N same-category sprites (style / proportion / view = ...). Generate the new one with the same lock? Tell me if you want to deviate."
-5. **[chibi]** If the existing roster is chibi, the `--ref` must be a frame 1 PNG of an existing project chibi — descriptive words alone are NOT enough. Embed in Strict Rules: "STRICT 2.5-head means head approximately 40% of total body height, NOT taller adult-leaning proportions even if the character concept is mature." Mature / elegant archetypes (aristocrat, sage, refined merchant) reliably drift to 3–3.5 head without a visual anchor.
-
-**Why**: Existing project assets define the visual lock for new ones. One drifted sprite in a multi-character roster breaks the visual rhyme — common failure: a single character generated without a project `--ref` ends up with different head-body proportions or line weight than the rest of the roster, only spotted after assembling them side by side.
-
----
-
-## Batch consistency mode (multiple same-category assets)
-
-**When the user requests 2+ same-category assets in one go** (e.g. 4 character sprites, 6 monster sprites, a full enemy roster), switch into batch mode:
-
-1. **Define a unified spec FIRST** before any generation: art style, sheet shape, head/body proportion (e.g. 2.5-head for chibi, true-scale for HD), view angle (top-down / 3/4 / side), lighting direction, **facing direction (left/right)** for non-symmetric idle, anchor (bottom/center/feet), margin policy.
-2. **Distinguish "locked" vs "variable"**: locked = style / proportion / view / facing / sheet shape / anchor; variable = colors / weapons / costume / FX color.
-3. **Write the locked rules into the Strict Rules section of EVERY prompt in the batch** — same wording across all assets, AI flexibility confined to variable parts. Sprites especially need explicit facing direction lock — without it, even `3/4 view` lets AI mirror frames left/right. **[chibi]** Also lock head-to-body ratio explicitly (head ≈ 40% of total height, body ≥ 1.5× head height) — AI tends to enlarge the head and shrink the body, and flips symmetric costumes to front-facing.
-4. **After generation, verify**: per-asset (check before applying) or batch-end (check uniformity + spec compliance before applying any). The confirmation step is mandatory.
-5. **Exception**: rarity-tier assets (R/SR/SSR monsters) — visual gap is the design goal, but **proportion must stay unified**; gap goes into accessory density / FX intensity / silhouette complexity, not head ratio.
-
-**Single-asset generation skips this mode** — go straight to the regular workflow.
-
-**Why**: Same-category sprites must visually rhyme on a shared roster screen / battle field. Without locking spec into every prompt, AI drifts (different head ratios, mixed views, mirrored facings, varying outline weight).
-
----
+- **Default visual rules (§1)**: female → fair luminous skin; all characters → refined attractive features (mobile gacha aesthetic), no western cartoon / Disney / Pixar / caricature drift; canvas full-bleed to all four edges via a positive composition instruction. Explicit user requests override. **[HD / chibi]** "refined" also means big expressive eyes and a well-proportioned chibi body.
+- **Project asset inheritance (§2, REQUIRED pre-flight)**: scan `assets/sprites/`, `sprites/`, `assets/sprites/monsters/`, `assets/maps/`, `assets/tiles/`. If same-category sprites exist: LOCK art style, head-body proportions, view angle, anchor (bottom / center), pixel / HD scale, line weight, shading style, facing direction, lighting direction; pass at least one existing sprite as `--ref` next to the subject ref; embed the "visually rhyme" Strict Rule; confirm the lock with the user.
+  - **[chibi]** The `--ref` must be a frame-1 PNG of an existing project chibi — descriptive words alone are NOT enough. Strict Rules must say: "STRICT 2.5-head means head approximately 40% of total body height, NOT taller adult-leaning proportions even if the character concept is mature." Mature / elegant archetypes (aristocrat, sage, refined merchant) reliably drift to 3–3.5 heads without a visual anchor.
+- **Batch consistency mode (§3, 2+ same-category sprites)**: unified spec first — art style, sheet shape, head/body proportion (2.5-head chibi / true-scale HD), view, lighting direction, **facing direction (left / right)** for non-symmetric idle, anchor, margin policy; locked = style / proportion / view / facing / sheet shape / anchor, variable = colors / weapons / costume / FX color; identical Strict Rules wording in every prompt; mandatory per-asset or batch-end verification. Rarity tiers (R / SR / SSR monsters) keep proportion unified — the gap goes into accessory density / FX intensity / silhouette complexity.
+  - **Facing lock**: without an explicit left / right rule, even `3/4 view` lets Banana mirror frames between assets.
+  - **[chibi]** Also lock the head-to-body ratio explicitly (head ≈ 40% of total height, body ≥ 1.5× head height) — Banana tends to enlarge the head, shrink the body, and flip symmetric costumes to front-facing.
+- **Hand-off (§4)**: second batch onward in the same project, or any style doubt → run `art-style-guard` first (Style Bible + contact-sheet QC).
 
 ## Agent Rules
 
 - Decide the asset plan yourself. Do not force the user to spell out sheet size, frame count, or bundle structure when the request already implies them.
-- Write the art prompt yourself. Do not default to the prompt-builder script.
+- Write the art prompt yourself. Do not default to the prompt-builder script; if a legacy prompt-builder command exists, treat it as historical compatibility only, not the normal skill workflow.
 - Use `~/.claude/skills/imagen/bin/generate.py` (Nano Banana Pro / gemini-3-pro-image-preview) for every raw image. The wrapper resolves the API key from `GEMINI_API_KEY` env, then `~/.claude/skills/imagen/.env`.
 - When the user provides or implies a visual reference, first Read the reference image with the Read tool so you can see it, then pass the same path to `imagen/bin/generate.py` via one or more `--ref <path>` flags. Banana embeds the reference as inline_data and uses it as the visual anchor — do not rely on a filesystem path string inside the text prompt.
 - Do not force pixel art when the asset is a map prop for `generate2dmap` or when the user/project requests a different style. Match the map or reference style first.
 - Use the script only as a deterministic processor: magenta cleanup, frame splitting, component filtering, scaling, alignment, QC metadata, transparent sheet export, and GIF export.
-- Do not use scripts to generate the creative image prompt. If a legacy prompt-builder command exists, treat it as historical compatibility only, not the normal skill workflow.
 - Treat script flags as execution primitives chosen by the agent, not user-facing hardcoded workflow.
 - If a generated sheet touches cell edges, drifts in scale, or breaks a projectile / impact loop, either reprocess with better primitive settings or regenerate the raw sheet.
 - Keep the solid `#FF00FF` background rule unless the user explicitly wants a different processing workflow.
@@ -126,31 +92,11 @@ Choose `art_style` before writing the prompt:
 - Use `cel_shaded_chibi` when the user says chibi / Q版 / cel-shaded / gacha-style, or the project roster is already chibi.
 - Use `map_style` or `project-native` when an existing map, game, or reference should define the style.
 
-**[chibi]** When `art_style = cel_shaded_chibi`, always include this style block in the prompt unless the user overrides it:
+**[chibi]** When `art_style = cel_shaded_chibi`, use the `cel_shaded_chibi` style block from prompt-rules.md **Style Rules** verbatim unless the user overrides it. Never write `16-bit`, `retro JRPG`, or `chunky pixel-art` in a chibi prompt.
 
-```
-Style: anime cel-shaded chibi sprite, 2.5-head proportions, clean bold black outlines,
-flat color fills with two-tone shading only (base color + one shadow tone), no gradients,
-no painterly brushwork, no soft edges. Reference style: Eversoul / Idle Heroes / Disgaea / AFK Arena sprite art.
-```
+If a reference is involved, follow prompt-rules.md **Reference Rules**: Read the image first and pass the same path with `--ref` (a freshly generated reference is already on disk — pass that path); state the reference role explicitly (preserve identity / style, animation sheet of the same subject, evolution / variant, matching prop / FX); keep silhouette, palette, face / eye features, costume marks, major accessories, and material language fixed; let only the requested action or evolution change — do not redesign the subject unless the user asks.
 
-Why chibi is worth its own style: flat fills + bold outlines give the most stable frame-to-frame consistency on Banana Pro; exaggerated proportions make poses read with few frames; effects render as cleanly separated elements for layered compositing; and it is the industry-standard look for animation-heavy gacha / mobile games. Do not write `16-bit`, `retro JRPG`, or `chunky pixel-art` in a chibi prompt.
-
-If a reference is involved:
-
-- Make the reference visible first. Use the Read tool on the local image path so you can see it, then pass the same path to `imagen/bin/generate.py` with `--ref`. For freshly generated references, the previous step already wrote the file — pass that path with `--ref`.
-- State the reference role explicitly: preserve identity/style, create an animation sheet for the same subject, create an evolution/variant, or derive a matching prop/FX.
-- Preserve the stable identity markers from the reference: silhouette, palette, face/eye features, costume marks, major accessories, and material language.
-- Let only the requested action or evolution change. Do not redesign the subject unless the user asks.
-- Still require exact sheet shape, solid magenta background, frame containment, and same scale across frames.
-
-Keep the strict parts:
-
-- solid `#FF00FF` background
-- exact sheet shape
-- same character or asset identity across frames
-- same bounding box and pixel scale across frames
-- explicit containment: nothing may cross cell edges
+Always restate the strict parts from prompt-rules.md **Global Rules** and **Containment Rules**: solid `#FF00FF` background, exact sheet shape, same identity / bounding box / pixel scale across frames, nothing may cross a cell edge.
 
 ### 3. Generate the raw image
 
@@ -213,52 +159,20 @@ Check:
 
 If not, rerun with different processor settings or regenerate the raw sheet.
 
-#### 5b. [chibi] Cross-character proportion QC (batch mode, REQUIRED)
+**[chibi] Cross-character proportion QC (batch mode, REQUIRED)** — head-body drift is the #1 silent failure; the boilerplate "2.5-head proportions" alone does not hold mature / elegant archetypes:
 
-When generating ≥2 chibi characters in the same batch, head-body ratio drift is the #1 silent failure on Banana Pro — boilerplate "2.5-head proportions" alone is NOT enough; mature / elegant archetypes consistently get pulled toward 3–3.5 head while playful / young archetypes stay near 2.5.
-
-**Required step** before declaring done:
-1. Open frame 1 (idle stance) of every character side by side at the same display size.
-2. Eyeball head height ratio between tallest and shortest head — if head height differs by >15%, the batch fails.
-3. Optional automated check: measure head bbox per character via PIL alpha (head = top connected component above shoulder) and compare ratios.
-4. **Regenerate only the outlier(s)** with a stricter prompt — add to Strict Rules: `"head must be approximately 40% of total chibi body height — explicitly NOT taller / leaner adult proportions; head from chin to crown must be at least as tall as the torso from shoulders to hips"`.
-
-Do not accept "looks roughly OK" — the user reads sprite rosters side by side, and unequal head sizes break the gacha-roster feel that is the whole point of chibi.
+- Open frame 1 (idle stance) of every character side by side at the same display size. If head height differs by **>15%** between the tallest and shortest head, the batch fails (optional automated check: measure the head bbox per character via PIL alpha and compare ratios).
+- **Regenerate only the outlier(s)** with a stricter Strict Rule: `"head must be approximately 40% of total chibi body height — explicitly NOT taller / leaner adult proportions; head from chin to crown must be at least as tall as the torso from shoulders to hips"`.
 
 ### 6. Return the right bundle
 
-For a single sheet, expect:
-
-- `raw-sheet.png`
-- `raw-sheet-clean.png`
-- `sheet-transparent.png`
-- frame PNGs
-- `animation.gif`
-- `prompt-used.txt`
-- `pipeline-meta.json`
-
-For `player_sheet`, expect:
-
-- transparent 4x4 sheet
-- 16 frame PNGs
-- direction strips
-- 4 direction GIFs
-
-For `spell_bundle` or `unit_bundle`, create one folder per asset in the bundle.
+- Single sheet: `raw-sheet.png`, `raw-sheet-clean.png`, `sheet-transparent.png`, frame PNGs, `animation.gif`, `prompt-used.txt`, `pipeline-meta.json`
+- `player_sheet`: transparent 4x4 sheet, 16 frame PNGs, direction strips, 4 direction GIFs
+- `spell_bundle` / `unit_bundle`: one folder per asset in the bundle
 
 ## Defaults
 
-- `idle`
-  - small or medium actor -> `2x2`
-  - large creature or boss -> `3x3`
-- `cast` -> prefer `2x3`
-- `projectile` -> prefer `1x4`
-- `impact` / `explode` -> prefer `2x2`
-- `walk`
-  - topdown actor -> `4x4` for four-direction walk
-  - side-view asset -> `2x2`
-- use `shared_scale` by default for any multi-frame asset where frame-to-frame consistency matters
-- use `largest` component mode when detached sparkles or edge debris make the main body unstable
+Sheet-shape defaults per action (`idle` → `2x2`, large creature / boss → `3x3`; `cast` → `2x3`; `projectile` → `1x4`; `impact` / `explode` → `2x2`; topdown `walk` → `4x4`; side-view `walk` → `2x2`) and processor defaults (`shared_scale` for any multi-frame asset, `largest` component mode when detached sparkles or edge debris destabilize the main body) are listed once in [references/modes.md](references/modes.md) — Sheet Presets and Processor Defaults.
 
 ## Resources
 
@@ -271,3 +185,4 @@ For `spell_bundle` or `unit_bundle`, create one folder per asset in the bundle.
 - 想還原某張參考圖的風格 → 先用 `image-to-prompt` 逆向出中性 prompt 再回來生
 - 場景／地圖 → `generate2dmap`
 - 通用生圖需求 → `imagen`
+- 第二批以後的同專案生圖 / 風格疑慮 → 先過 `art-style-guard`

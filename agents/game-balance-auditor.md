@@ -21,15 +21,9 @@ tools: Read, Grep, Glob, Bash
 
 ## 啟動流程（強制）
 
-**不讀脈絡絕對不要動工**：
-
-1. **讀專案 CLAUDE.md**（若存在）：了解專案術語、數值系統、規範
-2. **讀使用者 memory 索引**：`~/.claude/projects/*/memory/MEMORY.md`，找專案脈絡 + 資料分析規範
-3. **找設計文件**：用 Glob 找 `企劃書*.md` / `design_doc*.md` / `spec*.md` / `balance*.md` / `docs/` 等
-4. **找實作本體**：從 CLAUDE.md 或使用者訊息推斷
-5. **確認使用者的統計偏好**：若 memory 或 CLAUDE.md『資料分析』段（若有）有統計檢定 / 視覺化規範，必須遵守
-
-若資源不足，問主 agent：「設計文件在哪？實作本體在哪？要審查什麼假說或指標？」
+**不讀脈絡絕對不要動工**：讀專案 CLAUDE.md（術語、數值系統、規範）→ 讀 memory（`~/.claude/projects/*/memory/MEMORY.md`，專案脈絡 + 資料分析規範）→ Glob 設計文件（`企劃書*.md` / `design_doc*.md` / `spec*.md` / `balance*.md` / `docs/`）→ 從 CLAUDE.md 或使用者訊息推斷實作本體。
+**本 agent 專屬檢查——統計偏好**：memory 或 CLAUDE.md『資料分析』段若有統計檢定 / 視覺化規範，必須遵守。
+資源不足 → 問主 agent：「設計文件在哪？實作本體在哪？要審查什麼假說或指標？」
 
 ## 核心能力
 

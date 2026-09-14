@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## v1.6.0 (2026-09-14)
+
+健檢第三批:抽共用、砍 legacy、補測試。行為不變,結構收斂。
+
+**共用檔(progressive disclosure)**
+- 新增 `imagen/references/common.md`(9 節):三支 imagen skill 的預設視覺規則摘要、專案資產繼承路徑表、批次一致性、Prompt 確認框、參考圖規則、生成後循環、存檔與檔名、`imagen_history.md` schema、`generate.py` 標準指令與模式判定。各 SKILL.md 只留 2 到 4 行摘要 + 「見 common.md §N」
+- 新增 `imagen/references/consistency-rules.md`(英文正文 + 繁中摘要):五支生圖 skill 共用的一致性三段 + 交棒 art-style-guard。generate2dsprite / generate2dmap 只留摘要與領域特有條目;art-style-guard 加銜接段列出五支交棒來源
+- 行數:imagen 310→162、imagen-portrait 345→254、imagen-ui 366→292、generate2dsprite 273→188、generate2dmap 216→180
+
+**Python 腳本**
+- 新增 `imagen/bin/chroma_tools.py`(211 行):去背、裁邊、連通元件、bbox 等 8 個函式的唯一實作,generate2dsprite.py 與 extract_prop_pack.py 改 import(kit 內與 junction 安裝兩種路徑都解析得到)。兩支腳本各自的 CLI 預設值不變
+- `generate2dsprite.py` 911→486 行:刪除 SKILL 明說不用的 `build-prompt` 子命令與其常數;`process` 在沒給 `--rows/--cols` 時驗證 `--mode`,亂填會明確報錯而不是靜默走單幀;numpy 改純 PIL,少一個依賴
+- `extract_prop_pack.py` 337→209 行,移除兩個 `# type: ignore`
+- 新增 pytest:`imagen/bin/tests/test_chroma_tools.py`(13)、`generate2dsprite/scripts/tests/test_process.py`(6,含端到端跑 process 與 extract_prop_pack)。重構前後對同一合成 sheet 輸出位元組相同
+
+**文字去重**
+- game-develop:三張生圖對應表合併為 Phase 2 唯一權威表(15 列,新增 image-to-prompt 與 art-style-guard 兩列);紀律 1 縮半;新增「工作量切分與行數監控」共用段,game-prototype 改指向它,兩支的 session 策略以雙列表明寫差異
+- generate2dsprite:[chibi] 風格區塊只留 prompt-rules.md 一份;5b 頭身 QC 壓成 2 條 checklist;modes.md 刪 Legacy Compatibility 段
+- 三支 agents 啟動流程各壓到 5 行,只留 agent 專屬檢查
+
+**其他**
+- `.gitignore` 加 `.pytest_cache/`
+- 未動(留第四批):card-game 全文翻譯、半形標點統一、CLAUDE.md 瘦身四點
+
 ## v1.5.1 (2026-09-14)
 
 - **安裝精靈最終健檢加「換版評估」**:同名自改過的 skill、名稱不同但功能近似的 skill、agent 職責重疊、CLAUDE.md 重複 / 衝突 / 舊版 starter 複本,每一對都整份讀完 → 固定欄位比較表(觸發詞、流程完整度、死引用、銜接、角色標頭、行數、客製內容)→ 三選一建議附理由(A 改用 kit 版 / B 保留自有 / C kit 版為底 + 搬客製)。預設偏向 A / C,理由是 kit 版會隨升級更新;客製內容的落點(回饋進 kit / 寫進 CLAUDE.md / 保留複本放棄升級)明寫。使用者選了才動,動前備份

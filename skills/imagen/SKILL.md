@@ -19,7 +19,7 @@ allowed-tools:
 
 > **執行角色：美術**——關注風格一致、可讀性、資產規格（尺寸 / 切圖 / 命名）。
 
-使用 Gemini 的 Nano Banana Pro (`gemini-3-pro-image-preview`) 生成圖片。
+使用 Gemini 的 Nano Banana Pro (`gemini-3-pro-image-preview`) 生成圖片。三支 imagen skill 的共用流程、格式、指令集中在 `references/common.md`（下文以「common.md §N」引用）；五支生圖 skill 共用的一致性鎖規則在 `references/consistency-rules.md`。
 
 ---
 
@@ -28,51 +28,16 @@ allowed-tools:
 1. **Prompt 忠於討論結果** — 嚴禁擅自添加使用者沒提到的元素、風格或細節。Prompt 內容必須完全基於對話中確認的內容。
 2. **每次都問** — 圖片類型、尺寸、用途不要假設，每次都向使用者確認。
 3. **先建議再執行** — 收集完需求後，先給出專業建議，等使用者確認再產 prompt。
-4. **記錄偏好** — 每次生圖後，將使用情境記錄到 `<project-dir>/docs/imagen_history.md` 供未來參考。
+4. **記錄偏好** — 每次生圖後，將使用情境記錄到 `<project-dir>/docs/imagen_history.md` 供未來參考（common.md §8）。
 
 ---
 
-## 預設視覺規則（除非使用者明確要求不同）
+## 一致性規則（生圖前必讀）
 
-生圖時，使用者沒明確指定以下項目就套預設：
-
-1. **女性角色預設白皮膚**（fair luminous skin / pale skin）— 避免 sun-kissed / tanned / olive / bronzed / dark。使用者明確要求其他膚色才換。
-2. **所有角色預設美型**（refined attractive features，手遊 gacha 美學）— 美容貌、比例好。避免 western cartoon / Disney / Pixar / caricature 漂移。Banana Pro 對某些狂野詞（如 "manic"、"wild flying outward"、"battle-tested"）會 bias 到 western 風，需要在 [EXCLUSION] 段明確排除這些風格。
-3. **背景必須滿版到四個邊緣**（full-bleed edge-to-edge）— 不要白邊、letterbox、painting frame、gallery framing。在 [COMPOSITION] 段用**正向指令**鎖（"background extends full-bleed to all four edges"）；純粹在 [EXCLUSION] 加 negation 反而可能誘發 frame design。
-4. 使用者明確要求不同就依使用者指示。
-
----
-
-## 專案既存資產優先（生圖前必做）
-
-**生圖前先掃專案目錄**找有沒有同類別已有資產：
-- 立繪 / 角色 portraits → `立繪/`、`assets/portraits/`、`portraits/`
-- sprite / 動畫 → `assets/sprites/`、`sprites/`
-- UI 元件 → `assets/ui/`、`ui/`
-- 地圖 / 背景 → `assets/maps/`、`assets/backgrounds/`、`maps/`
-
-**若找到已有同類別資產：**
-1. 把既有資產的「畫風、頭身比例、視角、構圖、留白比例、面向方向、光源、色溫」**鎖死當預設**，不要重新發想
-2. 把代表性 1-2 張當 `--ref` 傳 Banana Pro（除了識別/題材 ref 之外，**多塞一張既有資產 ref 強制風格鎖**）
-3. 在 prompt 的 Strict Rules 段明寫「the new asset must visually rhyme with the existing project assets — same head-body proportions, same line weight, same shading style, same view angle」
-4. 跟使用者確認 lock：「專案既有 N 張同類資產（風格 / 比例 / 視角為...），這次照樣生？要改請明說」
-
-**為什麼**：專案已有的東西，畫風、畫面、人物比例等預設要參照。違反等於每次重新發想，4 張一組裡有 1 張飄掉就破壞 roster 視覺押韻。
-
----
-
-## 批次一致性模式（同類別資產 ≥ 2 張）
-
-**當使用者一次要產 ≥ 2 張同類別資產時**（例：4 個角色立繪、6 種怪物 sprite、一組 UI 元件），切換到批次模式：
-
-1. **先訂統一規格** — 任何生圖前，先決定：風格代號、長寬比、頭身比、視角、光源方向、**面向方向（朝左 / 朝右）**、構圖留白、姿態鎖定條件。
-2. **區分「鎖死」vs「可變」** — 鎖死 = 風格 / 比例 / 視角 / 面向 / 光源；可變 = 配色 / 武器 / 場景 / 表情。
-3. **把鎖死規格寫進每張 prompt 的 Strict Rules 段** — 同批次所有 prompt 的 Strict Rules 用同一段文字，AI 變化只能在「可變」項。
-4. **生完必確認** — 二選一：(a) 每張生完個別確認再套用 (b) 全部生完後一次看統一性 + 符合度。**確認步驟不能省**，避免實裝後才發現要重生。
-
-**單張生圖跳過此模式**，直接走原 Phase 流程。
-
-**為什麼**：同類別資產要視覺押韻。沒鎖規格進 prompt，AI 會飄（頭身比變、視角混、面向鏡像翻）。
+- **預設視覺規則**：女性白皮膚、所有角色美型（[EXCLUSION] 排除 western cartoon 漂移）、背景滿版四邊用正向指令鎖；使用者明說即覆蓋。詳見 common.md §1。
+- **專案既存資產優先（pre-flight 必做）**：先掃 `立繪/`、`assets/sprites/`、`assets/ui/`、`assets/maps/` 等同類資產；有就鎖畫風 / 頭身比 / 視角 / 構圖 / 面向 / 光源 / 色溫當預設、代表作當 `--ref`、Strict Rules 明寫 visually rhyme、跟使用者確認 lock。詳見 common.md §2（imagen 完整掃描路徑表在該節）。
+- **批次一致性模式（≥ 2 張同類資產）**：先訂統一規格 → 分鎖死 / 可變 → 鎖死規格用同一段文字寫進每張 Strict Rules → 生完必確認；單張跳過。詳見 common.md §3。
+- **第二批以後的同專案生圖 / 風格疑慮 → 先過 `art-style-guard`**（Style Bible + contact sheet QC；`references/consistency-rules.md` §4）。
 
 ---
 
@@ -96,34 +61,19 @@ allowed-tools:
 | **解析度** | 1K, 2K, 4K | 1K |
 | **參考圖** | 是否有畫風參考或角色示意圖？ | 無 |
 
-**如果使用者之前用過這個 Skill：**
-先讀取 `<project-dir>/docs/imagen_history.md`，提示：「上次你做 [情境] 用了 [尺寸] + [風格]，這次要沿用還是重新設定？」
+**如果使用者之前用過這個 Skill**：先讀 `<project-dir>/docs/imagen_history.md`，提示上次的情境 / 尺寸 / 風格問要不要沿用（common.md §8）。
 
 ---
 
 ## Phase 2｜參考圖處理
 
-如果使用者提供參考圖：
-
-### 畫風參考
-1. 用 Read 工具查看圖片
-2. **向使用者描述你看到的風格特徵**，確認理解正確
-3. 將風格特徵轉化為 prompt 中的描述詞（但僅限使用者確認的特徵）
-
-### 角色示意圖
-1. 用 Read 工具查看圖片
-2. **向使用者確認**：哪些特徵要保留？哪些可以改？
-3. 將確認的特徵納入 prompt
-
-**參考圖限制：** 最多 6 張，超過品質下降。
+有參考圖就依 common.md §5：先 Read 看圖 → **畫風參考**向使用者描述你看到的風格特徵確認理解；**角色示意圖**向使用者確認哪些特徵保留、哪些可改 → 只把確認過的特徵寫進 prompt。上限 6 張。
 
 ---
 
 ## Phase 3｜建議與討論
 
 收集完需求和參考圖後，**先提出專業建議**再進入 prompt 階段：
-
-### 建議內容
 
 ```
 ## 建議
@@ -148,130 +98,36 @@ allowed-tools:
 
 ## Phase 4｜Prompt 撰寫與確認
 
-### 流程（兩步驟）
+### Step 1：中文 Prompt 確認
 
-#### Step 1：中文 Prompt 確認
+建議確認後，**自動整理一份中文版 prompt** 給使用者確認。撰寫原則與展示格式見 common.md §4；imagen **省略** 🎨 風格 / 🧩 boilerplate / 📦 元件三行。
 
-建議確認後，**自動整理一份中文版 prompt** 給使用者確認。
+### Step 2：轉英文並判定模式
 
-**撰寫原則（嚴格遵守）：**
-- 只包含討論中**明確提到或確認**的內容
-- **不要**自行添加：額外的背景元素、光影描述、情緒氛圍、構圖指示等使用者沒提的東西
-- **不要**使用模板化的 prompt 結構（如 "masterpiece, best quality, 4k, detailed" 等套路詞）
-- 簡潔直白，描述清楚即可
+使用者確認後直接把中文 prompt 翻成英文（忠於原文、不增不減，common.md §4）。接著依 common.md §9 判定模式——**整個任務只判這一次**：
 
-**展示格式：**
-
-```
-## Prompt 確認
-
-📝 中文 Prompt：
-> [完整中文 prompt，基於討論內容整理]
-
-📐 長寬比：[ratio]
-📏 解析度：[size]
-🖼️ 參考圖：[有/無，幾張]
-
-沒問題的話我就轉英文並開始生成。要修改什麼嗎？
-```
-
-#### Step 2：轉換英文並交付或生成
-
-使用者確認中文 prompt 沒問題後（如「好」「OK」「沒問題」「可以」），**直接將中文 prompt 翻譯為英文。**
-
-翻譯原則：
-- 忠於中文 prompt 的內容，不增不減
-- 使用自然英文描述
-- 不加入翻譯過程中想到的「補充」
-
-翻譯完成後，依據模式執行：
-- **Prompt 模式**：將英文 prompt 連同建議的參數設定（長寬比、解析度）一併提供給使用者，方便直接貼到 Google AI Studio 使用。同時提醒參考圖的使用方式。
-- **API 模式**：直接呼叫 API 生成（見 Phase 5）。
-
-**模式判斷：** `skills/imagen/.env` 或環境變數 `GEMINI_API_KEY` 存在 → API 模式；否則 Prompt 模式（只產 prompt）。Key 的解析順序：先讀環境變數 `GEMINI_API_KEY`，沒有再讀 `skills/imagen/.env`。
+- **API 模式**（有 `GEMINI_API_KEY`）→ Phase 5
+- **Prompt 模式**（沒有 key）→ Phase 5.5
 
 ---
 
 ## Phase 5｜圖片生成（API 模式）
 
-> 此階段僅在 API 模式下執行（模式判斷見 Phase 4 Step 2）。如果是 Prompt 模式，跳過此階段直接進入 Phase 5.5。
-
-### 檔案命名與存放
-
-**位置決定**：
-1. 使用者明確指定 → 用指定的
-2. 沒指定 → 先問「要存在哪？」
-3. fallback → 當前工作目錄下 `imagen/`
-
-檔名格式：`{簡短描述}_{日期}_{序號}.png`
-範例：`fire_monster_20260331_01.png`
-
-### 執行生成
-
-先把最終英文 prompt Write 到 `prompt-final.txt`，再呼叫 skill 內建的 wrapper（參數詳見 `--help`）：
-
-```bash
-python ~/.claude/skills/imagen/bin/generate.py \
-  --prompt "$(cat prompt-final.txt)" \
-  --ratio 3:4 --size 1K \
-  --ref reference/style.jpg \
-  --output {output_path}
-```
-
-- `--ratio` / `--size` 只接受下方速查表列的值
-- `--ref` 可重複多次（最多 6 張）
-- wrapper 會自動讀 API Key、組 payload、存 PNG，不需手動處理 base64 或 curl
-
-### 生成後
-
-1. 用 Read 工具查看生成的圖片，確認有正常產出
-2. 告知使用者圖片路徑
-3. 詢問：「滿意嗎？要調整 prompt 重新生成，還是這張可以用？」
-
-如果使用者要調整：
-- 根據回饋修改 prompt（同樣只改使用者提到的部分）
-- 重新確認並生成
+1. **存放位置與檔名**：依 common.md §7 決定（fallback `<cwd>/imagen/`；檔名 `{簡短描述}_{日期}_{序號}.png`，例 `fire_monster_20260331_01.png`）。
+2. **執行**：英文 prompt Write 到 `prompt-final.txt`，呼叫 `~/.claude/skills/imagen/bin/generate.py`（標準指令、`--ratio` / `--size` 合法值見 common.md §9）。
+3. **生成後**：Read 看圖 → 回報路徑 → 問是否滿意；要調整只改使用者提到的部分（common.md §6）。
 
 ---
 
 ## Phase 5.5｜Prompt 交付（Prompt 模式）
 
-> 此階段僅在 Prompt 模式下執行。
-
-將英文 prompt 以方便複製的格式呈現：
-
-```
-## 生成資訊
-
-📝 英文 Prompt：
-> [完整英文 prompt]
-
-📐 建議長寬比：[ratio]
-📏 建議解析度：[size]
-🖼️ 參考圖：[幾張，提醒一起上傳到 AI Studio]
-
-💡 使用方式：到 Google AI Studio 貼上 prompt，上傳參考圖，選擇對應的長寬比即可生成。
-```
-
-如果使用者要調整：
-- 根據回饋修改 prompt（同樣只改使用者提到的部分）
-- 重新產出英文版
+以 common.md §9 的「生成資訊」格式交付英文 prompt + 建議長寬比 / 解析度 + 參考圖上傳提醒。要調整 → 只改使用者提到的部分，重新產出英文版。
 
 ---
 
 ## Phase 6｜記憶更新
 
-每次完成 prompt 產出或成功生成圖片後，更新記錄。
-
-### 記錄格式
-
-更新或建立 `<project-dir>/docs/imagen_history.md`（三支 imagen skill 共用同一檔、同一欄位）：
-
-```markdown
-| 日期 | skill | 用途 | 最終英文 prompt 摘要 | 輸出檔 | 備註 |
-|------|-------|------|---------------------|--------|------|
-| 2026-03-31 | imagen | 卡牌插圖 | fire monster, anime style, 3:4, 2K | imagen/fire_monster_20260331_01.png | 有參考圖 |
-```
+每次完成 prompt 產出或成功生成圖片後，追加一列到 `<project-dir>/docs/imagen_history.md`（6 欄位與範例見 common.md §8）。
 
 ---
 
@@ -294,12 +150,7 @@ python ~/.claude/skills/imagen/bin/generate.py \
 
 ## 錯誤處理
 
-| 錯誤 | 處理方式 |
-|------|---------|
-| API Key 無效 | 提示使用者檢查 `.env` 中的 `GEMINI_API_KEY` |
-| 生成失敗（安全過濾） | 告知使用者，建議調整 prompt 中可能觸發過濾的詞彙 |
-| 參考圖格式不支援 | 支援 JPG/PNG/WebP/GIF，提示使用者轉換格式 |
-| 網路錯誤 | 提示檢查網路連線，可重試一次 |
+API Key 無效 / 安全過濾 / 參考圖格式 / 網路錯誤的處理見 common.md §9 通用錯誤處理表。
 
 ## 銜接：更專精的生圖 skill
 
@@ -308,3 +159,4 @@ python ~/.claude/skills/imagen/bin/generate.py \
 - UI 素材（icon／卡框／banner） → `imagen-ui`
 - 2D 地圖／場景 → `generate2dmap`
 - 角色 sprite／動畫 → `generate2dsprite`；chibi／Q 版風用 `generate2dsprite`（`art_style=cel_shaded_chibi`）
+- 第二批以後的同專案生圖 / 風格疑慮 → 先過 `art-style-guard`

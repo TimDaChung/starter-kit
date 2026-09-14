@@ -186,21 +186,10 @@ user 回饋 → Edit HTML → 再 self-walkthrough → loop。
 
 ---
 
-## 工作量切分（避免 session 超時）
+## 工作量切分與行數監控
 
-當 user 一次要動 5+ 處或寫 500+ 行新 code：
-1. 先把任務拆成「子任務清單」寫進 GAME_TODO.md
-2. 本 session 跑前 1–2 個子任務 + checkpoint
-3. 告訴 user：「子任務 A、B 完成；C/D/E 排在 TODO，下次 invoke 接續」
-
----
-
-## 行數監控（提醒 only）
-
-- HTML 5000 行：提醒 user「未來改動建議用 grep marker 精準定位」
-- HTML 8000 行：提醒「考慮哪些 section 可以瘦身（例如 emoji 對照表搬到 SPEC）」
-
-**不強制拆檔**——除非 user 明確說要。
+**game-prototype 策略：單次 invoke 做完玩法閉環**；任務超量（動 5+ 處或寫 500+ 行）時，先把子任務清單寫進 GAME_TODO.md，本 session 跑前 1–2 項 + checkpoint，告訴 user「子任務 A、B 完成；C/D/E 排在 TODO，下次 invoke 接續」。
+細節與行數門檻見 `../game-develop/SKILL.md` 的「工作量切分與行數監控」。
 
 ---
 

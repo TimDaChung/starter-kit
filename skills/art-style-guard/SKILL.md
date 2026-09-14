@@ -51,3 +51,15 @@ description: 遊戲美術風格一致性守門。Use when 遊戲/demo 專案批�
 | 使用者糾正只改當批 prompt | 下批又犯。同步寫進 bible 禁忌清單 |
 | 無上限自動重生 | 燒 quota 燒時間。2 輪不過就升級給使用者 |
 | 首批就跑 QC 流程 | 沒有黃金樣本可比。首批＝定調批，直接給使用者挑 |
+
+## 銜接（誰會把工作交過來）
+
+以下 5 支生圖 skill 在「同專案第二批以後的生圖」或「風格疑慮」時先過本 skill；共用的交接規則見 `../imagen/references/consistency-rules.md` §4：
+
+- `imagen`（通用生圖）
+- `imagen-portrait`（角色立繪）
+- `imagen-ui`（UI 元件）
+- `generate2dsprite`（sprite / 動畫 sheet）
+- `generate2dmap`（地圖 / 場景 / prop pack）
+
+分工：那五支負責**單次生圖時的 prompt 鎖**（預設視覺規則 / 專案資產繼承 / 批次 Strict Rules）；本 skill 負責**跨批的 Style Bible 與生成後的 contact sheet 守門**。首批＝定調批，核准後立刻落地 bible，再回原 skill 從 bible 組 prompt 繼續生。
