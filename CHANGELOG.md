@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## v1.7.0 (2026-09-14)
+
+健檢第四批：一致性收尾。
+
+- **card-game 全文翻成繁體中文**（SKILL.md + references/effect-resolution.md）：TCG 術語（deckbuilder、constructed、fizzle、保底）保留圈內慣用說法，code block 與識別字不動；description 保留既有中文觸發詞
+- **半形標點統一為全形**：product-planning、data-report-builder（含三個模板）、starter-setup 六個檔，只動中文語境內的標點，code fence / inline code / URL / 路徑 / regex 觸發詞位元組不變；兩個原為 LF 的模板改 CRLF，kit 內文字檔換行全部一致
+- **CLAUDE.starter.md**：效率習慣的唯一一條併入核心原則，少一個段落；語言段加「第三方或英文原生的 skill / 腳本文件保留原文，不硬翻」（webapp-testing、generate2dsprite、generate2dmap 因此不再與「文件繁中」衝突）；專案角色的「改不改由使用者決定」刪除，核心原則已涵蓋
+- **安裝精靈健檢加「瘦身的邊界」**：只建議動重複、死引用、過時路徑；使用者的角色定位句、原則句、meta 規則不列為瘦身對象，「工具還沒接上」不是刪句子的理由（來自今天實際誤刪一次的教訓）
+
 ## v1.6.1 (2026-09-14)
 
 - **略過清單**:使用者說「X 不要裝」→ 記進 `~/.claude/starter-skip.md`,之後安裝與升級都跳過;「裝回 X」→ 移除並立即裝。解決升級時把使用者刻意不要的 skill 裝回來的問題。分類表加「使用者略過」一類,結算表加 ⛔ 一行
