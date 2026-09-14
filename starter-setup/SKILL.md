@@ -80,6 +80,7 @@ description: Starter kit 健檢式安裝/升級精靈。開場先健檢(盤點 C
 
 - **近似**:名稱或 description 高度相近的兩支(kit 對自有、自有對自有都看)→ 列出,建議合併或刪其一
 - **失效**:junction 目標不存在、資料夾沒有 SKILL.md、frontmatter 缺 name/description → 列出
+- **缺角色標頭**:SKILL.md 的 H1 之後沒有 `> **執行角色：X**` 一行 → 列出,建議補(kit 的 skill 不會缺;自有 skill 缺的話附一句建議寫法)
 - **自改過**(第 2 節):列客製段落摘要,問「保留你的改動合併新版 / 整個不動」
 
 ### agents

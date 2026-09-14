@@ -5,6 +5,7 @@
 - **新 skill `data-report-builder`**(meta skill):一輪訪談(資料來源 / 指標公式 / 比較基準 / 異常門檻 / 分群 / 產出 / 週期)→ 在 `~/.claude/skills/report-<slug>/` 生成專屬的定期報表分析 skill(SKILL.md + 指標字典 + 報告模板 + 選配 load.py)→ 試跑一次 → 給排程建議。生成的 skill 屬使用者自有,不進 kit。附三個模板
 - **企劃角色加數據能力**:CLAUDE.starter.md 專案角色表,企劃關注點加「KPI 定義、A/B 假設驗證」,產出加「指標定義表、數據解讀報告」,對應 skill 加 data-report-builder
 - kit 回到 15 支 skills
+- **規則:新建 skill / agent 必標執行角色**(CLAUDE.starter.md 專案角色段);安裝精靈最終健檢加「缺角色標頭」檢查項
 
 ## v1.3.0 (2026-09-14)
 
