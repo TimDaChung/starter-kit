@@ -17,7 +17,7 @@ allowed-tools:
 
 > **執行角色：美術**——關注風格一致、可讀性、UI 資產規格；產出後切**工程**視角核對切圖與尺寸可直接使用。
 
-使用 Gemini 的 Nano Banana Pro (`gemini-3-pro-image-preview`) 生成 RPG 手遊 UI 元件，預設套用高營收手遊（米哈遊、明日方舟等）的 UI 視覺語言。
+使用 Gemini 的 Nano Banana Pro (`gemini-3-pro-image-preview`) 生成 RPG 手遊 UI 元件，預設套用高營收手遊（米哈遊、明日方舟等）的 UI 視覺語言。三支 imagen skill 的共用流程、格式、指令集中在 `../imagen/references/common.md`（下文以「common.md §N」引用）。
 
 ---
 
@@ -27,48 +27,19 @@ allowed-tools:
 2. **預設手遊高品質 UI 審美** — 金屬質感 / 漸層 / 半透明 / 細節描邊，但**不喧賓奪主**（UI 元件背後通常會放文字或其他內容）。
 3. **每次都問元件類型** — UI 是功能性設計，必須先確定要做哪一類元件。
 4. **去背優先** — 大多數 UI 元件都要去背才能融入遊戲畫面；Gemini 輸出沒有 alpha，所以生成時鎖純品紅 `#FF00FF` 滿版背景，Phase 5 再用 magenta chroma-key 後製去背。
-5. **記錄偏好** — 寫入 `<project-dir>/docs/imagen_history.md`。
+5. **記錄偏好** — 寫入 `<project-dir>/docs/imagen_history.md`（common.md §8）。
 
 ---
 
-## 預設視覺規則（除非使用者明確要求不同）
+## 一致性規則（生圖前必讀）
 
-生圖時，使用者沒明確指定以下項目就套預設：
-
-1. **女性角色預設白皮膚**（fair luminous skin / pale skin）— 避免 sun-kissed / tanned / olive / bronzed / dark。使用者明確要求其他膚色才換。
-2. **所有角色預設美型**（refined attractive features，手遊 gacha 美學）— 美容貌、比例好。避免 western cartoon / Disney / Pixar / caricature 漂移。Banana Pro 對某些狂野詞會 bias 到 western 風，需要在 [EXCLUSION] 段明確排除這些風格。
-3. **背景 / 元件背景必須滿版到四個邊緣**（full-bleed edge-to-edge）— UI 元件如果有背景場景，不要意外白邊 / letterbox / painting frame。在 [COMPOSITION] 段用**正向指令**鎖；純粹在 [EXCLUSION] 加 negation 反而可能誘發 frame design。
-4. 使用者明確要求不同就依使用者指示。
-
----
-
-## 專案既存資產優先（生圖前必做）
-
-**生圖前先掃專案目錄**找有沒有已有 UI 資產：`assets/ui/`、`ui/`、`assets/icons/`、`assets/frames/`，含立繪 / sprite 也可參考其風格代號。
-
-**若找到既有 UI 元件：**
-1. 把既有 UI 的「風格代號、邊框粗細 / 轉角圓度、光效強度、配色主軸、稀有度視覺系統」**鎖死當預設**，不要從風格庫重新挑
-2. 把代表性 1-2 張當 `--ref` 傳 Banana Pro，**多塞既有 UI ref 強制風格鎖**
-3. Strict Rules 段明寫「the new UI element must visually rhyme with existing project UI — same border weight, same corner radius, same lighting style, same color temperature」
-4. 跟使用者確認：「專案既有 N 個同類 UI（風格 / 邊框 / 光效為...），這次照樣？要改請明說」
-
-**為什麼**：專案已有的東西，畫風、畫面預設要參照。UI 元件常組成系列同畫面出現，新做的 1 個風格飄掉直接破壞整個 HUD 視覺。
-
----
-
-## 批次一致性模式（同類別資產 ≥ 2 張）
-
-**當使用者一次要產 ≥ 2 個同類別 UI 元件時**（例：6 個技能 icon、4 種稀有度卡框、活動 banner 系列、多語系 popup），切換到批次模式：
-
-1. **先訂統一規格** — 任何生圖前，先決定：風格代號、元件比例（icon 1:1 / banner 16:9 等）、配色主軸、邊框風格、光效強度、字體 / 文字配置（如有）、是否去背（magenta 底）、稀有度視覺系統（如有層級）。
-2. **區分「鎖死」vs「可變」** — 鎖死 = 風格 / 比例 / 邊框 / 光效系統 / 配色主軸；可變 = 圖標符號 / 主題色 / 文字內容。
-3. **把鎖死規格寫進每張 prompt 的 Strict Rules 段** — 同批次所有 prompt 的 Strict Rules 用同一段文字，AI 變化只能在「可變」項。UI 特別注意：邊框粗細、轉角圓度、光效強度若不寫 Strict 容易飄。
-4. **生完必確認** — 二選一：(a) 每張生完個別確認再套用 (b) 全部生完後一次看統一性 + 符合度（建議組成 grid 或實際擺到模擬 UI 上看）。**確認步驟不能省**。
-5. **稀有度差距系列例外**：R/SR/SSR 卡框、技能 icon 稀有度差 — 視覺差距是設計目的，但**比例 + 風格代號 + 邊框基本結構仍要統一**，差距走光效強度、邊框複雜度、配件密度，不走比例。
-
-**單張 UI 元件跳過此模式**，直接走原 Phase 流程。
-
-**為什麼**：UI 元件常組成系列出現在同一畫面（角色卡 + 稀有度框、技能列、活動 banner 牆）。沒鎖規格進 prompt，AI 會飄（光效強度不一、邊框風格亂、配色基準偏移）。
+- **預設視覺規則**：女性白皮膚、角色美型（[EXCLUSION] 排除 western cartoon 漂移）、元件若含背景場景須滿版四邊用正向指令鎖；使用者明說即覆蓋。詳見 common.md §1。
+- **專案既存資產優先（pre-flight 必做）**：先掃 `assets/ui/`、`ui/`、`assets/icons/`、`assets/frames/`；有既有 UI 就鎖風格代號 / 邊框粗細 / 轉角圓度 / 光效強度 / 配色主軸 / 稀有度視覺系統當預設，**不從風格庫重新挑**，代表作當 `--ref`，Strict Rules 明寫 visually rhyme，跟使用者確認 lock。詳見 common.md §2。
+  - UI 元件常組成系列同畫面出現（角色卡 + 稀有度框、技能列、banner 牆），新做的 1 個風格飄掉直接破壞整個 HUD。
+- **批次一致性模式（≥ 2 個同類元件，例：6 個技能 icon、4 種稀有度卡框、banner 系列、多語系 popup）**：先訂統一規格（UI 多訂：元件比例、邊框風格、光效強度、字體 / 文字配置、是否去背 magenta 底、稀有度視覺系統）→ 鎖死 = 風格 / 比例 / 邊框 / 光效系統 / 配色主軸，可變 = 圖標符號 / 主題色 / 文字內容 → 同一段 Strict Rules 寫進每張 prompt → 生完必確認（建議組成 grid 或實際擺到模擬 UI 上看）；單張跳過。詳見 common.md §3。
+  - 邊框粗細、轉角圓度、光效強度不寫進 Strict 必飄。
+  - R / SR / SSR 卡框 / icon 稀有度差：**比例 + 風格代號 + 邊框基本結構仍統一**，差距走光效強度 / 邊框複雜度 / 配件密度，不走比例。
+- **第二批以後的同專案生圖 / 風格疑慮 → 先過 `art-style-guard`**（Style Bible + contact sheet QC）。
 
 ---
 
@@ -133,23 +104,18 @@ allowed-tools:
 | **變體數量** | 1 / normal+pressed / 多稀有度版本（白藍紫金紅）| 1 |
 | **參考圖** | 是否上傳（既有 UI / 風格 / motif）| 無 |
 
-**如果做多稀有度版本**：產一張通用構造，再用「relight + recolor」走色階變體（白 / 綠 / 藍 / 紫 / 金 / 紅）。
+**如果做多稀有度版本**：產一張通用構造，再用「relight + recolor」走色階變體（白 / 綠 / 藍 / 紫 / 金 / 紅），見 Phase 5。
+
+**如果使用者之前用過**：先讀 `<project-dir>/docs/imagen_history.md` 提示沿用（common.md §8）。
 
 ---
 
 ## Phase 2｜參考圖處理
 
-### 既有 UI 參考圖
-1. Read 看圖
-2. 確認：哪些 motif 要保留（角型 / 紋飾 / 質感），哪些可改
-3. 寫進 prompt 描述
+依 common.md §5（先 Read 看圖 → 向使用者確認 → 只寫確認過的；上限 6 張）。UI 常見兩類參考：
 
-### 風格參考圖
-1. Read 看圖
-2. 描述視覺語言（金屬亮度、紋飾密度、色相），確認理解
-3. 轉成 prompt 描述詞
-
-**參考圖限制：** 最多 6 張，超過品質下降。
+- **既有 UI 參考**：確認哪些 motif 要保留（角型 / 紋飾 / 質感）、哪些可改
+- **風格參考**：描述視覺語言（金屬亮度、紋飾密度、色相），確認理解後轉 prompt 描述詞
 
 ---
 
@@ -187,24 +153,11 @@ allowed-tools:
 
 ### Step 1：中文 Prompt
 
-依「**風格 → 元件類型 → 形狀 → 材質 → 配色 → 紋飾 / 細節 → 背景 → 排除項**」順序組。
-
-```
-## Prompt 確認
-
-📝 中文 Prompt：
-> [完整中文 prompt]
-
-📐 長寬比：[ratio]
-📏 解析度：[size]
-🎨 風格：[風格代號]
-📦 元件：[元件代號]
-🖼️ 參考圖：[有/無]
-
-要修改什麼嗎？
-```
+依「**風格 → 元件類型 → 形狀 → 材質 → 配色 → 紋飾 / 細節 → 背景 → 排除項**」順序組。撰寫原則與確認框格式見 common.md §4；ui **含** 🎨 風格、🧩 套用風格 boilerplate：<style_key>、📦 元件三行。
 
 ### Step 2：轉英文 + 套風格 boilerplate
+
+翻譯原則見 common.md §4。依風格代號在英文 prompt 加上對應 UI boilerplate：
 
 #### `mihoyo_genshin` UI boilerplate
 ```
@@ -247,38 +200,16 @@ mobile RPG game UI asset, Azur Lane-style, deep navy with gold trim, naval / mil
 soft painted gradient, ornate but readable, solid #FF00FF magenta background, edge-to-edge, production-quality 2D game UI
 ```
 
-### Step 3：執行生成或交付 Prompt
+### Step 3：判定模式
 
-- **Prompt 模式**：交付英文 prompt + 建議參數 + 提醒參考圖
-- **API 模式**：呼叫 `~/.claude/skills/imagen/bin/generate.py`
+依 common.md §9 判定（整個任務只判一次）：**API 模式** → Phase 5；**Prompt 模式** → 以 §9「生成資訊」格式交付英文 prompt + 建議參數 + 參考圖上傳提醒。
 
 ---
 
 ## Phase 5｜圖片生成（API 模式）
 
-### 檔案命名與存放
-
-**位置決定**：
-1. 使用者明確指定 → 用指定的
-2. 沒指定 → 先問「要存在哪？」
-3. fallback → 當前工作目錄下 `imagen-ui/`
-
-檔名：`{元件代號}_{風格代號}_{日期}_{序號}.png`
-範例：`icon_skill_mihoyo_genshin_20260430_01.png`
-
-### 執行生成
-
-先把最終英文 prompt Write 到 `prompt-final.txt`，再執行：
-
-```bash
-python ~/.claude/skills/imagen/bin/generate.py \
-  --prompt "$(cat prompt-final.txt)" \
-  --ratio 1:1 --size 1K \
-  --ref reference/style.jpg \
-  --output {output_path}
-```
-
-寬元件（button / tab / progress_bar / divider）用 `--ratio 21:9` 生成，去背後再裁到目標比例。
+1. **存放位置與檔名**：依 common.md §7（fallback `<cwd>/imagen-ui/`；檔名 `{元件代號}_{風格代號}_{日期}_{序號}.png`，例 `icon_skill_mihoyo_genshin_20260430_01.png`）。
+2. **執行**：英文 prompt Write 到 `prompt-final.txt`，呼叫 `~/.claude/skills/imagen/bin/generate.py`（標準指令 common.md §9）；UI 預設 `--size 1K`。寬元件（button / tab / progress_bar / divider）用 `--ratio 21:9` 生成，去背後再裁到目標比例。
 
 ### 去背（magenta chroma-key）
 
@@ -290,7 +221,7 @@ python ~/.claude/skills/generate2dsprite/scripts/generate2dsprite.py process --t
 
 ### 多稀有度變體（常見需求）
 
-如果要白藍紫金紅五階稀有度，**用同一個 base prompt + 改色相詞 + 改光效強度**生 5 張：
+如果要白藍紫金紅五階稀有度，**用同一個 base prompt + 改色相詞 + 改光效強度**生 5 張，每張獨立呼叫 API，保持構造一致只變色：
 
 ```
 common (white): muted gray-white palette, soft minimal glow
@@ -300,26 +231,18 @@ legendary (gold): rich gold palette, radiant golden burst
 mythic (red): crimson palette, fiery red aura with flame motif
 ```
 
-每張獨立呼叫 API，保持構造一致只變色。
-
 ### 生成後
 
-1. Read 看圖
-2. 工程視角：尺寸是否為 2 的倍數、是否含安全邊距、檔名是否照 `{元件代號}_{風格代號}_{日期}_{序號}.png`
-3. **回報：給完整絕對資料夾路徑**
-4. 詢問：「滿意嗎？要做變體（不同色 / 不同稀有度 / pressed 狀態）嗎？」
+依 common.md §6（Read 看圖 → 回報絕對資料夾路徑 → 問滿意 / 調整只改指出的部分），UI 另加：
+
+- **工程視角**：尺寸是否為 2 的倍數、是否含安全邊距、檔名是否照 `{元件代號}_{風格代號}_{日期}_{序號}.png`
+- 詢問是否做變體（不同色 / 不同稀有度 / pressed 狀態）
 
 ---
 
 ## Phase 6｜記憶更新
 
-更新 `<project-dir>/docs/imagen_history.md`（三支 imagen skill 共用同一檔、同一欄位）：
-
-```markdown
-| 日期 | skill | 用途 | 最終英文 prompt 摘要 | 輸出檔 | 備註 |
-|------|-------|------|---------------------|--------|------|
-| 2026-04-30 | imagen-ui | 火球術技能 icon | fireball skill icon, mihoyo_genshin, 1:1, 1K | imagen-ui/icon_skill_mihoyo_genshin_20260430_01.png | 五階稀有度變體 |
-```
+追加一列到 `<project-dir>/docs/imagen_history.md`（6 欄位與 ui 範例見 common.md §8）。
 
 ---
 
@@ -351,6 +274,8 @@ mythic (red): crimson palette, fiery red aura with flame motif
 
 ## 錯誤處理
 
+通用錯誤（API Key / 安全過濾 / 參考圖格式 / 網路）見 common.md §9；UI 特有：
+
 | 錯誤 | 處理 |
 |------|------|
 | 出來太擁擠 | 強調 `clean readable shape` + `clear negative space` |
@@ -364,3 +289,4 @@ mythic (red): crimson palette, fiery red aura with flame motif
 - 想還原某張參考 UI 的風格 → 先用 `image-to-prompt` 逆向出中性 prompt 再回來生
 - 角色立繪 → `imagen-portrait`
 - 通用生圖需求 → `imagen`
+- 第二批以後的同專案生圖 / 風格疑慮 → 先過 `art-style-guard`

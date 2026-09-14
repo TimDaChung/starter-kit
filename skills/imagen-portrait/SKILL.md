@@ -17,7 +17,7 @@ allowed-tools:
 
 > **執行角色：美術**——關注風格一致、角色辨識度、立繪規格（構圖 / 尺寸 / 命名）。
 
-使用 Gemini 的 Nano Banana Pro (`gemini-3-pro-image-preview`) 生成 RPG 手遊角色立繪，預設套用高營收手遊（米哈遊、明日方舟等）的視覺語言。
+使用 Gemini 的 Nano Banana Pro (`gemini-3-pro-image-preview`) 生成 RPG 手遊角色立繪，預設套用高營收手遊（米哈遊、明日方舟等）的視覺語言。三支 imagen skill 的共用流程、格式、指令集中在 `../imagen/references/common.md`（下文以「common.md §N」引用）。
 
 ---
 
@@ -26,48 +26,19 @@ allowed-tools:
 1. **Prompt 忠於討論結果** — 嚴禁擅自添加使用者沒提到的元素或設計細節。
 2. **預設手遊高品質審美** — 厚塗、立體光影、設計密度高、有 silhouette 辨識度。除非使用者要 chibi / 像素 / 寫實扁平等其他風格才切換。
 3. **每次都問角色設定** — 立繪是設計工作，必須先確認角色身份、職業、世界觀基調。
-4. **記錄偏好** — 每次生圖後寫入 `<project-dir>/docs/imagen_history.md`。
+4. **記錄偏好** — 每次生圖後寫入 `<project-dir>/docs/imagen_history.md`（common.md §8）。
 
 ---
 
-## 預設視覺規則（除非使用者明確要求不同）
+## 一致性規則（生圖前必讀）
 
-生圖時，使用者沒明確指定以下項目就套預設：
-
-1. **女性角色預設白皮膚**（fair luminous skin / pale skin）— 避免 sun-kissed / tanned / olive / bronzed / dark。使用者明確要求其他膚色才換。
-2. **所有角色預設美型**（refined attractive features，手遊 gacha 美學）— 美容貌、比例好。避免 western cartoon / Disney / Pixar / caricature 漂移。Banana Pro 對某些狂野詞（如 "manic"、"wild flying outward"、"battle-tested"）會 bias 到 western 風，需要在 [EXCLUSION] 段明確排除這些風格。
-3. **背景必須滿版到四個邊緣**（full-bleed edge-to-edge）— 不要白邊、letterbox、painting frame、gallery framing。在 [COMPOSITION] 段用**正向指令**鎖（"background extends full-bleed to all four edges"）；純粹在 [EXCLUSION] 加 negation 反而可能誘發 frame design。
-4. 使用者明確要求不同就依使用者指示。
-
----
-
-## 專案既存資產優先（生圖前必做）
-
-**生圖前先掃專案目錄**找有沒有已有立繪 / 角色資產：`立繪/`、`assets/portraits/`、`portraits/`、`assets/sprites/`（chibi sprite 也可作 portrait 風格參考）。
-
-**若找到既有立繪：**
-1. 把既有立繪的「畫風代號、頭身比、視角、光源、構圖留白、面向方向」**鎖死當預設**，不要從風格庫重新挑
-2. 把代表性 1-2 張當 `--ref` 傳 Banana Pro，除了角色設計 ref 之外**多塞既有立繪 ref 強制風格鎖**
-3. Strict Rules 段明寫「the new portrait must visually rhyme with existing project portraits — same head-body proportions, same view angle, same lighting」
-4. 跟使用者確認：「專案既有 N 張立繪（畫風 / 頭身比為...），這次照樣？要改風格請明說」
-
-**為什麼**：專案已有的東西，畫風、畫面、人物比例等預設要參照。立繪特別容易在頭身比飄（成熟系角色被 Banana 自動拉長身），ref + Strict Rules 雙鎖才穩。
-
----
-
-## 批次一致性模式（同類別資產 ≥ 2 張）
-
-**當使用者一次要產 ≥ 2 張同類別資產時**（例：4 個角色立繪、一組職業立繪、SR/SSR 角色組），切換到批次模式：
-
-1. **先訂統一規格** — 任何生圖前，先決定：風格代號、長寬比、頭身比、視角、光源方向、**面向方向（朝左 / 朝右）**、構圖留白、姿態鎖定條件、背景處理強度。
-2. **區分「鎖死」vs「可變」** — 鎖死 = 風格 / 比例 / 視角 / 面向 / 光源；可變 = 配色 / 武器 / 場景 / 表情。
-3. **把鎖死規格寫進每張 prompt 的 Strict Rules 段** — 同批次所有 prompt 的 Strict Rules 用同一段文字，AI 變化只能在「可變」項。立繪特別注意：頭身比、面向方向、視角不寫 Strict 容易飄。
-4. **生完必確認** — 二選一：(a) 每張生完個別確認再套用 (b) 全部生完後一次看統一性 + 符合度。**確認步驟不能省**，避免實裝後才發現要重生。
-5. **例外**：明確稀有度差距的角色組（R/SR/SSR）— 視覺差距是設計目的，但**頭身比仍要統一**，差距走配件密度 / 光效 / 服裝細節，不走頭身比。
-
-**單張立繪跳過此模式**，直接走原 Phase 流程。
-
-**為什麼**：同遊戲的角色立繪要視覺押韻。沒鎖規格進 prompt，AI 會飄（頭身比變、視角混、面向鏡像翻、風格漂浮）。
+- **預設視覺規則**：女性白皮膚、所有角色美型（[EXCLUSION] 排除 western cartoon 漂移）、背景滿版四邊用正向指令鎖；使用者明說即覆蓋。詳見 common.md §1。
+- **專案既存資產優先（pre-flight 必做）**：先掃 `立繪/`、`assets/portraits/`、`portraits/`、`assets/sprites/`；有既有立繪就鎖畫風代號 / 頭身比 / 視角 / 光源 / 構圖留白 / 面向當預設，**不從風格庫重新挑**，代表作當 `--ref`，Strict Rules 明寫 visually rhyme，跟使用者確認 lock。詳見 common.md §2。
+  - 立繪特別容易在**頭身比**飄（成熟系角色被 Banana 自動拉長身），ref + Strict Rules 雙鎖才穩。
+- **批次一致性模式（≥ 2 張立繪，例：4 個角色、一組職業、SR/SSR 角色組）**：先訂統一規格（立繪多訂一項**背景處理強度**）→ 分鎖死 / 可變 → 同一段 Strict Rules 寫進每張 prompt → 生完必確認；單張跳過。詳見 common.md §3。
+  - 頭身比、面向方向、視角不寫進 Strict 必飄。
+  - R / SR / SSR 角色組：**頭身比仍要統一**，差距走配件密度 / 光效 / 服裝細節，不走頭身比。
+- **第二批以後的同專案生圖 / 風格疑慮 → 先過 `art-style-guard`**（Style Bible + contact sheet QC）。
 
 ---
 
@@ -120,29 +91,17 @@ allowed-tools:
 | **解析度** | 1K / 2K / 4K | 2K |
 | **參考圖** | 是否上傳（角色 / 服裝 / 風格）| 無 |
 
-**如果使用者之前用過：**
-讀 `<project-dir>/docs/imagen_history.md`，提示：「上次做 [角色] 用了 [風格 + 構圖]，這次要沿用嗎？」
+**如果使用者之前用過**：先讀 `<project-dir>/docs/imagen_history.md`，提示「上次做 [角色] 用了 [風格 + 構圖]，這次要沿用嗎？」（common.md §8）。
 
 ---
 
 ## Phase 2｜參考圖處理
 
-### 角色參考圖
-1. 用 Read 工具看圖
-2. 向使用者確認：哪些保留（臉型 / 髮色 / 標誌服裝），哪些改
-3. 寫進 prompt（只寫確認過的）
+依 common.md §5（先 Read 看圖 → 向使用者確認 → 只寫確認過的；上限 6 張）。立繪常見三類參考：
 
-### 風格參考圖
-1. Read 看圖
-2. 描述你看到的風格特徵（厚塗程度、光影、線條、色彩取向），確認理解正確
-3. 轉成 prompt 描述詞
-
-### 服裝 / 配件參考圖
-1. Read 看圖
-2. 確認哪些配件 / 元素要保留
-3. 寫進 prompt 的服裝描述
-
-**參考圖限制：** 最多 6 張，超過品質下降。
+- **角色參考**：確認哪些保留（臉型 / 髮色 / 標誌服裝）、哪些改
+- **風格參考**：描述厚塗程度、光影、線條、色彩取向，確認理解後轉 prompt 描述詞
+- **服裝 / 配件參考**：確認哪些配件 / 元素要保留，寫進服裝描述
 
 ---
 
@@ -160,7 +119,7 @@ allowed-tools:
 [構圖]，[長寬比]，因為 [用途符合 / 角色設計能完整呈現]
 
 ### 重點視覺元素
-- [哪些設計細節是 must-keep] 
+- [哪些設計細節是 must-keep]
 - [哪些可以 AI 自由發揮]
 
 ### 商業參考
@@ -181,28 +140,11 @@ allowed-tools:
 
 ### Step 1：中文 Prompt
 
-依「**風格 → 角色身份 → 服裝細節 → 姿態 / 表情 → 構圖 / 鏡頭 → 背景 → 光影 → 排除項**」順序組。
-
-**展示格式：**
-
-```
-## Prompt 確認
-
-📝 中文 Prompt：
-> [完整中文 prompt]
-
-📐 長寬比：[ratio]
-📏 解析度：[size]
-🎨 風格：[風格代號]
-🧩 套用風格 boilerplate：<style_key>
-🖼️ 參考圖：[有/無，幾張]
-
-沒問題的話我就轉英文並開始生成。要修改什麼嗎？
-```
+依「**風格 → 角色身份 → 服裝細節 → 姿態 / 表情 → 構圖 / 鏡頭 → 背景 → 光影 → 排除項**」順序組。撰寫原則與確認框格式見 common.md §4；portrait **含** 🎨 風格、🧩 套用風格 boilerplate：<style_key> 兩行。
 
 ### Step 2：轉英文 + 套風格 boilerplate
 
-依風格代號加上對應 boilerplate（確認框已用「套用風格 boilerplate：<style_key>」標示，英文 boilerplate 原文不另翻進中文 prompt）：
+翻譯原則見 common.md §4。依風格代號在英文 prompt 加上對應 boilerplate（英文原文不另翻進中文 prompt）：
 
 #### `mihoyo_genshin` boilerplate
 ```
@@ -248,59 +190,23 @@ extremely high detail density, decorative naval / military elements, soft painte
 ornate costume design, vibrant accent colors, refined linework, 2D production-quality
 ```
 
-### Step 3：執行生成或交付 Prompt
+### Step 3：判定模式
 
-模式同 `/imagen`：
-- **Prompt 模式**：交付英文 prompt + 建議參數 + 提醒參考圖上傳到 Google AI Studio
-- **API 模式**：直接呼叫 `~/.claude/skills/imagen/bin/generate.py`（共用 wrapper），參考圖用 `--ref` 傳
+依 common.md §9 判定（整個任務只判一次）：**API 模式** → Phase 5；**Prompt 模式** → 以 §9「生成資訊」格式交付英文 prompt + 建議參數 + 參考圖上傳提醒。
 
 ---
 
 ## Phase 5｜圖片生成（API 模式）
 
-### 檔案命名與存放
-
-**位置決定**：
-1. 使用者明確指定 → 用指定的
-2. 沒指定 → 先問「要存在哪？」
-3. fallback → 當前工作目錄下 `imagen-portrait/`
-
-檔名：`{角色名或主題}_{風格代號}_{日期}_{序號}.png`
-範例：`ice_mage_mihoyo_genshin_20260430_01.png`
-
-### 執行生成
-
-先把最終英文 prompt Write 到 `prompt-final.txt`，再執行：
-
-```bash
-python ~/.claude/skills/imagen/bin/generate.py \
-  --prompt "$(cat prompt-final.txt)" \
-  --ratio 3:4 --size 2K \
-  --ref reference/character.jpg \
-  --output {output_path}
-```
-
-`--ref` 可重複多次（角色 + 風格 + 服裝參考都可以一起傳）。
-
-### 生成後
-
-1. Read 看圖確認產出
-2. **回報：給完整絕對資料夾路徑**（不用列每個檔案）
-3. 詢問：「滿意嗎？要調整 prompt 重新生成？要做不同表情 / 姿態變體？」
-
-調整循環：只改使用者明確指出的部分。
+1. **存放位置與檔名**：依 common.md §7（fallback `<cwd>/imagen-portrait/`；檔名 `{角色名或主題}_{風格代號}_{日期}_{序號}.png`，例 `ice_mage_mihoyo_genshin_20260430_01.png`）。
+2. **執行**：英文 prompt Write 到 `prompt-final.txt`，呼叫 `~/.claude/skills/imagen/bin/generate.py`（標準指令 common.md §9）；立繪預設 `--size 2K`，`--ref` 可同時傳角色 + 風格 + 服裝參考。
+3. **生成後**：依 common.md §6——Read 看圖 → 回報絕對資料夾路徑 → 問「滿意嗎？要調整 prompt？要做不同表情 / 姿態變體？」；調整只改使用者明確指出的部分。
 
 ---
 
 ## Phase 6｜記憶更新
 
-更新 `<project-dir>/docs/imagen_history.md`（三支 imagen skill 共用同一檔、同一欄位）：
-
-```markdown
-| 日期 | skill | 用途 | 最終英文 prompt 摘要 | 輸出檔 | 備註 |
-|------|-------|------|---------------------|--------|------|
-| 2026-04-30 | imagen-portrait | 冰系法師半身立繪 | ice mage girl, mihoyo_genshin, bust shot, 3:4, 2K | imagen-portrait/ice_mage_mihoyo_genshin_20260430_01.png | 有上傳服裝參考 |
-```
+追加一列到 `<project-dir>/docs/imagen_history.md`（6 欄位與 portrait 範例見 common.md §8）。
 
 ---
 
@@ -330,6 +236,8 @@ python ~/.claude/skills/imagen/bin/generate.py \
 
 ## 錯誤處理
 
+通用錯誤（API Key / 安全過濾 / 參考圖格式 / 網路）見 common.md §9；立繪特有：
+
 | 錯誤 | 處理 |
 |------|------|
 | 安全過濾觸發（暴露 / 暴力）| 調整 prompt 措辭，避開觸發詞，必要時加 `safe-for-work` 修飾 |
@@ -343,3 +251,4 @@ python ~/.claude/skills/imagen/bin/generate.py \
 - 想還原某張參考立繪的風格 → 先用 `image-to-prompt` 逆向出中性 prompt，換上角色名再回來生
 - UI 素材／頭像框等 → `imagen-ui`
 - 通用生圖需求 → `imagen`
+- 第二批以後的同專案生圖 / 風格疑慮 → 先過 `art-style-guard`

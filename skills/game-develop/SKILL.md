@@ -53,7 +53,7 @@ allowed-tools:
 
 ## 核心紀律（不可違反）
 
-1. **整套 5 phases 一次跑完才回報**：phase 之間自動推進，不對 user check-in、不問「要繼續嗎」、不要每張生圖叫 user 看、**沒有 session batch 上限這回事**——同類別有 N 張就連續呼叫 N 次直到全部生完。**唯一例外**：碰到不可逆動作（破壞性檔案操作）或硬決策（玩法核心改動 / 數值範圍超出 SPEC）才停下來問。否則一路跑到 Phase 5.4 完才一次性給總結摘要
+1. **整套 5 phases 一次跑完才回報**：phase 之間自動推進、不對 user check-in，跑到 Phase 5.4 完才一次性給總結摘要（例：同類別有 N 張生圖就連續生完，不逐張叫 user 看）。**唯一例外**：不可逆動作（破壞性檔案操作）或硬決策（玩法核心改動 / 數值超出 SPEC）才停下來問
 2. **不外包就自己做**：遇到對應 sub-skill / agent → invoke；沒對應的（音效 / 自訂特效 / 動效 / 粒子）→ 用原生 web 技術做（Web Audio API / CSS animation / Canvas）
 3. **單檔不拆**：HTML 維持單檔。改動 100% 用 Edit + section marker，不重寫整檔
 4. **每張生圖獨立 checkpoint**：Phase 3 每張生完立即更新 TODO（含路徑、版本、決策註解），但**不打擾 user**
@@ -65,14 +65,16 @@ allowed-tools:
 
 ## Phase 結構（彈性順序，建議從 0 起）
 
-| Phase | 工作 | 主要外包 | 完成標準 |
-|-------|------|---------|---------|
-| **0** | 診斷 + 對齊（每次 invoke 跑） | — | 讀完兩檔 + 確認本次推進項目 |
-| **1** | Design system 建立 | —（skill 自己用 CSS variables 規劃） | CSS variables 內嵌 + DESIGN.md 完成 |
-| **2** | 素材清單規劃 | — | TODO「素材」分區建立 |
-| **3** | 批次生圖 | imagen-portrait / imagen-ui / generate2dsprite / generate2dmap / imagen | 每張：路徑寫進 TODO，標 ✅ |
-| **4** | 素材整合（emoji → 真圖） | — | section-by-section 替換 + 不破 layout |
-| **5** | Polish | game-balance-auditor / dialogue-writer / self-walkthrough（chrome-devtools MCP）/ `webapp-testing` | 平衡達標 + 對白 + 視覺 + 玩法 QA 全過 |
+| Phase | 工作 | 完成標準 |
+|-------|------|---------|
+| **0** | 診斷 + 對齊（每次 invoke 跑） | 讀完兩檔 + 確認本次推進項目 |
+| **1** | Design system 建立 | CSS variables 內嵌 + DESIGN.md 完成 |
+| **2** | 素材清單規劃 | TODO「素材」分區建立 |
+| **3** | 批次生圖 | 每張：路徑寫進 TODO，標 ✅ |
+| **4** | 素材整合（emoji → 真圖） | section-by-section 替換 + 不破 layout |
+| **5** | Polish | 平衡達標 + 對白 + 視覺 + 玩法 QA 全過 |
+
+各 Phase 的外包（生圖 skill / agent / QA）與 fallback：**生圖 skill 對應見 Phase 2 表**。
 
 ---
 
@@ -92,16 +94,24 @@ allowed-tools:
 
 從 GAME_SPEC.md 的 emoji 對照表反推：
 
-**Sub-skill 強制對應表**（按用途選，不要憑感覺挑）：
+**外包強制對應表（全 skill 唯一權威表）**——生圖按用途選，不要憑感覺挑；agent / QA / fallback 亦列於此，其他段落只指回本表：
 
-| 素材用途 | 強制使用 | 為什麼 |
-|---------|---------|--------|
-| **角色 / 物件，遊戲中會動或需要狀態切換**（揮棒、投球、走路、待機、被擊中、攻擊…）| **`generate2dsprite`**（chibi 風用 `art_style=cel_shaded_chibi`）| 內建 magenta chroma key + processor，產出真透明 PNG + 多 frame sheet |
-| **小物件 sprite**（球、子彈、道具、特效粒子）| **`generate2dsprite`** | 同上，要透明背景才能疊在背景上 |
-| **背景 / 地圖 / 場景**（球場、戰鬥背景、村莊、戰場）| **`generate2dmap`** | 場景專用 pipeline，比例 / 透視 / 圖層處理對 |
-| **UI 元件**（button / icon / frame / banner / popup / coin / chip）| **`imagen-ui`** | imagen-ui 產出 magenta 背景，用 generate2dsprite 的 processor 去背，得到真透明 PNG |
-| **靜態角色立繪**（封面圖、選角畫面，純單張無動畫）| `imagen-portrait` | 半身 / 全身大圖，內建後製 |
-| **通用單張插圖**（splash art、敘事插畫、無 alpha 需求）| `imagen` | **僅限**真的不需要透明背景的場合 |
+| 工作 / 素材用途 | 強制使用 | Phase | 為什麼 | 沒外包時 fallback |
+|---------|---------|-------|--------|-------------------|
+| Design system | 無外包 | 1 | — | skill 用 CSS variables 自己規劃 |
+| **角色 / 物件，遊戲中會動或需要狀態切換**（揮棒、投球、走路、待機、被擊中、攻擊…）| **`generate2dsprite`**（Q 版 / chibi 風用 `art_style=cel_shaded_chibi`）| 3 | 內建 magenta chroma key + processor，產出真透明 PNG + 多 frame sheet | — |
+| **小物件 sprite**（球、子彈、道具、特效粒子）| **`generate2dsprite`** | 3 | 同上，要透明背景才能疊在背景上 | — |
+| **背景 / 地圖 / 場景**（球場、戰鬥背景、村莊、戰場）| **`generate2dmap`** | 3 | 場景專用 pipeline，比例 / 透視 / 圖層處理對 | — |
+| **UI 元件**（button / icon / frame / banner / popup / coin / chip）| **`imagen-ui`** | 3 | imagen-ui 產出 magenta 背景，用 generate2dsprite 的 processor 去背，得到真透明 PNG | — |
+| **靜態角色立繪**（封面圖、選角畫面，純單張無動畫）| `imagen-portrait` | 3 | 半身 / 全身大圖，內建後製 | — |
+| **通用單張插圖**（splash art、敘事插畫、無 alpha 需求）| `imagen` | 3 | **僅限**真的不需要透明背景的場合 | — |
+| **有參考圖要還原風格**（user 給圖說「照這種感覺」）| `image-to-prompt` | 2–3 | 逆向出中性、可換角色的 prompt，再交給上列生圖 skill | skill 自己 Read 看圖描述風格 |
+| **第二批以後生圖 / 新素材併入既有素材** | `art-style-guard` | 3 | Style Bible + contact sheet 並排自檢，擋風格不一致 | skill 自己 Read 並排比對 style-lock |
+| Balance | `game-balance-auditor` agent | 5 | 需 simulation 數據，不靠感覺 | skill 跑簡易 sim（Bash+python） |
+| 對白 | `dialogue-writer` agent | 5 | 依 persona 出多版草稿 | skill 自己依 persona 寫 |
+| 視覺 QA | 無外包（self-walkthrough：chrome-devtools MCP 截圖逐畫面檢查） | 5 | — | grep 靜態檢查 |
+| 玩法 QA | `webapp-testing`（Playwright） | 5 | end-to-end 最後關卡 | skill 用 chrome-devtools MCP 跑互動測試 |
+| **動效 / 音效 / 特效 / 粒子** | **無外包** | 任何 | 沒有對應 skill | **skill 自己做（CSS animation / Web Audio API / Canvas）** |
 
 **反模式**：
 - ❌ 用 `imagen` 生「透明背景 PNG」——`imagen` 不跑後製，prompt 寫 transparent 也沒用，會出 RGB 圖
@@ -260,42 +270,33 @@ Skill: webapp-testing
 
 ---
 
-## 整合 map（總表）
+## 整合 map
 
-| 工作 | 外包 | Phase | 沒外包時 fallback |
-|------|------|-------|-------------------|
-| Design system | 無外包 | 1 | skill 用 CSS variables 自己規劃 |
-| **角色 / 物件 sprite（含動畫 frame）** | **`generate2dsprite`**（chibi 風用 `art_style=cel_shaded_chibi`）| 3 | — |
-| **小物件 sprite（球、子彈、特效等）** | **`generate2dsprite`** | 3 | — |
-| **背景 / 地圖 / 場景** | **`generate2dmap`** | 3 | — |
-| **UI 元件**（button / icon / frame / banner）| **`imagen-ui`** | 3 | — |
-| 靜態角色立繪（無動畫，純單張）| `imagen-portrait` | 3 | — |
-| 通用單張插圖（splash / 不需 alpha）| `imagen` | 3 | **僅限**不需透明背景的場合 |
-| Balance | `game-balance-auditor` agent | 5 | skill 跑簡易 sim（Bash+python） |
-| 對白 | `dialogue-writer` agent | 5 | skill 自己寫 |
-| 視覺 QA | 無外包（self-walkthrough：chrome-devtools MCP 截圖逐畫面檢查） | 5 | grep 靜態檢查 |
-| 玩法 QA | `webapp-testing`（Playwright） | 5 | skill 用 chrome-devtools MCP 跑互動測試 |
-| **動效 / 音效 / 特效 / 粒子** | **無外包** | 任何 | **skill 自己做（CSS animation / Web Audio API / Canvas）** |
+生圖 skill 對應見 Phase 2 表（agent / QA / fallback 同表，不另列）。
 
 ---
 
-## 工作量切分（內部追蹤，不切 session）
+## 工作量切分與行數監控（game-prototype 共用）
 
-任務要動 5+ 處或寫 500+ 行時：
+### Session 策略（兩 skill 刻意不同，不是矛盾）
+
+| Skill | Session 策略 | 任務超量時（動 5+ 處或寫 500+ 行） |
+|-------|-------------|----------------------------------|
+| **game-prototype** | **單次 invoke 做完玩法閉環**（Phase 0–5 一次跑完） | 子任務清單寫進 GAME_TODO.md，本 session 跑前 1–2 項 + checkpoint，**C/D/E 排進 TODO 下次 invoke 接續** |
+| **game-develop** | **分 Phase 多次 invoke**（Resume 偵測讀 TODO 接續），**不在 Phase 中途切 session**；單次 invoke 預設仍連續推進到 Phase 5.4 | 子任務清單寫進 GAME_TODO.md，本 session 內**逐項做完**（並行 / 連續 Edit / 連續 Bash），全完才回報，不要求 user 下次 invoke 接續 |
+
+### 工作量切分
+
 1. 先把任務拆成「子任務清單」寫進 GAME_TODO.md
-2. 本 session 內**逐項做完**（用並行 / 連續 Edit / 連續 Bash 推進），每完成一項標 ✅
-3. 全完才回報——**不在中途切 session、不要求 user 下次 invoke 接續**
+2. 依上表所屬 skill 的策略推進，每完成一項標 ✅
+3. session 內部的 task tracker（TaskCreate / TodoWrite）可用來追蹤本次推進的子項，但不改變上表策略
 
-session 內部的 task tracker（TaskCreate / TodoWrite）可用來追蹤本次推進的子項，但不影響「一次做完」原則。
+### 行數監控（提醒 only）
 
----
-
-## 行數監控（提醒 only）
-
-- HTML 5000 行：提醒「未來改動建議用 grep marker 精準定位」
+- HTML 5000 行：提醒 user「未來改動建議用 grep marker 精準定位」
 - HTML 8000 行：提醒「考慮哪些 section 可以瘦身（例如 emoji 對照表搬到 SPEC）」
 
-**不強制拆檔**——user 偏好單檔分配給別人方便。
+**不強制拆檔**——user 偏好單檔分配給別人方便；除非 user 明確說要。
 
 ---
 

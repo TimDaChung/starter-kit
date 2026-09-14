@@ -20,55 +20,21 @@ Use user-specified parameters when present. When the user does not specify them,
 
 Read [references/map-strategies.md](references/map-strategies.md) when the pipeline choice is not obvious. Read [references/layered-map-contract.md](references/layered-map-contract.md) before implementing a layered raster map. Read [references/prop-pack-contract.md](references/prop-pack-contract.md) before batching generated props into a sheet.
 
-## Default visual rules (unless user explicitly specifies otherwise)
+## Consistency rules (read before the first generation)
 
-When the user has NOT specified the following, apply these defaults:
+The lock rules shared by all five image skills live in [`../imagen/references/consistency-rules.md`](../imagen/references/consistency-rules.md) — §1 default visual rules, §2 project asset inheritance, §3 batch consistency mode, §4 hand-off to `art-style-guard`. Summary plus the map-only deltas:
 
-1. **Map / background must extend full-bleed to all four edges** — NO white margins, NO letterbox bars, NO painting-style frame, NO gallery framing. Use **positive instruction** in the composition section ("scene extends full-bleed to all four edges of canvas"); pure negation in EXCLUSION can paradoxically trigger frame design.
-2. **Any character or NPC in the map: refined attractive features by default** (mobile gacha aesthetic), and **female characters default to fair luminous skin** unless the user explicitly specifies otherwise. Avoid western cartoon / Disney / Pixar drift.
-3. Any user explicit request overrides these defaults.
-
----
-
-## Project asset inheritance (pre-flight, REQUIRED)
-
-Before generating, scan the project directory for existing same-category map / background assets:
-- maps / backgrounds → `assets/maps/`, `assets/backgrounds/`, `maps/`, `backgrounds/`
-- tilesets / props → `assets/tiles/`, `assets/props/`, `tiles/`
-- character sprites that will sit on the map → `assets/sprites/` (their scale + style is the lock for prop scale)
-
-**If existing same-category map assets are found:**
-1. LOCK their visual specs as the default: art style, perspective angle, palette family, lighting direction, scale / pixel-density target, atmosphere
-2. Pass at least one of the existing maps / props as a `--ref` to Banana Pro — concrete style anchor
-3. Embed in Strict Rules: "the new map asset must visually rhyme with the existing project maps — same perspective, same palette family, same lighting direction, same scale; props from this asset must sit on the existing maps without scale or palette clash"
-4. Confirm with the user: "the project already has N same-category map assets (perspective / palette / lighting = ...). Generate the new one with the same lock? Tell me if you want to deviate."
-
-**Why**: Existing project assets define the visual lock for new ones. Map assets sit together on a single rendered scene — drift is visible at first glance and breaks immersion.
-
----
-
-## Batch consistency mode (multiple same-category assets)
-
-**When the user requests 2+ same-category map assets in one go** (e.g. a prop pack of 8 trees, a tile set of 6 floor variants, a parallax layer set, multiple battle backgrounds for one biome), switch into batch mode:
-
-1. **Define a unified spec FIRST** before any generation: art style code (clean_hd / pixel_inspired / project-native), aspect ratio, perspective angle (top-down / 3/4 isometric / side / parallax depth), lighting direction (sun angle, time of day), **palette family** locked across the batch, scale / pixel-density target, and any composition rules (e.g. all props centered, all tiles seamless 256×256).
-2. **Distinguish "locked" vs "variable"**: locked = style / perspective / palette / scale / lighting; variable = subject (which tree, which prop) / detail composition.
-3. **Write the locked rules into the Strict Rules section of EVERY prompt in the batch** — same wording across all assets. Map assets especially need explicit palette and lighting-direction lock — without them, AI mixes warm/cool atmospheres or lights from inconsistent angles, breaking immersion when assets sit on the same map.
-4. **After generation, verify**: per-asset (check before applying) or batch-end (assemble assets onto a test scene and check the assembled image looks coherent). The confirmation step is mandatory.
-
-**Single-asset generation skips this mode** — go straight to the regular workflow.
-
-**Why**: Map assets sit together on a single rendered scene, so any spec drift is visible at first glance (mismatched lighting on adjacent props, palette clashes, scale jumps). Without locking spec into every prompt, AI drifts.
-
----
+- **Default visual rules (§1)**: map / background full-bleed to all four edges via a positive composition instruction ("scene extends full-bleed to all four edges of canvas" — pure negation can trigger frame design); any character or NPC on the map → refined attractive features (mobile gacha aesthetic), female → fair luminous skin, no western cartoon / Disney / Pixar drift. Explicit user requests override.
+- **Project asset inheritance (§2, REQUIRED pre-flight)**: scan `assets/maps/`, `assets/backgrounds/`, `maps/`, `backgrounds/` (maps), `assets/tiles/`, `assets/props/`, `tiles/` (tilesets / props), and `assets/sprites/` (the character sprites that will sit on the map — their scale + style is the lock for prop scale). If same-category map assets exist: LOCK art style, perspective angle, palette family, lighting direction, scale / pixel-density target, atmosphere; pass at least one existing map / prop as `--ref`; embed in Strict Rules "same perspective, same palette family, same lighting direction, same scale; props from this asset must sit on the existing maps without scale or palette clash"; confirm the lock with the user.
+- **Batch consistency mode (§3, 2+ same-category map assets — a prop pack of 8 trees, 6 floor-tile variants, a parallax layer set, several battle backgrounds for one biome)**: unified spec first — art style code (`clean_hd` / `pixel_inspired` / project-native), aspect ratio, perspective (top-down / 3/4 isometric / side / parallax depth), lighting direction (sun angle, time of day), **palette family**, scale / pixel-density target, composition rules (e.g. all props centered, all tiles seamless 256×256); locked = style / perspective / palette / scale / lighting, variable = subject (which tree, which prop) / detail composition; identical Strict Rules wording in every prompt; mandatory verification, preferably by assembling the assets onto a test scene and checking the assembled image.
+  - Maps especially need explicit **palette + lighting-direction** locks — without them Banana mixes warm / cool atmospheres or lights adjacent props from different angles, which is visible at first glance on a shared scene.
+- **Hand-off (§4)**: second batch onward in the same project, or any style doubt → run `art-style-guard` first (Style Bible + contact-sheet QC).
 
 ## Image Generation First
 
-This skill is image-generation-first for visual assets. Call `~/.claude/skills/imagen/bin/generate.py` (Nano Banana Pro / gemini-3-pro-image-preview) as the default creative art source for base maps, dressed references, prop sheets, prop sprites, tileset art, parallax layers, battle backgrounds, and other visible map assets.
+This skill is image-generation-first for visual assets. Call `~/.claude/skills/imagen/bin/generate.py` (Nano Banana Pro / gemini-3-pro-image-preview) as the default creative art source for base maps, dressed references, prop sheets, prop sprites, tileset art, parallax layers, battle backgrounds, and other visible map assets. The agent writes the creative prompts itself — scripts never generate creative prompts or procedurally draw final visual art. Scripts may assemble, slice, chroma-key, crop, validate, compose previews, emit JSON metadata, and wire image-generated assets into engine-native files such as Godot `.tscn` scenes.
 
-The agent must write the creative image prompts itself. Do not use scripts to generate creative prompts or to procedurally draw final visual art. Scripts may assemble, slice, chroma-key, crop, validate, compose previews, emit JSON metadata, and wire image-generated assets into engine-native files such as Godot `.tscn` scenes.
-
-Only use procedural drawing or scripted placeholder art when the user explicitly asks for placeholders, test fixtures, debug maps, or engine scaffolding without final art. If using an engine target such as `Godot_TileMap`, generate or reuse the visual tileset art first, then use scripts/code only to build tile layers, collision, zones, and scene wiring.
+Only use procedural drawing or scripted placeholder art when the user explicitly asks for placeholders, test fixtures, debug maps, or engine scaffolding without final art. For an engine target such as `Godot_TileMap`, generate or reuse the visual tileset art first, then use scripts/code only to build tile layers, collision, zones, and scene wiring.
 
 ### Calling generate.py
 
@@ -121,25 +87,22 @@ When unspecified:
    - Select `visual_asset_source`. Default to `banana_pro`; use `existing_assets` only when the project already has suitable art; use `procedural_placeholder` only when explicitly requested.
    - Treat `hybrid` as a result of combining axes, not as a primary category.
 
-3. Produce assets.
-   - Write the creative prompts manually and use `~/.claude/skills/imagen/bin/generate.py` for visible map art unless the user explicitly chose existing assets or procedural placeholders.
-   - For baked raster maps, generate one background with `~/.claude/skills/imagen/bin/generate.py`, or edit/use an existing image when supplied, then add optional collision/zones metadata.
-   - For layered raster maps, generate a ground-only base map first. Then show that base image in context and generate a dressed reference from the visible base before making final props and placements.
+3. Produce assets (creative prompts written by hand, art from `generate.py` — see Image Generation First).
+   - For baked raster maps, generate one background, or edit/use an existing image when supplied, then add optional collision/zones metadata.
+   - For layered raster maps, follow the reference pipeline in Prop Generation Rules (ground-only base → dressed reference from the visible base → props → placement).
    - For tilemaps, generate or reuse tileset art first, then follow the engine/editor format for layers, objects, collision, and scene files. Do not script-draw the tileset as the final art source.
    - For parallax scenes, generate background/midground/foreground visual layers first, then produce scroll metadata.
-   - Do not present a rerunnable script that creates the whole art pack as the main solution unless the user asked for procedural placeholder art.
 
 4. Build metadata.
    - Store prop placement, actor spawn points, interactables, blockers, walk bounds, encounter zones, exits, and triggers as structured data.
    - Keep collision independent from pixels unless the target engine explicitly uses tile collision.
 
 5. Validate and preview.
-   - Compose a flattened preview for layered maps.
-   - Validate image sizes, alpha channels, prop pack extraction metadata, JSON parseability, and critical walkability points when collision matters.
+   - Compose a flattened preview for layered maps, then run the Validation checklist below.
 
 ## Prop Generation Rules
 
-Use `generate2dsprite` for reusable transparent props, but the agent must write the prop prompt itself using the selected map `art_style`. Do not use a script to generate the creative prompt. For `clean_hd` maps, explicitly request clean hand-painted HD 2D game assets and explicitly forbid pixel art. For `pixel_inspired`, request clean modern pixel-art-inspired props without retro chunkiness. For `retro_pixel`, request 16-bit or retro JRPG pixel art.
+Use `generate2dsprite` for reusable transparent props, but the agent must write the prop prompt itself using the selected map `art_style` (wording per style: see Parameter Contract defaults; for `clean_hd` explicitly forbid pixel art).
 
 Choose the generation shape deliberately:
 
@@ -214,3 +177,4 @@ Always validate what the chosen pipeline requires:
 - 想還原某張參考地圖／場景的風格 → 先用 `image-to-prompt` 逆向出中性 prompt 再回來生
 - 地圖上的角色／道具 sprite → `generate2dsprite`
 - 通用生圖需求 → `imagen`
+- 第二批以後的同專案生圖 / 風格疑慮 → 先過 `art-style-guard`

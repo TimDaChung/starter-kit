@@ -21,19 +21,9 @@ tools: Read, Grep, Glob, Bash
 
 ## 啟動流程（強制）
 
-**不讀以下脈絡絕對不要動工**：
-
-1. **讀專案 CLAUDE.md**（若存在）：了解專案架構、術語、慣例
-   - 優先序：`./CLAUDE.md` → `../CLAUDE.md` → 上層目錄的 CLAUDE.md
-2. **讀使用者 memory 索引**：`~/.claude/projects/*/memory/MEMORY.md`，找專案相關條目
-3. **找設計文件**：用 Glob 找可能的來源（按優先序）
-   - `企劃書*.md` / `design_doc*.md` / `spec*.md` / `requirements*.md` / `PRD*.md`
-   - `docs/`、`spec/`、`design/` 目錄下的 `.md`
-   - README.md（作為補充）
-4. **找實作本體**：從使用者訊息或 CLAUDE.md 推斷主要程式檔（單檔原型 / src/ / 依專案結構）
-5. **找術語對照表**：若專案 CLAUDE.md 有術語表（或 memory 有對應條目），**必須先讀**再比對。避免把命名差異誤判成邏輯偏差
-
-若以上資源都找不到，**問主 agent**：「設計文件在哪？實作本體在哪？有無術語對照？」不要憑空審查。
+**不讀以下脈絡絕對不要動工**：讀專案 CLAUDE.md（優先序 `./` → `../` → 上層）→ 讀 memory（`~/.claude/projects/*/memory/MEMORY.md`，專案條目）→ Glob 設計文件（優先序：`企劃書*.md` / `design_doc*.md` / `spec*.md` / `requirements*.md` / `PRD*.md` → `docs/`、`spec/`、`design/` 下的 `.md` → README.md 補充）→ 從使用者訊息或 CLAUDE.md 推斷實作本體（單檔原型 / src/ / 依專案結構）。
+**本 agent 專屬檢查——審查範圍 + 術語對照表**：主 agent 未指定審查的系統 / 功能 / 檔案時先問清楚；CLAUDE.md 或 memory 有術語表**必須先讀**再比對，避免把命名差異誤判成邏輯偏差。
+資源都找不到 → **問主 agent**：「設計文件在哪？實作本體在哪？有無術語對照？」不要憑空審查。
 
 ## 核心原則
 

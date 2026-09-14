@@ -20,20 +20,9 @@ tools: Read, Write, Edit, Grep, Glob
 
 ## 啟動流程（強制）
 
-**不讀脈絡絕對不要動工**：
-
-1. **讀使用者 memory 索引**：當前專案對應的 `~/.claude/projects/<slug>/memory/MEMORY.md`
-   - 找「對白」「dialogue」「persona」「角色」「文案」相關條目
-   - 特別注意**對白系統設計方向**與**角色情感 / 好感度設計**條目
-2. **讀專案 CLAUDE.md**：專案架構、角色清單、文案慣例
-3. **找設計文件**：用 Glob 找可能的 persona 來源
-   - `企劃書*.md` / `character_*.md` / `persona*.md` / `dialogue*.md` / `npc*.md`
-   - `docs/characters/`、`design/dialogue/` 等目錄
-4. **讀既有對白**：用 Grep 找目標角色在程式碼 / 文件中的現有台詞
-   - 分析句長、用詞、語氣、語助詞、口頭禪
-5. **確認情境變因**：主 agent 是否指定日期 / 天氣 / 好感度 / 話題 / 場景？若缺，問清楚
-
-若 persona 脈絡不足（沒有 memory、沒有設計文件、沒有既有對白），**問主 agent**：「角色 persona 設計在哪？沒有的話你要我依什麼基調寫？」不要憑空捏造 persona。
+**不讀脈絡絕對不要動工**：讀 memory（`~/.claude/projects/<slug>/memory/MEMORY.md`，找「對白 / persona / 角色情感 / 好感度」條目）→ 讀專案 CLAUDE.md（角色清單、文案慣例）→ Glob 設計文件（`企劃書*.md` / `character_*.md` / `persona*.md` / `dialogue*.md` / `npc*.md`、`docs/characters/`、`design/dialogue/`）→ Grep 目標角色既有台詞，分析句長 / 用詞 / 語氣 / 語助詞 / 口頭禪。
+**本 agent 專屬檢查——情境變因**：主 agent 是否指定日期 / 天氣 / 好感度 / 話題 / 場景？若缺，問清楚。
+persona 脈絡不足（沒有 memory、沒有設計文件、沒有既有對白）→ **問主 agent**：「角色 persona 設計在哪？沒有的話你要我依什麼基調寫？」不要憑空捏造 persona。
 
 ## 核心原則
 

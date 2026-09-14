@@ -65,6 +65,7 @@ Use this file when the user's wording leaves room for multiple valid asset plans
   - high-value showcase idles
 - `4x4`
   - topdown 4-direction player walk sheet
+- legacy aliases (kept working for compatibility only): `player_sheet` = 4-direction overworld walk (`4x4`); `player_walk` / `npc_walk` = `2x2` down-facing walk; `combat` = `2x2` attack + hurt; `evolution` = legacy concept sheet
 
 ## Agent-First Mapping Hints
 
@@ -78,16 +79,6 @@ Use this file when the user's wording leaves room for multiple valid asset plans
 - `"make a summon entrance"` -> `summon` + `cast` or `impact`
 - `"make a full fire samurai creature line"` -> `line_bundle`; plan 1-3 forms, then choose sheets per form
 - `"make a talking / dialogue sprite"` -> not a built-in processor `mode`. Use `--target asset --mode cast --rows 2 --cols 3 --label-prefix talk` (talk shares the `2x3` six-frame layout that `cast` already supports; without `--label-prefix` the frames are labelled `cast-N`). Same for any custom sequence that fits a known grid — pass `--rows` / `--cols` explicitly.
-
-## Legacy Compatibility
-
-Keep these mappings working:
-
-- `player_sheet`: 4-direction overworld walk
-- `player_walk`: 2x2 down-facing walk
-- `npc_walk`: 2x2 down-facing walk
-- `combat`: 2x2 attack + hurt
-- `evolution`: legacy concept sheet
 
 ## Processor Defaults
 
