@@ -10,11 +10,13 @@
 ```
 幫我安裝這個 starter kit:https://github.com/TimDaChung/starter-kit
 步驟:1. git clone 到 %USERPROFILE%\starter-kit
-2. 讀 starter-kit\starter-setup\SKILL.md,照裡面的診斷流程執行:
-   先盤點我現有的 CLAUDE.md/skills/agents,對照分類後經我確認才動手,
-   不要覆蓋或刪除我自己的任何東西。
+2. 讀 starter-kit\starter-setup\SKILL.md,照裡面的健檢式流程執行:
+   先健檢我現有的 CLAUDE.md/skills/agents;我沒有的 skills/agents 直接裝、
+   CLAUDE.md 缺的規則直接併入(原內容不動);我自己改過的東西不要碰。
+   裝完做最終健檢,有重複/衝突/太肥的只列建議給我決定,不要自己刪。
 ```
 
+流程:開場健檢 → 自動裝 → 最終健檢(只建議)→ 結算表。中間不會逐項問你。
 裝完重開 Claude Code 一次(讓新 agents 生效)。
 
 ## 包內容
@@ -30,10 +32,11 @@
 
 ## 升級
 
-對 Claude 說「**starter 升級**」= git pull + 摘要更新內容 + 重跑診斷。
-你的 CLAUDE.md、imagen 的 .env、你自己加的 skills/agents 永遠不會被升級動到。
+對 Claude 說「**starter 升級**」= git pull + 摘要更新內容 + 重跑健檢式流程(新 skill 直接裝、新規則直接併)。
+對 Claude 說「**starter 健檢**」= 只健檢不安裝,定期整理 CLAUDE.md 與 skills 用。
+你的 CLAUDE.md 原有內容、imagen 的 .env、你自己加的 skills/agents 永遠不會被升級動到。
 
 ## 已經拿過舊版 skills 的人
 
-照常跑安裝——診斷流程會認出「Tim 以前給過的舊版」,列出差異讓你決定要不要升級,
-你自己改過的部分會被保留或經你確認才合併。
+照常跑安裝——健檢會認出「Tim 以前給過的舊版」,備份後直接升級;
+你自己改過的部分不會被動,差異會列在最終健檢讓你決定要不要合併。
