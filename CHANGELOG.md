@@ -10,6 +10,7 @@
 - **playtest-loop 加前置節**：需 chrome-devtools MCP + Chrome 以 `--remote-debugging-port=9222` 啟動，缺就退手貼 `exportDevNotes()` 模式
 - 安裝說明加「Chrome 開遠端偵錯」四步（改捷徑目標、完全關閉重開、用 `/json/version` 驗證）；維持 `--browser-url 9222` 寫法不改成讓 MCP 自開瀏覽器，因為 playtest-loop 要讀玩家分頁的 localStorage
 - README 測試列標註需 Python + Playwright，升級節前補一句誰需要額外依賴
+- **Claude in Chrome 選配**：安裝說明加三步（Web Store 連結、`/chrome` 設預設、確認 Installed）；精靈開場健檢偵測擴充功能目錄、結算表加 🧩 一行給連結，不代裝（Chrome 擴充功能沒有指令安裝途徑）
 
 ## v1.7.0 (2026-09-14)
 

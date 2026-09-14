@@ -36,6 +36,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
   - `python -c "import PIL"`、`python -c "import playwright"` 各自過不過？
   - Playwright 的 Chromium：`%LOCALAPPDATA%\ms-playwright\chromium*` 目錄存在？
   - `claude mcp list` 有 `chrome-devtools`？`npx --version` 有 Node？
+  - Claude in Chrome 擴充功能：`%LOCALAPPDATA%\Google\Chrome\User Data\Default\Extensions\fcoeoabgfenejglbffodgkkbkcdhcgfn` 目錄存在？（只能偵測、不能代裝；沒有就結算表給連結）
 
 ## 2. 分類（kit `skills/` 目錄內的每一支 skill + `agents/` 內每支 agent 逐一比對）
 
@@ -67,6 +68,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
    python -m playwright install chromium
    claude mcp add --scope user chrome-devtools -- cmd /c npx chrome-devtools-mcp@latest --browser-url http://127.0.0.1:9222
    ```
+   Claude in Chrome 擴充功能沒有指令能裝，不列進這張表，只在結算表 🧩 那行給連結與 `/chrome` 兩步。
    沒有 Python / Node 的人給 `winget install Python.Python.3.12` / `winget install OpenJS.NodeJS.LTS`，裝完請他重開終端再叫一次「starter 升級」，本精靈不自己裝 runtime。裝了 MCP 要提醒：Chrome 需以 `--remote-debugging-port=9222` 啟動 playtest-loop 才讀得到玩家分頁，且新 MCP 要重開 Claude Code 才生效
 
 ## 4. CLAUDE.md 併入
@@ -135,6 +137,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 ```
 🩺 開場健檢:CLAUDE.md 96 行 / skills 0 / agents 0 / secretary 無
 🧰 環境:Python 3.13 ✔ / Pillow ✔ / Playwright ✔(本次裝) / chrome-devtools MCP ✘(你說先不裝→playtest-loop 退手貼模式) / Gemini key ✘(.env 待填)
+🧩 Claude in Chrome:未裝 → 自己點一下 https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn,裝完在 Claude Code 打 /chrome 選 Enabled by default
 ✅ 新裝 skills(N,junction):product-planning、imagen …
 ✅ 新裝 agents(3):dialogue-writer、game-balance-auditor、planning-doc-auditor
 ⬆️ 升級:game-prototype(舊版→v1.1,原版備份於 skills-backup/)
