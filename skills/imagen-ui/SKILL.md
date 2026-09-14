@@ -19,6 +19,8 @@ allowed-tools:
 
 # /imagen-ui — RPG 手遊 UI 素材生成
 
+> **執行角色：美術**——關注風格一致、可讀性、UI 資產規格；產出後切**工程**視角核對切圖與尺寸可直接使用。
+
 使用 Gemini 的 Nano Banana Pro (`gemini-3-pro-image-preview`) 生成 RPG 手遊 UI 元件，預設套用高營收手遊（米哈遊、明日方舟等）的 UI 視覺語言。
 
 姊妹 skill：

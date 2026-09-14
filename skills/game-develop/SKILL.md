@@ -24,6 +24,8 @@ allowed-tools:
 
 # /game-develop — 單檔 HTML 遊戲發行級升級
 
+> **執行角色：工程（主導）**——依階段調度**美術 / 數值 / 敘事**角色對應的 skill 與 agent；每段產出回**顧問**視角整合，不直接轉貼 agent 全文。
+
 把原型升級為高完成度 demo（itch.io / 個人上架等級）。**主動調度** imagen / sprite / map 系列生圖 skill 與 agents（balance / dialogue / QA）。**沒對應工具的部分自己做**（音效 / 自訂特效 / 轉場動畫等）。
 
 ---

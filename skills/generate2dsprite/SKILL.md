@@ -5,6 +5,8 @@ description: "Generate + postprocess 2D game sprites/animation sheets via Nano B
 
 # Generate2dsprite
 
+> **執行角色：美術**——關注風格一致、動作可讀性、sprite 規格（尺寸 / 幀數 / 透明背景 / 命名）。
+
 Use this skill for self-contained 2D sprite or animation assets.
 
 If the user wants a whole playable content pack, map, story, slideshow, or pack assembly, use `generate2dgamepack`.

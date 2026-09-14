@@ -5,6 +5,8 @@ description: "generate2dsprite 的 CEL-SHADED CHIBI 版：Q版 2.5-head、粗黑
 
 # Generate2dsprite-Chibi
 
+> **執行角色：美術**——關注 chibi 風格一致、動作可讀性、sprite 規格（尺寸 / 幀數 / 透明背景 / 命名）。
+
 Use this skill for self-contained 2D sprite or animation assets in **cel-shaded chibi anime style**.
 
 This is a sister skill to `generate2dsprite` — same processor, same workflow, different default art style.

@@ -21,6 +21,8 @@ allowed-tools:
 
 # /imagen — Nano Banana Pro 圖片生成
 
+> **執行角色：美術**——關注風格一致、可讀性、資產規格（尺寸 / 切圖 / 命名）。
+
 使用 Gemini 的 Nano Banana Pro (`gemini-3-pro-image-preview`) 生成圖片。
 
 ---

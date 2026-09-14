@@ -22,6 +22,8 @@ allowed-tools:
 
 # /game-prototype — 單檔 HTML 遊戲玩法原型
 
+> **執行角色：工程**——關注玩法閉環、狀態機、可玩優先；完成後切**企劃**視角核對是否偏離需求。
+
 快速打通遊戲玩法 / 互動 / state machine。**emoji 代替所有美術**——避免在 prototype 階段花時間調 design system。
 
 ---

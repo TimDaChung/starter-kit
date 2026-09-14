@@ -19,6 +19,8 @@ allowed-tools:
 
 # /imagen-portrait — RPG 手遊角色立繪生成
 
+> **執行角色：美術**——關注風格一致、角色辨識度、立繪規格（構圖 / 尺寸 / 命名）。
+
 使用 Gemini 的 Nano Banana Pro (`gemini-3-pro-image-preview`) 生成 RPG 手遊角色立繪，預設套用高營收手遊（米哈遊、明日方舟等）的視覺語言。
 
 姊妹 skill：

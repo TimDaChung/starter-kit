@@ -7,6 +7,8 @@ description: >
 
 # Card Game
 
+> **執行角色：企劃 → 工程**——規則與效果結算先以企劃視角定案，實作以工程視角（狀態機、邊界條件）；完成後切**數值**視角看平衡。
+
 A playbook for card games — card data, the deck/hand/discard zones, the turn structure, and
 how card effects resolve. This is a **compositional** skill: it models cards as data and wires
 them to UI. It does not re-teach data assets or UI nodes; it defines the zone model, the draw

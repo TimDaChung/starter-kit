@@ -6,6 +6,8 @@ license: Complete terms in LICENSE.txt
 
 # Web Application Testing
 
+> **執行角色：工程 / QA**——關注重現步驟、邊界條件、可驗證的斷言。
+
 To test local web applications, write native Python Playwright scripts.
 
 **Helper Scripts Available**:

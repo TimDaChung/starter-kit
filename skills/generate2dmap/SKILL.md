@@ -5,6 +5,8 @@ description: "Generate/revise 2D game maps via Nano Banana Pro (imagen/bin/gener
 
 # Generate2dmap
 
+> **執行角色：美術**——關注風格一致、可讀性、地圖資產規格（圖層 / 碰撞區 / 尺寸 / 命名）；碰撞與圖層合約切**工程**視角核對。
+
 ## Overview
 
 Build the smallest map bundle that satisfies the game. Decide the map as a pipeline, not as a single strategy label:
