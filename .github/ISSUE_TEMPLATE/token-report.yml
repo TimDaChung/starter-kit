@@ -1,0 +1,64 @@
+name: Token 用量回報
+description: 覺得某支 skill / agent 太燒 token?把數字貼過來,幫我找出元兇。
+title: "[token] "
+labels: ["token-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感謝回報。所有欄位都是自願填,只填你方便的就好。
+        **怎麼看數字**:
+        - API 方案:在 Claude Code 打 `/cost`,直接貼結果
+        - Pro / Max 訂閱:`/cost` 不顯示用量,改用 `npx ccusage@latest` 看當天各 session 的 token 與估算成本
+  - type: dropdown
+    id: plan
+    attributes:
+      label: 方案
+      options:
+        - Pro
+        - Max
+        - API(自付 token)
+        - 不確定
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: 使用模型
+      placeholder: 例:Opus 5 / Sonnet 5
+  - type: input
+    id: skill
+    attributes:
+      label: 用了哪支 skill / agent
+      placeholder: 例:imagen-portrait、game-balance-auditor、starter-setup 安裝流程
+    validations:
+      required: true
+  - type: textarea
+    id: task
+    attributes:
+      label: 做了什麼任務
+      description: 一兩句話就好,例如「叫它幫一個卡牌遊戲跑 200 場模擬」
+    validations:
+      required: true
+  - type: textarea
+    id: numbers
+    attributes:
+      label: Token / 成本數字
+      description: 直接貼 `/cost` 或 `ccusage` 的輸出,不用整理
+      render: text
+  - type: dropdown
+    id: feel
+    attributes:
+      label: 你的感受
+      options:
+        - 明顯太貴,以後不敢用
+        - 有點貴,但值得
+        - 可接受
+        - 比預期省
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: 其他觀察
+      description: 例如「它重複讀了同一個檔案好幾次」「agent 跑了三輪才停」,這種線索最有價值

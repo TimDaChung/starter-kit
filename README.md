@@ -37,3 +37,14 @@
 
 照常跑安裝——診斷流程會認出「Tim 以前給過的舊版」,列出差異讓你決定要不要升級,
 你自己改過的部分會被保留或經你確認才合併。
+
+## 覺得太燒 token?回報一下
+
+這包不會偷傳任何使用資料回來,所以哪支 skill 太貴我只能靠你說。
+用完某支 skill / agent 覺得額度掉得太快,花一分鐘開個
+[Token 用量回報](https://github.com/TimDaChung/starter-kit/issues/new?template=token-report.yml):
+
+- API 方案:打 `/cost` 把結果貼上
+- Pro / Max 訂閱:`/cost` 看不到用量,用 `npx ccusage@latest` 看當天各 session 的數字
+
+只填方便填的欄位就好,「感覺太貴」本身就是有用的訊號。
