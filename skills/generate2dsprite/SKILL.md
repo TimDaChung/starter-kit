@@ -131,6 +131,8 @@ Banana's interpretation of "pixel art" / "16-bit" / "retro JRPG" tends to render
 
 - it often draws **black grid borders between cells** even when explicitly told not to. The chroma-key step removes them as long as the magenta backdrop is otherwise clean and `--component-mode largest` is used. Do not regenerate just for this.
 - it sometimes repeats two adjacent frames (especially mid-sequence in `2x3` talking / casting sheets) — if the animation must look distinct, write more dramatic frame-to-frame deltas in the prompt
+- **the API only outputs JPEG** (confirmed against both generateContent and the interactions endpoint — `image/png` is rejected), so `raw-sheet.png` is JPEG bytes regardless of extension. Chroma subsampling puts artifacts exactly on the magenta/subject hard edges: if the cutout shows purple fringing, raise `--edge-clean-depth`; if it bites into the body, loosen `--threshold` instead of regenerating
+- a failed generation now exits non-zero (with `finishReason` in the message). `IMAGE_RECITATION` = prompt too generic/derivative — rephrase with more specific original details; do NOT retry the identical prompt, and check the output file timestamp before postprocessing (a stale sheet from a previous run may still be on disk)
 
 ### 4. Postprocess locally
 

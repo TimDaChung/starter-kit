@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v2.1.1 (2026-09-15)
+
+- **修正 imagen/bin/generate.py 兩個問題**（感謝組員裝機實測回報）：
+  - 生圖失敗（如 IMAGE_RECITATION 被扣留）原本 exit 0 且不讀 finishReason → 下游可能靜默拿到磁碟上的舊檔。現在無圖即 exit 1，訊息帶 finishReason 與對應提示（recitation=換更具體的 prompt；safety=調內容）
+  - `--output xxx.png` 實際存出 JPEG：實測確認**此模型 API 只支援 image/jpeg 輸出**（generateContent 與 interactions 端點都拒收 image/png），不做轉檔（維持零依賴），改為 mime 與副檔名不符時印警告
+- generate2dsprite 的 Banana quirks 補兩條：JPEG 色度失真的去背參數對策（edge-clean-depth／threshold）、生圖失敗重試前先檢查輸出檔時間戳
+
 ## v2.1.0 (2026-09-15)
 
 - **收編企劃一部雙 skill**:`plan-dept1-writer`(house style 八章骨架、逐畫面確認、調整標記)+`plan-doc-qa`(一致性審查、複查差異比對)。已含修正:Windows/容器雙環境渲染路徑(實測過)、house-style 優先自我宣告、角色標頭

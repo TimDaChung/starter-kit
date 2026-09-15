@@ -148,8 +148,16 @@ def extract_and_save(response: dict, output_path: str) -> str:
     text_response = ""
     image_saved = False
     image_count = 0
+    finish_reasons = []
+
+    # The API only ever returns image/jpeg for this model (confirmed against
+    # both generateContent and the interactions endpoint); warn when the
+    # requested output extension disagrees so downstream chroma-key users
+    # know the bytes are JPEG regardless of the file name.
+    MIME_EXT = {"image/jpeg": {".jpg", ".jpeg"}, "image/png": {".png"}, "image/webp": {".webp"}}
 
     for candidate in candidates:
+        finish_reasons.append(candidate.get("finishReason", "UNKNOWN"))
         content = candidate.get("content", {})
         for part in content.get("parts", []):
             # Text part
@@ -174,9 +182,31 @@ def extract_and_save(response: dict, output_path: str) -> str:
                     print(f"OK: Image saved to {save_path} ({len(img_bytes)} bytes)")
                     image_saved = True
 
+                    mime = img_data.get("mimeType") or img_data.get("mime_type") or ""
+                    ext = Path(save_path).suffix.lower()
+                    if mime in MIME_EXT and ext not in MIME_EXT[mime]:
+                        print(
+                            f"WARNING: API returned {mime} but output file is {ext} — "
+                            "bytes are saved as-is (no conversion). This model only "
+                            "outputs JPEG; expect chroma-subsampling artifacts on hard "
+                            "edges when chroma-keying.",
+                            file=sys.stderr,
+                        )
+
     if not image_saved:
-        print("WARNING: No image data found in response", file=sys.stderr)
+        reasons = ", ".join(finish_reasons) or "UNKNOWN"
+        print(f"ERROR: No image data in response (finishReason: {reasons})", file=sys.stderr)
+        if "IMAGE_RECITATION" in finish_reasons:
+            print(
+                "HINT: IMAGE_RECITATION means the prompt was too generic/derivative "
+                "and the output was withheld. Rephrase with more specific, original "
+                "details and retry.",
+                file=sys.stderr,
+            )
+        elif any(r.startswith("SAFETY") or r == "PROHIBITED_CONTENT" for r in finish_reasons):
+            print("HINT: blocked by safety filters — adjust the prompt content.", file=sys.stderr)
         print(f"Response: {json.dumps(response, indent=2, ensure_ascii=False)[:2000]}", file=sys.stderr)
+        sys.exit(1)
 
     return text_response
 
