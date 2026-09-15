@@ -1,0 +1,21 @@
+# ~/.claude 設定資產版控用 .gitignore（whitelist 式：全擋，再逐項放行受管理的設定）
+# 由 starter-setup 精靈拷貝安裝；junction 進來的 kit skills 要逐行補在下方「junction 排除區」
+/*
+!/.gitignore
+!/CLAUDE.md
+!/settings.json
+!/agents/
+!/hooks/
+!/commands/
+!/skills/
+# ---- junction 排除區：每支 junction 裝的 kit skill 一行（內容歸 kit repo 版控）----
+# /skills/<junction-skill-name>/
+# ---- 密鑰永不進版控 ----
+/skills/imagen/.env
+# ---- memory 只收錄使用者自己的記憶目錄（轉錄檔與其他專案資料不進）----
+!/projects/
+/projects/*
+# 精靈安裝時把下行的 <memory-dir> 換成使用者實際的 memory 上層目錄名再啟用：
+# !/projects/<memory-dir>/
+# /projects/<memory-dir>/*
+# !/projects/<memory-dir>/memory/

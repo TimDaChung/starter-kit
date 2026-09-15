@@ -83,6 +83,8 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
    ```
    Claude in Chrome 擴充功能沒有指令能裝，不列進這張表，只在結算表 🧩 那行給連結與 `/chrome` 兩步。
    沒有 Python / Node 的人給 `winget install Python.Python.3.12` / `winget install OpenJS.NodeJS.LTS`，裝完請他重開終端再叫一次「starter 升級」，本精靈不自己裝 runtime。裝了 MCP 要提醒：Chrome 需以 `--remote-debugging-port=9222` 啟動 playtest-loop 才讀得到玩家分頁，且新 MCP 要重開 Claude Code 才生效
+7. **生成個人 skill map**（裝機與升級收尾必做）：在**當前 session 的 memory 目錄**（Claude 自己知道路徑）寫 `reference_skill_map.md`——「工作情境 → 首選工具」對照表，內容 = 本次實際裝上的 + 使用者自有的 skills/agents（略過的不列）；已存在就更新到現況。同時在 MEMORY.md 索引加一行，並於頂部寫「上次 starter 健檢：<今天>」。這張表是使用者的個人地圖，之後健檢會拿它對帳
+8. **設定資產版控**（選配，問一次）：「要不要幫你的 `~/.claude` 開 git 版控？改壞規則可回滾、換電腦可還原。」同意才做：`git init` + 拷 `templates/claude-config.gitignore` 為 `~/.claude/.gitignore`，並把本次 junction 的 skill 名逐行補進 gitignore（junction 內容歸 kit repo 版控，不重複記帳），首次 commit。不同意就跳過，結算表不再追問
 
 ## 4. CLAUDE.md 併入
 
@@ -126,6 +128,12 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 
 - **職責重疊**：description 高度相近 → 使用者 agent 對 kit agent 進「換版評估」；自有對自有只列出
 - **孤兒**：CLAUDE.md 與任何 skill 都沒提到、也沒有觸發描述 → 提示「這支目前只能手動叫」
+
+### memory / skill map
+
+- **skill map 對帳**：`reference_skill_map.md` 與 `~/.claude/skills/`、`agents/` 實況比對——表上有但已不存在的（如 kit 合併掉的）、實際有但表上漏列的，各列一句建議更新；沒有這張表就建議生成（第 3 節第 7 步）
+- **MEMORY.md 健康度**：索引超過 40 行 → 建議把過期專案條目歸檔；有索引指向不存在的檔 → 列出
+- **健檢標記**：更新 MEMORY.md 頂部「上次 starter 健檢」為今天
 
 ### 換版評估（同名自改過 / 近似 skill / agent 重疊 / CLAUDE.md 重複、衝突、舊版）
 
@@ -184,7 +192,7 @@ https://github.com/TimDaChung/secretary-kit」
 
 ## 健檢（「starter 健檢」/「新手包健檢」）
 
-只跑第 1 節與第 5 節，不裝任何東西。給已裝完一陣子的人定期整理用。
+只跑第 1 節與第 5 節，不裝任何東西。給已裝完一陣子的人定期整理用；CLAUDE.starter 的月度健檢規則（超過 30 天主動提議）指的就是這個口令。
 
 ---
 
@@ -194,5 +202,5 @@ https://github.com/TimDaChung/secretary-kit」
 - **刪改必問**：刪除、覆蓋、衝突處理、自改過的合併，列建議等使用者說了才動
 - 任何刪除/覆蓋前先備份到 `~/.claude/skills-backup/`
 - CLAUDE.md 原有內容一字不刪、不改寫、不重排
-- 不碰 settings.json、memory、與 kit 無關的任何檔案；Python 套件與 MCP 設定是唯一例外，且**問過才裝**（第 3 節第 6 步）
+- 不碰 settings.json、使用者既有的 memory 內容、與 kit 無關的任何檔案。例外三個，各有邊界：本精靈自建的 skill map 與健檢標記（只增改自己建的檔與 MEMORY.md 對應行）、Python 套件與 MCP 設定（問過才裝，第 3 節第 6 步）、設定資產版控（問過才 init，第 3 節第 8 步）
 - 同一步卡兩次 → 停止重試，整理錯誤請使用者找 Tim

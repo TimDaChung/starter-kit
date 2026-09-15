@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v2.0.0 (2026-09-15)
+
+- **自我優化層**：kit 從工具包升級成會自我成長的系統
+  - CLAUDE.starter 的 meta 規則加配套三條：違規回寫（重犯 2 次 → 案例寫回規則旁）、教訓歸 memory 規則歸 CLAUDE.md 的分工、月度健檢（超過 30 天主動提議「starter 健檢」）
+  - 安裝/升級收尾**自動生成個人 skill map**（memory reference 檔，情境→工具對照，健檢時對帳更新）
+  - 選配**設定資產版控**：問一次要不要幫 `~/.claude` 開 git（whitelist gitignore 模板在 `templates/claude-config.gitignore`），改壞可回滾、換電腦可還原
+  - 最終健檢加「memory / skill map」節：skill map 對帳、MEMORY.md 健康度、健檢日期標記
+
 ## v1.9.0 (2026-09-15)
 
 乾淨機器審查修復：模擬同事照安裝說明裝完，找出「裝了但一用就壞」的項目全修。
