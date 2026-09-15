@@ -58,7 +58,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 | game-prototype | game-develop | `templates/*.template.md` |
 | game-develop | imagen、imagen-ui、generate2dsprite、generate2dmap、webapp-testing、art-style-guard、image-to-prompt | 生圖 / 後製 / QA 全部轉派這些 sub-skill |
 | playtest-loop | agents dialogue-writer、game-balance-auditor | 收割後的文筆 / 數值修正轉派 |
-| plan-dept1-writer | plan-doc-qa | 產出後的一致性複查 |
+| plan-dept14-writer | plan-doc-qa | 產出後的一致性複查 |
 
 使用者說「X 不要裝」要進略過清單時，先查這張表：X 若是某一列的「依賴」欄，一句話警告「略過 X 會讓 Y、Z 的某功能壞」（例：略過 generate2dsprite → imagen-ui 的去背不能跑）。使用者仍要略過就照辦，結算表 ⛔ 那行附註連帶影響。
 
