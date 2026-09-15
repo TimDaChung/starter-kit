@@ -189,7 +189,7 @@ https://github.com/TimDaChung/secretary-kit」
 1. `git -C %USERPROFILE%\starter-kit pull`
 2. 摘要 CHANGELOG 新增段落
 3. 重跑第 1 到 6 節：junction 裝的自動生效；新出現的、以及使用者先前沒裝的 skills/agents 直接補裝（`starter-skip.md` 內的除外）；CLAUDE.starter.md 新增的規則直接併；agents 有 diff 進最終健檢
-4. **kit 已移除或更名的 skill**（junction 指向 kit 內但目標已消失）→ **直接刪除失效 junction，不問**（它已無任何功能，刪除零風險），並查 CHANGELOG 判斷去向，在結算表交代清楚（例：plan-dept1-writer → v2.4.0 更名 plan-dept14-writer，新版已裝；generate2dsprite-chibi → v1.3.0 併入 generate2dsprite）。**只自動刪失效 junction**；同名的實體資料夾（非 junction，可能含使用者自改內容）不自動刪，仍進最終健檢建議
+4. **kit 已移除或更名的 skill**（junction 指向 kit 內但目標已消失）→ **直接刪除失效 junction，不問**（它已無任何功能，刪除零風險），並查 CHANGELOG 判斷去向，在結算表交代清楚（例：plan-dept1-writer → v2.4.0 更名 plan-dept14-writer，新版已裝；generate2dsprite-chibi → v1.3.0 併入 generate2dsprite）。**只自動刪失效 junction**；實體資料夾（非 junction，zip 備援安裝）分兩種：名稱在 CHANGELOG 更名／併入紀錄中、且內容與 kit 舊版同源（diff 只有 kit 後續更新）→ 視同「舊版」處理：備份到 `skills-backup/` 後刪除舊名資料夾、裝上新名（不問，結算表列出）——否則新舊兩支會並存搶觸發詞；內容有使用者自改 → 不動，進最終健檢換版評估
 
 ## 健檢（「starter 健檢」/「新手包健檢」）
 
