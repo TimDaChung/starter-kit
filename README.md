@@ -28,6 +28,7 @@
 | 遊戲開發 | game-prototype、game-develop、playtest-loop、card-game |
 | 美術生圖 | imagen、imagen-portrait、imagen-ui、generate2dsprite(像素 / HD / cel-shaded chibi 用 art_style 切)、generate2dmap、image-to-prompt、batch-image-brief、art-style-guard(需自備 Gemini API key) |
 | 測試 | webapp-testing(需 Python + Playwright) |
+| 異常處理 | issue-triage(回報模式:標準異常回報;收單模式:維護端驗證修復 SOP) |
 | Agents | dialogue-writer(對白)、game-balance-auditor(數值模擬)、planning-doc-auditor(企劃vs實作對照)、my-voice 範本(自己的分身自己建) |
 
 企劃與遊戲原型類裝完即用;生圖、測試、playtest-loop 另需 Python 套件或 chrome-devtools MCP,安裝精靈會偵測缺什麼並問你要不要順手裝(細節見 `安裝說明.md` 前置表)。

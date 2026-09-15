@@ -24,6 +24,7 @@
 - **違規回寫**：已經寫進檔案的規則仍被違反 2 次 → 把實際案例一句話補在該規則旁邊（「已重犯兩次：…」），讓規則自帶前科
 - **教訓歸 memory、規則歸這裡**：CLAUDE.md 只放「怎麼做事」的規則；專案脈絡、工作教訓、外部資源讓 Claude 寫進內建 memory（一個檔一件事，feedback 類要含 Why 與 How to apply，並更新 MEMORY.md 索引）
 - **月度健檢**：MEMORY.md 頂部記「上次 starter 健檢：<日期>」，超過 30 天 Claude 要主動提議跑「starter 健檢」，跑完更新日期
+- **異常走 SOP**：kit 的 skill／腳本出異常 → 走 `issue-triage` 回報模式產出標準回報轉給維護者，不自行修改 junction 內的 kit 檔案
 
 ---
 
