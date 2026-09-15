@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v2.1.0 (2026-09-15)
+
+- **收編企劃一部雙 skill**:`plan-dept1-writer`(house style 八章骨架、逐畫面確認、調整標記)+`plan-doc-qa`(一致性審查、複查差異比對)。已含修正:Windows/容器雙環境渲染路徑(實測過)、house-style 優先自我宣告、角色標頭
+- product-planning 定位改為通用 fallback(跨部門/無範本/反寫 demo);依賴表補 writer→qa
+
 ## v2.0.0 (2026-09-15)
 
 - **自我優化層**：kit 從工具包升級成會自我成長的系統
