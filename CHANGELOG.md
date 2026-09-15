@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v2.4.1 (2026-09-15)
+
+- **starter-setup 升級流程：失效 junction 改為自動刪除**——kit 已移除或更名的 skill，其 junction 目標消失即無功能，升級時直接刪不再問（結算表查 CHANGELOG 交代去向，例：plan-dept1-writer → 已更名 plan-dept14-writer）。同名實體資料夾（可能含自改內容）維持不自動刪、進最終健檢
+
 ## v2.4.0 (2026-09-15)
 
 - **plan-dept1-writer 更名 `plan-dept14-writer`，升級為一＋四部雙部版**：
