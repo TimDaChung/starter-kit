@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v2.5.5 (2026-09-17)
+
+- **CLAUDE.starter Git 基本盤新增「禁推機密」**：含 token / API key / 密碼的內容一律不得 commit 進有遠端的 repo；push 前掃金鑰特徵；已進歷史視同外洩（revoke 換新→清歷史）。全域與 kit 同步收錄
+
+### ⚙️ 升級動作
+
+1. `~/.claude/CLAUDE.md` 的 Git 段若尚無「禁推機密」條 → 自動併入 kit 新版該條（冪等：已含「禁推機密」字樣即跳過；使用者自寫過類似規則但措辭不同時，列對照提醒不動手）
+
 ## v2.5.4 (2026-09-17)
 
 - **修正 game-balance-auditor 圖表中文字體**（感謝組員異常回報實測）：原指定的 `Noto Serif CJK JP` 是 Linux／容器常見的全字集包，Windows 繁中裝的是分地區版（實測只有 Microsoft JhengHei 與 Noto TC/HK），matplotlib 找不到只出 warning 不中斷 → 圖表中文**靜默**變豆腐。改為從跨平台候選清單 `["Microsoft JhengHei", "Noto Serif TC", "Noto Sans TC", "Noto Serif CJK TC"]` 挑第一個系統有的再設（實測整串直接塞 `font.family` 會對缺的字體刷 findfont warning；matplotlib 只認英文名，不認 `Microsoft JhengHei UI` 與「微軟正黑體」）。已於 Windows 繁中實機渲染驗證中文正常

@@ -44,6 +44,7 @@
 - 每完成一組功能就 commit，訊息簡潔涵蓋變更
 - 新功能開新分支；**協作 repo 絕不直推 `main` / `master`**
 - 改動先在本地測過流程，確認沒問題才 push
+- **禁推機密**：任何含 token / API key / 密碼的內容（程式碼、設定、文件、commit 訊息皆算）一律不得 commit 進有遠端的 repo，公開 repo 零容忍；金鑰放環境變數或已 gitignore 的本地設定檔。push 前掃一次金鑰特徵（`ntn_`、`ghp_`、`sk-`、`xox`、`AIza`、`Bearer` 等）；已進歷史的金鑰視同外洩——先 revoke 換新，再清歷史或重開 repo
 
 ---
 
