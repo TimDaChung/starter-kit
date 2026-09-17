@@ -4,7 +4,7 @@
 
 - **生圖雙引擎路由**：新增共用規則 `imagen/references/draw-engines.md`——GPT 線（`image-studio` skill，含個人憑證故**不隨 kit 發佈、由主任另行提供**，預期人人有裝）一律優先；沒裝或憑證過期會提醒一次再走原 Gemini 線（generate.py），既有流程不變
   - 失敗判定：一批 N 張 0 張成功才算整批失敗；≥1 張成功＝部分成功，回報成功張數並**問使用者要不要補**缺的張數（不自行默默補，避免永遠補不滿的迴圈）
-  - 整批失敗**不自動 fallback**：先回報失敗原因（HTTP／timeout／內容過濾／401 憑證過期），由使用者拍板才換 Gemini 線；換線後整批重生，不混引擎
+  - 整批失敗**不自動 fallback**：先判斷原因並附建議再問——提示詞／版權觸發過濾→建議改 prompt（換線通常沒用）；用量用完→直接問要不要換 Gemini；401→換季度 key；未知原因→問「GPT 重跑還是換 Gemini」。由使用者拍板才換線；換線後整批重生，不混引擎
   - 引擎鎖：art-style-guard 的 STYLE_BIBLE 新增 `engine` 欄，同專案第二批以後鎖首批引擎
   - 去背：GPT 線 `--remove-background` 直出透明 PNG；Gemini 線維持 magenta chroma-key 後製
 - 五支生圖 skill（imagen / imagen-portrait / imagen-ui / generate2dmap / generate2dsprite）＋art-style-guard 的 SKILL.md 接上路由引用

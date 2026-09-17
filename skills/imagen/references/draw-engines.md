@@ -38,5 +38,12 @@ python ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 ## 4. Failure handling (the user decides fallback)
 
 - **Batch verdict**: a batch of N counts as failed ONLY when **0** images were saved. Exit code 1 with a non-empty `files` list = partial success → report how many were saved vs. requested and **ask the user** whether to top up the missing count (still on the GPT line). Never re-request on your own — a repeated shortfall could loop forever.
-- **Full batch failure (0 saved)** → STOP. Report the cause to the user first (HTTP status / timeout / content filter; HTTP 401 = quarterly key expired → refresh from the Image Studio `/agent-api` page). **The user decides** whether to rerun on the Gemini line — never fall back automatically.
+- **Full batch failure (0 saved)** → STOP. Diagnose the cause from the client's stderr / response JSON, then report it **with a recommendation and a concrete question** — the user always decides, never fall back automatically:
+
+  | Diagnosed cause | Report + recommend |
+  |---|---|
+  | Content filter / copyright / prompt problem (policy rejection, filtered results, named IP or real person in the prompt) | Say which prompt element likely triggered it and propose a revised prompt — switching engines rarely helps here; offer the prompt fix first |
+  | Quota / usage exhausted (e.g. HTTP 429 or a quota message) | Ask directly: "GPT 用量用完了，這批要不要換 Gemini 線試試？" |
+  | HTTP 401 | Quarterly key expired → refresh from the Image Studio `/agent-api` page (Gemini as the stopgap if the user wants the batch now) |
+  | Unknown / other (timeout, 5xx, connection loss) | Ask: "要在 GPT 線重跑一次，還是換 Gemini 線試試？" For connection loss, first check the user's Image Studio web tabs before any resubmit — accepted work may still be running and a repeated POST creates a duplicate job |
 - User approves the switch → regenerate the **whole batch** on the Gemini line, and record/update the bible's `engine` field accordingly.
