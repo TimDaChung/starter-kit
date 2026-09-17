@@ -121,7 +121,10 @@ tools: Read, Grep, Glob, Bash, Write
 
 - 報告全繁體中文
 - 程式碼（變數、註解）英文
-- 若要畫圖（優先 plotnine，備用 matplotlib），中文字體必須設 `Noto Serif CJK JP`
+- 若要畫圖（優先 plotnine，備用 matplotlib），中文字體從候選清單挑**第一個系統有的**再設（實測直接把整串清單塞 `font.family` 會對缺的字體每個文字元素刷一行 findfont warning）：
+  `avail = {f.name for f in matplotlib.font_manager.fontManager.ttflist}`
+  `plt.rcParams["font.family"] = next(c for c in ["Microsoft JhengHei", "Noto Serif TC", "Noto Sans TC", "Noto Serif CJK TC"] if c in avail)`
+  背景：Windows 繁中沒有 `Noto Serif CJK JP` 全字集包（那是 Linux／容器裝法），單指定它找不到時 matplotlib 只出 warning 不中斷，中文會**靜默**變豆腐；matplotlib 只認英文名，不認 `Microsoft JhengHei UI` 與「微軟正黑體」
 - 標題 / 軸標籤 / 圖例：繁體中文（若使用者要求）
 
 ## 禁止事項

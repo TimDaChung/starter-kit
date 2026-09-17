@@ -1,6 +1,16 @@
 # CHANGELOG
 
-## v2.5.3 (2026-09-17)
+## v2.5.4 (2026-09-17)
+
+- **修正 game-balance-auditor 圖表中文字體**（感謝組員異常回報實測）：原指定的 `Noto Serif CJK JP` 是 Linux／容器常見的全字集包，Windows 繁中裝的是分地區版（實測只有 Microsoft JhengHei 與 Noto TC/HK），matplotlib 找不到只出 warning 不中斷 → 圖表中文**靜默**變豆腐。改為從跨平台候選清單 `["Microsoft JhengHei", "Noto Serif TC", "Noto Sans TC", "Noto Serif CJK TC"]` 挑第一個系統有的再設（實測整串直接塞 `font.family` 會對缺的字體刷 findfont warning；matplotlib 只認英文名，不認 `Microsoft JhengHei UI` 與「微軟正黑體」）。已於 Windows 繁中實機渲染驗證中文正常
+- **CLAUDE.starter.md 三處補同步歷史 skill 異動**（同一份回報指出）：企劃書路由改部門版優先（`plan-dept14-writer`＋`plan-doc-qa`，`product-planning` 降通用 fallback——v2.1.0 的既定方向，範本漏改）；角色表企劃列補 plan-dept14-writer／plan-doc-qa、數值/QA 列補 issue-triage
+- 維護慣例補課：之後**新增／更名／降級 skill 時必同步 CLAUDE.starter.md**（路由句與角色表），列入發版檢查
+
+### ⚙️ 升級動作
+
+1. `~/.claude/agents/game-balance-auditor.md` 若仍含字串 `Noto Serif CJK JP` → 把該 bullet 替換為 kit 新版的字體段（agents 是拷貝制，pull 不會自動生效；只動這一段，檔內其他自改內容不碰）
+2. `~/.claude/CLAUDE.md` 若含舊條「企劃書的寫/反寫/審修走 `product-planning` skill（裝了 starter kit 就有）」——**完全同文才改**——替換為新版路由句；角色表企劃列／數值/QA 列同理（完全同文才替換；使用者自改過的只列出對照提醒，不動手）
+3. 使用者若曾自行在 CLAUDE.md 寫字體繞法（如語言段的全域覆寫）→ 不自動改，提醒一句「kit 已修正，繞法可移除」即可
 
 - **starter-setup 開場健檢新增 image-studio 檢查**（生圖 GPT 線，主任另行發放）：偵測 skill 目錄與憑證是否存在／過期——只偵測不代裝、kit 不含安裝路徑；缺就結算表提醒「找主任拿，裝好前自動走 Gemini 不影響功能」
 - draw-engines 的缺裝／401 提醒措辭統一為「找主任」，安裝與憑證細節一律不寫進 kit
