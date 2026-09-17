@@ -8,6 +8,7 @@ Shared lock rules for the five image-generation skills in this kit: `imagen`, `i
 | 2 | Project asset inheritance | before the first generation in any project directory (pre-flight) |
 | 3 | Batch consistency mode | the request is for 2+ same-category assets |
 | 4 | Hand-off to art-style-guard | second batch onward in the same project, or any style doubt |
+| 5 | Reference hygiene (anti feedback-loop) | any generation that passes a previously AI-generated image as reference |
 
 ---
 
@@ -75,3 +76,19 @@ Hand off **before** generating when any of these hold:
 - any doubt about whether a new asset will sit with the already-approved ones
 
 When golden samples exist, do the §3 step-4 verification as an art-style-guard contact sheet rather than by eyeballing single images. `docs/imagen_history.md` is a usage log, not a style bible — do not treat it as one.
+
+---
+
+## 5. Reference hygiene (anti feedback-loop)
+
+> 繁中摘要：AI 產出當參考圖會複利放大高頻雜訊（白點／一條條髮絲／碎花越畫越多）——身分走圖、風格走字、圖只給 gen-0 且適度縮圖。兩線（GPT／Gemini）皆適用。
+
+Feeding a model its own output as a reference compounds high-frequency noise: the model reads speckles, strand-by-strand hair, and micro-florals in the reference as *intentional style*, reproduces them, and adds its own — each generation amplifies the last (same mechanism as re-photocopying a copy). Symptoms: detail density visibly climbing across generations, style drifting "busier" without being asked.
+
+When a reference image is itself AI-generated, apply all three together:
+
+1. **Gen-0 only** — the identity anchor is always the *original user-approved* image (a Style Bible golden sample). Never chain: generation N must not become the reference for generation N+1. A polluted series is rescued by going back to the earliest clean image and discarding the intermediates.
+2. **Moderate downscale** — resize the reference before passing it (start at **768–1024 px long edge**, not lower): noise lives at far higher frequency than identity, so a moderate downscale kills speckles while faces, silhouettes and palettes survive. Identity drifting → raise the resolution; noise creeping back in → lower it. Record the sweet spot per character in the Style Bible.
+3. **Role-split prompt** — state explicitly that the image carries identity ONLY and style follows the text: *"From the reference image, preserve ONLY the character's identity: face, eye shape and color, hair silhouette and color, costume signature marks. Do NOT treat the reference's rendering texture as style — no speckles, hair as simple masses not individual strands, clean flat color areas. The art style follows this text description instead: [style words assembled from the Style Bible]."* Text carries zero compounding noise, so style restarts clean every generation.
+
+One-line summary: **identity from the image, style from the text; the image is always gen-0 and moderately downscaled.** Applies on both engines (draw-engines.md) — observed on the GPT line first, but the mechanism is engine-agnostic. References that are *not* AI-generated (photos, hand-drawn art) need no downscale, but the role-split wording in (3) is still good practice.

@@ -33,6 +33,7 @@ python ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 
 - The client has **no** `--ratio` / `--size` flags: write aspect-ratio and resolution requirements into the prompt text.
 - Reuse the confirmed final English prompt from the host skill. Keep boilerplates per-engine — do not port Gemini-specific technical blocks (e.g. `generate.py` flag values) into GPT prompts.
+- AI-generated image as `--reference` → apply consistency-rules.md §5 (gen-0 only, moderate downscale, role-split prompt) — GPT compounds reference micro-noise fast.
 - **Transparency**: use `--remove-background` for direct transparent PNG output (on the Gemini line, transparency stays chroma-key postprocess as before). Sheet slicing and other postprocess steps still apply to GPT output where the host skill uses them.
 - Exactly one POST per batch; never auto-retry (a repeated POST may create a duplicate job). Default timeout 1800 s. Use `--output` to target the host skill's asset directory; filenames are client-generated (`image-studio-tab-*.png`) — rename to the host skill's naming convention after saving.
 

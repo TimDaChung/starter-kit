@@ -8,6 +8,7 @@
   - 引擎鎖：art-style-guard 的 STYLE_BIBLE 新增 `engine` 欄，同專案第二批以後鎖首批引擎
   - 去背：GPT 線 `--remove-background` 直出透明 PNG；Gemini 線維持 magenta chroma-key 後製
   - **預設張數 1**：兩線皆同，使用者明講張數（「畫 4 張」）才多算，不自行多生候選版本
+- **參考圖衛生規則（consistency-rules.md 新增 §5）**：AI 產出當參考圖會複利放大高頻雜訊（白點／髮絲／碎花越畫越多）——身分走圖、風格走字；圖只用 gen-0 黃金樣本（絕不 N 代餵 N+1 代）、適度縮圖（768–1024px 長邊起手）、prompt 明寫「圖只給身分、風格聽文字」。兩線通用
 - 五支生圖 skill（imagen / imagen-portrait / imagen-ui / generate2dmap / generate2dsprite）＋art-style-guard 的 SKILL.md 接上路由引用
 
 ## v2.4.1 (2026-09-15)
