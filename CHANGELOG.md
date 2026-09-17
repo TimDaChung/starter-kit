@@ -7,6 +7,7 @@
   - 整批失敗**不自動 fallback**：先判斷原因並附建議再問——提示詞／版權觸發過濾→建議改 prompt（換線通常沒用）；用量用完→直接問要不要換 Gemini；401→換季度 key；未知原因→問「GPT 重跑還是換 Gemini」。由使用者拍板才換線；換線後整批重生，不混引擎
   - 引擎鎖：art-style-guard 的 STYLE_BIBLE 新增 `engine` 欄，同專案第二批以後鎖首批引擎
   - 去背：GPT 線 `--remove-background` 直出透明 PNG；Gemini 線維持 magenta chroma-key 後製
+  - **預設張數 1**：兩線皆同，使用者明講張數（「畫 4 張」）才多算，不自行多生候選版本
 - 五支生圖 skill（imagen / imagen-portrait / imagen-ui / generate2dmap / generate2dsprite）＋art-style-guard 的 SKILL.md 接上路由引用
 
 ## v2.4.1 (2026-09-15)

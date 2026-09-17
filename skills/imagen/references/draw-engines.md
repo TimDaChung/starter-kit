@@ -20,7 +20,8 @@ Shared engine-selection rules for the five image-generation skills in this kit: 
 
 1. Determine availability **once per task**, before common.md §9 mode determination. GPT line available → use it for **every** style and asset type (mihoyo/arknights cel-shaded included). Unavailable → Gemini line. Either way, state which line was used when reporting results.
 2. **Engine lock across batches**: the project's `docs/STYLE_BIBLE.md` records an `engine` field (`gpt` / `gemini`, set when the first approved batch lands). Second batch onward in the same project uses the bible's engine, even if the other line is available. A user-approved line switch updates the field.
-3. **Never mix engines within one batch** — a batch's images must all come from the same line.
+3. **Default count: 1** — every generation run produces a single image on either line, unless the user explicitly states a count（「畫 4 張」「來 3 個版本」）. Never generate extra candidates or variants on your own initiative.
+4. **Never mix engines within one batch** — a batch's images must all come from the same line.
 
 ## 3. GPT line call contract
 
