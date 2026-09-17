@@ -13,7 +13,7 @@ Shared engine-selection rules for the five image-generation skills in this kit: 
 
 ## 1. Engines
 
-- **GPT line (preferred)** — the personal `image-studio` skill: `~/.claude/skills/image-studio/scripts/image-studio-client.py`, one `POST /draw` per call. **Not part of this kit.** Available only when that skill directory exists AND `~/.config/image-studio/credentials.json` is present with `expiresAt` in the future. If unavailable, skip this file entirely — the host SKILL.md's existing Gemini flow applies unchanged.
+- **GPT line (preferred)** — the `image-studio` skill: `~/.claude/skills/image-studio/scripts/image-studio-client.py`, one `POST /draw` per call. **Distributed separately by the team lead, never bundled in this kit** (its credentials are personal). Every kit user is expected to have it. Usable only when that skill directory exists AND `~/.config/image-studio/credentials.json` is present with `expiresAt` in the future — if missing or expired, tell the user once that the GPT line is unavailable (installer/credentials come from the team lead; expired quarterly keys refresh from the Image Studio `/agent-api` page), then proceed on the Gemini line.
 - **Gemini line (fallback)** — `~/.claude/skills/imagen/bin/generate.py` (Nano Banana Pro), exactly as each SKILL.md already documents it, including API/Prompt mode determination (common.md §9) and any postprocess scripts.
 
 ## 2. Routing & engine lock
