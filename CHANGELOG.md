@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v2.5.1 (2026-09-17)
+
+- **升級動作機制**：CHANGELOG 各版本下可掛「⚙️ 升級動作」區塊——「starter 升級」pull 完由精靈自動執行（冪等設計、`~/.claude/starter-kit-version.txt` 記進度；要使用者選擇的問一句才做）。與 secretary-kit 同一套慣例
+
 ## v2.5.0 (2026-09-17)
 
 - **生圖雙引擎路由**：新增共用規則 `imagen/references/draw-engines.md`——GPT 線（`image-studio` skill，含個人憑證故**不隨 kit 發佈、由主任另行提供**，預期人人有裝）一律優先；沒裝或憑證過期會提醒一次再走原 Gemini 線（generate.py），既有流程不變

@@ -188,8 +188,9 @@ https://github.com/TimDaChung/secretary-kit」
 
 1. `git -C %USERPROFILE%\starter-kit pull`
 2. 摘要 CHANGELOG 新增段落
-3. 重跑第 1 到 6 節：junction 裝的自動生效；新出現的、以及使用者先前沒裝的 skills/agents 直接補裝（`starter-skip.md` 內的除外）；CLAUDE.starter.md 新增的規則直接併；agents 有 diff 進最終健檢
-4. **kit 已移除或更名的 skill**（junction 指向 kit 內但目標已消失）→ **直接刪除失效 junction，不問**（它已無任何功能，刪除零風險），並查 CHANGELOG 判斷去向，在結算表交代清楚（例：plan-dept1-writer → v2.4.0 更名 plan-dept14-writer，新版已裝；generate2dsprite-chibi → v1.3.0 併入 generate2dsprite）。**只自動刪失效 junction**；實體資料夾（非 junction，zip 備援安裝）分兩種：名稱在 CHANGELOG 更名／併入紀錄中、且內容與 kit 舊版同源（diff 只有 kit 後續更新）→ 視同「舊版」處理：備份到 `skills-backup/` 後刪除舊名資料夾、裝上新名（不問，結算表列出）——否則新舊兩支會並存搶觸發詞；內容有使用者自改 → 不動，進最終健檢換版評估
+3. **執行 CHANGELOG「⚙️ 升級動作」**（有標才有,多數版本沒有）:各版本下的「⚙️ 升級動作」區塊 = pull 完精靈自動執行的清單。規則:(a) 只跑比 `~/.claude/starter-kit-version.txt`（一行版號）記錄新的版本,由舊到新逐版跑,跑完寫回最新版號;檔案不存在（舊裝機首次）→ 全部版本的動作都檢查一遍——**升級動作一律寫成冪等**（「缺才補」句型,重跑無害） (b) 純補檔/補設定的直接做;**要使用者選擇的（開新功能、要憑證/scope）問一句才做,不擅自開** (c) 失敗不硬解,顯示錯誤請使用者找 Tim
+4. 重跑第 1 到 6 節：junction 裝的自動生效；新出現的、以及使用者先前沒裝的 skills/agents 直接補裝（`starter-skip.md` 內的除外）；CLAUDE.starter.md 新增的規則直接併；agents 有 diff 進最終健檢
+5. **kit 已移除或更名的 skill**（junction 指向 kit 內但目標已消失）→ **直接刪除失效 junction，不問**（它已無任何功能，刪除零風險），並查 CHANGELOG 判斷去向，在結算表交代清楚（例：plan-dept1-writer → v2.4.0 更名 plan-dept14-writer，新版已裝；generate2dsprite-chibi → v1.3.0 併入 generate2dsprite）。**只自動刪失效 junction**；實體資料夾（非 junction，zip 備援安裝）分兩種：名稱在 CHANGELOG 更名／併入紀錄中、且內容與 kit 舊版同源（diff 只有 kit 後續更新）→ 視同「舊版」處理：備份到 `skills-backup/` 後刪除舊名資料夾、裝上新名（不問，結算表列出）——否則新舊兩支會並存搶觸發詞；內容有使用者自改 → 不動，進最終健檢換版評估
 
 ## 健檢（「starter 健檢」/「新手包健檢」）
 
