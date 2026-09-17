@@ -192,7 +192,7 @@ ornate costume design, vibrant accent colors, refined linework, 2D production-qu
 
 ### Step 3：判定模式
 
-依 common.md §9 判定（整個任務只判一次）：**API 模式** → Phase 5；**Prompt 模式** → 以 §9「生成資訊」格式交付英文 prompt + 建議參數 + 參考圖上傳提醒。
+先依 draw-engines.md §2 判引擎（整個任務只判一次）：**GPT 線可用** → Phase 5 改用 image-studio client（draw-engines.md §3；`--size` / `--ratio` 需求改寫進 prompt 文字），整批失敗照 §4 先回報原因、由使用者決定是否換線。**GPT 線不可用** → 依 common.md §9 判定：**API 模式** → Phase 5；**Prompt 模式** → 以 §9「生成資訊」格式交付英文 prompt + 建議參數 + 參考圖上傳提醒。
 
 ---
 

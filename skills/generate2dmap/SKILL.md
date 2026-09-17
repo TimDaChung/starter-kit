@@ -34,6 +34,8 @@ The lock rules shared by all five image skills live in [`../imagen/references/co
 
 This skill is image-generation-first for visual assets. Call `~/.claude/skills/imagen/bin/generate.py` (Nano Banana Pro / gemini-3-pro-image-preview) as the default creative art source for base maps, dressed references, prop sheets, prop sprites, tileset art, parallax layers, battle backgrounds, and other visible map assets. The agent writes the creative prompts itself — scripts never generate creative prompts or procedurally draw final visual art. Scripts may assemble, slice, chroma-key, crop, validate, compose previews, emit JSON metadata, and wire image-generated assets into engine-native files such as Godot `.tscn` scenes.
 
+**Engine routing**: when the personal `image-studio` skill is installed, the GPT line is preferred for all raw art — see `../imagen/references/draw-engines.md` (§3 call contract: aspect ratio goes into the prompt text; §4 failure handling: a batch fails only when 0 images saved, and fallback to `generate.py` happens only after reporting the cause and getting the user's go-ahead). Without it, `generate.py` below applies unchanged.
+
 Only use procedural drawing or scripted placeholder art when the user explicitly asks for placeholders, test fixtures, debug maps, or engine scaffolding without final art. For an engine target such as `Godot_TileMap`, generate or reuse the visual tileset art first, then use scripts/code only to build tile layers, collision, zones, and scene wiring.
 
 ### Calling generate.py

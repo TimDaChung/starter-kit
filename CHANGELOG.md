@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## v2.5.0 (2026-09-17)
+
+- **生圖雙引擎路由**：新增共用規則 `imagen/references/draw-engines.md`——GPT 線（個人 `image-studio` skill，非 kit 內建）一律優先，未安裝則自動走原 Gemini 線（generate.py），既有流程不變
+  - 失敗判定：一批 N 張 0 張成功才算整批失敗；≥1 張成功留在 GPT 線補生缺的張數
+  - 整批失敗**不自動 fallback**：先回報失敗原因（HTTP／timeout／內容過濾／401 憑證過期），由使用者拍板才換 Gemini 線；換線後整批重生，不混引擎
+  - 引擎鎖：art-style-guard 的 STYLE_BIBLE 新增 `engine` 欄，同專案第二批以後鎖首批引擎
+  - 去背：GPT 線 `--remove-background` 直出透明 PNG；Gemini 線維持 magenta chroma-key 後製
+- 五支生圖 skill（imagen / imagen-portrait / imagen-ui / generate2dmap / generate2dsprite）＋art-style-guard 的 SKILL.md 接上路由引用
+
 ## v2.4.1 (2026-09-15)
 
 - **starter-setup 升級流程：失效 junction 改為自動刪除**——kit 已移除或更名的 skill，其 junction 目標消失即無功能，升級時直接刪不再問（結算表查 CHANGELOG 交代去向，例：plan-dept1-writer → 已更名 plan-dept14-writer）。同名實體資料夾（可能含自改內容）維持不自動刪、進最終健檢

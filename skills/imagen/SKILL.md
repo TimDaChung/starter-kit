@@ -19,7 +19,7 @@ allowed-tools:
 
 > **執行角色：美術**——關注風格一致、可讀性、資產規格（尺寸 / 切圖 / 命名）。
 
-使用 Gemini 的 Nano Banana Pro (`gemini-3-pro-image-preview`) 生成圖片。三支 imagen skill 的共用流程、格式、指令集中在 `references/common.md`（下文以「common.md §N」引用）；五支生圖 skill 共用的一致性鎖規則在 `references/consistency-rules.md`。
+使用 Gemini 的 Nano Banana Pro (`gemini-3-pro-image-preview`) 生成圖片。三支 imagen skill 的共用流程、格式、指令集中在 `references/common.md`（下文以「common.md §N」引用）；五支生圖 skill 共用的一致性鎖規則在 `references/consistency-rules.md`；生圖引擎路由（GPT 線優先／Gemini 線備援）在 `references/draw-engines.md`。
 
 ---
 
@@ -104,17 +104,18 @@ allowed-tools:
 
 ### Step 2：轉英文並判定模式
 
-使用者確認後直接把中文 prompt 翻成英文（忠於原文、不增不減，common.md §4）。接著依 common.md §9 判定模式——**整個任務只判這一次**：
+使用者確認後直接把中文 prompt 翻成英文（忠於原文、不增不減，common.md §4）。接著判定生成線——**整個任務只判這一次**：
 
-- **API 模式**（有 `GEMINI_API_KEY`）→ Phase 5
-- **Prompt 模式**（沒有 key）→ Phase 5.5
+1. **GPT 線**（依 draw-engines.md §2 判可用：image-studio 已裝＋憑證未過期）→ Phase 5，生成指令改用 image-studio client（draw-engines.md §3；比例／解析度寫進 prompt 文字）；整批失敗照 §4 —— 先回報原因，由使用者決定是否換 Gemini 線
+2. **API 模式**（GPT 線不可用、有 `GEMINI_API_KEY`）→ Phase 5
+3. **Prompt 模式**（都沒有）→ Phase 5.5
 
 ---
 
 ## Phase 5｜圖片生成（API 模式）
 
 1. **存放位置與檔名**：依 common.md §7 決定（fallback `<cwd>/imagen/`；檔名 `{簡短描述}_{日期}_{序號}.png`，例 `fire_monster_20260331_01.png`）。
-2. **執行**：英文 prompt Write 到 `prompt-final.txt`，呼叫 `~/.claude/skills/imagen/bin/generate.py`（標準指令、`--ratio` / `--size` 合法值見 common.md §9）。
+2. **執行**：英文 prompt Write 到 `prompt-final.txt`；GPT 線呼叫 image-studio client（draw-engines.md §3），Gemini 線呼叫 `~/.claude/skills/imagen/bin/generate.py`（標準指令、`--ratio` / `--size` 合法值見 common.md §9）。
 3. **生成後**：Read 看圖 → 回報路徑 → 問是否滿意；要調整只改使用者提到的部分（common.md §6）。
 
 ---
