@@ -3,7 +3,7 @@
 ## v2.5.5 (2026-09-17)
 
 - **CLAUDE.starter Git 基本盤新增「禁推機密」**：含 token / API key / 密碼的內容一律不得 commit 進有遠端的 repo；push 前掃金鑰特徵；已進歷史視同外洩（revoke 換新→清歷史）。全域與 kit 同步收錄
-- **plan-dept14-writer 八、新增 Notion 頁面容器規則**：API 建不出按鈕 block、不能移動 block → 新建企劃頁一律由範本「建立複本」產生（目錄與「新增調整紀錄」按鈕用骨架自帶），Claude 只灌中間章節、不自產目錄與調整紀錄章，插入用 append `after` 錨定；調整舊頁直接改對應位置不整頁重灌（skills 為 junction 制，pull 即生效）
+- **plan-dept14-writer 八、新增 Notion 頁面容器規則**：API 建不出按鈕 block、不能移動 block → 新建企劃頁一律由範本「建立複本」產生（目錄與「新增調整紀錄」按鈕用骨架自帶），Claude 只灌中間章節、不自產目錄與調整紀錄章，插入用 append `after` 錨定；本地 md 產出同步不寫目錄/調整紀錄章；調整舊頁直接改對應位置不整頁重灌（skills 為 junction 制，pull 即生效）
 
 ### ⚙️ 升級動作
 
