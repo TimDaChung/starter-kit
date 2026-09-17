@@ -37,6 +37,6 @@ python ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 
 ## 4. Failure handling (the user decides fallback)
 
-- **Batch verdict**: a batch of N counts as failed ONLY when **0** images were saved. Exit code 1 with a non-empty `files` list = partial success → stay on the GPT line and re-request just the missing count.
+- **Batch verdict**: a batch of N counts as failed ONLY when **0** images were saved. Exit code 1 with a non-empty `files` list = partial success → report how many were saved vs. requested and **ask the user** whether to top up the missing count (still on the GPT line). Never re-request on your own — a repeated shortfall could loop forever.
 - **Full batch failure (0 saved)** → STOP. Report the cause to the user first (HTTP status / timeout / content filter; HTTP 401 = quarterly key expired → refresh from the Image Studio `/agent-api` page). **The user decides** whether to rerun on the Gemini line — never fall back automatically.
 - User approves the switch → regenerate the **whole batch** on the Gemini line, and record/update the bible's `engine` field accordingly.
