@@ -31,6 +31,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 - `%USERPROFILE%\starter-kit` 已 clone？（已有就 `git pull`，記 CHANGELOG 新增段落）
 - secretary(skills/secretary)→ 歸「自有」，本精靈完全不碰
 - `skills/imagen/.env` 存在？（影響生圖類能不能用）
+- **image-studio 已裝？**（生圖 GPT 線，主任另行發放、不在 kit 內）：`~/.claude/skills/image-studio/` 目錄存在？`~/.config/image-studio/credentials.json` 存在且 `expiresAt` 未過期？——**只偵測、不能代裝、不給安裝路徑**；缺或過期就結算表提醒一行「生圖 GPT 線未裝／憑證過期 → 找主任拿安裝包，裝好前五支生圖 skill 自動走 Gemini 線，功能不受影響」
 - **環境依賴**（企劃 / 原型類 6 支不需要，只影響生圖、測試、試玩迴圈；data-report-builder 生成的報表 skill 另需 pandas + plotnine，用到再裝）：
   - `python --version` 有 3.10+？
   - `python -c "import PIL"`、`python -c "import playwright"` 各自過不過？

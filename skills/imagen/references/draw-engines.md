@@ -13,7 +13,7 @@ Shared engine-selection rules for the five image-generation skills in this kit: 
 
 ## 1. Engines
 
-- **GPT line (preferred)** — the `image-studio` skill: `~/.claude/skills/image-studio/scripts/image-studio-client.py`, one `POST /draw` per call. **Distributed separately by the team lead, never bundled in this kit** (its credentials are personal). Every kit user is expected to have it. Usable only when that skill directory exists AND `~/.config/image-studio/credentials.json` is present with `expiresAt` in the future — if missing or expired, tell the user once that the GPT line is unavailable (installer/credentials come from the team lead; expired quarterly keys refresh from the Image Studio `/agent-api` page), then proceed on the Gemini line.
+- **GPT line (preferred)** — the `image-studio` skill: `~/.claude/skills/image-studio/scripts/image-studio-client.py`, one `POST /draw` per call. **Distributed separately by the team lead, never bundled in this kit** (its credentials are personal). Every kit user is expected to have it. Usable only when that skill directory exists AND `~/.config/image-studio/credentials.json` is present with `expiresAt` in the future — if missing or expired, tell the user once that the GPT line is unavailable — the installer and quarterly credentials come from the team lead, ask them; nothing more to document here — then proceed on the Gemini line.
 - **Gemini line (fallback)** — `~/.claude/skills/imagen/bin/generate.py` (Nano Banana Pro), exactly as each SKILL.md already documents it, including API/Prompt mode determination (common.md §9) and any postprocess scripts.
 
 ## 2. Routing & engine lock
@@ -46,6 +46,6 @@ python ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
   |---|---|
   | Content filter / copyright / prompt problem (policy rejection, filtered results, named IP or real person in the prompt) | Say which prompt element likely triggered it and propose a revised prompt — switching engines rarely helps here; offer the prompt fix first |
   | Quota / usage exhausted (e.g. HTTP 429 or a quota message) | Ask directly: "GPT 用量用完了，這批要不要換 Gemini 線試試？" |
-  | HTTP 401 | Quarterly key expired → refresh from the Image Studio `/agent-api` page (Gemini as the stopgap if the user wants the batch now) |
+  | HTTP 401 | Quarterly key expired → ask the team lead for the new quarterly setup (Gemini as the stopgap if the user wants the batch now) |
   | Unknown / other (timeout, 5xx, connection loss) | Ask: "要在 GPT 線重跑一次，還是換 Gemini 線試試？" For connection loss, first check the user's Image Studio web tabs before any resubmit — accepted work may still be running and a repeated POST creates a duplicate job |
 - User approves the switch → regenerate the **whole batch** on the Gemini line, and record/update the bible's `engine` field accordingly.
