@@ -8,11 +8,11 @@
 | 2 | 專案既存資產優先 | 每個專案第一次生圖前（pre-flight） |
 | 3 | 批次一致性模式 | 一次要 ≥ 2 張同類資產 |
 | 4 | Prompt 確認框 | Phase 4 Step 1 / Step 2 |
-| 5 | 參考圖規則 | 使用者附圖 / 需要 `--ref` |
+| 5 | 參考圖規則 | 使用者附圖 / 需要 `--reference` |
 | 6 | 生成後檢查與調整循環 | 每次生成或交付後 |
 | 7 | 存檔位置與檔名 | Phase 5 生成前 |
 | 8 | `imagen_history.md` | Phase 1 讀偏好、Phase 6 寫入 |
-| 9 | 呼叫 `generate.py` 與模式判定 | Phase 4 Step 2 / Phase 5 / Phase 5.5 |
+| 9 | 呼叫生圖引擎與 prompt 交付 | Phase 4 Step 2 / Phase 5 / Phase 5.5 |
 
 ---
 
@@ -26,7 +26,7 @@
 
 ## §2 專案既存資產優先（生圖前必做）
 
-生圖前**先掃專案目錄**找同類資產；找到就：(1) 把其規格**鎖死當預設**，不重新發想；(2) 代表性 1–2 張當 `--ref`，**在識別 / 題材 ref 之外多塞一張既有資產 ref 強制風格鎖**；(3) Strict Rules 段明寫「the new asset must visually rhyme with the existing project assets — same …」；(4) 跟使用者確認：「專案既有 N 張同類資產（規格為…），這次照樣生？要改請明說」。
+生圖前**先掃專案目錄**找同類資產；找到就：(1) 把其規格**鎖死當預設**，不重新發想；(2) 代表性 1–2 張當 `--reference`，**在識別 / 題材參考圖之外多塞一張既有資產強制風格鎖**；(3) Strict Rules 段明寫「the new asset must visually rhyme with the existing project assets — same …」；(4) 跟使用者確認：「專案既有 N 張同類資產（規格為…），這次照樣生？要改請明說」。
 
 完整條文與「為什麼」：`consistency-rules.md` §2。imagen 家族各 skill 的掃描路徑與鎖死項目：
 
@@ -70,7 +70,7 @@
 
 使用者回「好」「OK」「沒問題」「可以」即視為確認，直接進 Step 2，不再追問。
 
-**Step 2 轉英文原則**：忠於中文 prompt，不增不減；自然英文；不加翻譯過程中想到的「補充」。portrait / ui 在英文版加上對應風格 boilerplate（英文原文不另翻進中文 prompt，確認框以 🧩 行標示）。轉完依 §9 判定模式執行。
+**Step 2 轉英文原則**：忠於中文 prompt，不增不減；自然英文；不加翻譯過程中想到的「補充」。portrait / ui 在英文版加上對應風格 boilerplate（英文原文不另翻進中文 prompt，確認框以 🧩 行標示）。長寬比與解析度沒有對應 flag，要一併寫進英文 prompt 文字。轉完依 §9 執行。
 
 ---
 
@@ -79,7 +79,7 @@
 1. **先 Read 看圖**（Claude Code 可直接看圖），看過才決定寫什麼。
 2. **向使用者確認**：風格參考 → 描述你看到的特徵（厚塗程度、光影、線條、色彩取向）確認理解正確；角色 / 元件 / 服裝參考 → 確認哪些特徵保留、哪些可改。
 3. **只把確認過的特徵寫進 prompt**。
-4. API 模式用 `--ref <path>` 傳給 Banana Pro，可重複多次（角色 + 風格 + 服裝可一起傳）；wrapper 會把圖嵌成 inline_data，**不要**只在 prompt 文字裡寫路徑。Prompt 模式則提醒使用者一起上傳到 Google AI Studio。
+4. 生圖時用 `--reference <path>` 傳圖，可重複多次（角色 + 風格 + 服裝可一起傳），**不要**只在 prompt 文字裡寫路徑。只交付 prompt 文字時，提醒使用者自行把參考圖一起帶上。參考圖本身是 AI 產出 → 另加 `consistency-rules.md` §5。
 5. **上限 6 張**，超過品質下降。支援 JPG / PNG / WebP / GIF。
 
 ---
@@ -89,7 +89,7 @@
 1. 用 Read 工具看生成的圖，確認正常產出（imagen-ui 另加工程視角核對，見其 SKILL.md）。
 2. **回報完整絕對資料夾路徑**（不逐檔列）。
 3. 詢問：「滿意嗎？要調整 prompt 重新生成，還是這張可以用？」（portrait / ui 另問是否做變體）。
-4. 要調整 → **只改使用者明確指出的部分**，重新走 §4 確認再生成；Prompt 模式則重新產出英文版交付。
+4. 要調整 → **只改使用者明確指出的部分**，重新走 §4 確認再生成；只交付 prompt 文字時則重新產出英文版交付。
 
 ---
 
@@ -103,7 +103,7 @@
 | imagen-portrait | `{角色名或主題}_{風格代號}_{日期}_{序號}.png` | `ice_mage_mihoyo_genshin_20260430_01.png` |
 | imagen-ui | `{元件代號}_{風格代號}_{日期}_{序號}.png` | `icon_skill_mihoyo_genshin_20260430_01.png` |
 
-最終英文 prompt 先 Write 到 `prompt-final.txt`（與輸出同目錄），再呼叫 generate.py。
+最終英文 prompt 先 Write 到 `prompt-final.txt`（與輸出同目錄），再呼叫生圖 client（§9）。client 產出的檔名是 `image-studio-tab-*.png`，存檔後改成上表的命名。
 
 ---
 
@@ -126,45 +126,44 @@
 
 ---
 
-## §9 呼叫 `generate.py` 與模式判定
+## §9 呼叫生圖引擎與 prompt 交付
 
-**Key 解析順序**：先讀環境變數 `GEMINI_API_KEY`，沒有再讀 `~/.claude/skills/imagen/.env`。
+**引擎唯一**：image-studio GPT 線，完整規則（可用性判定、呼叫契約、失敗分流）見 `draw-engines.md`。引擎不可用 → 生圖停止、請使用者向主任索取安裝包，**不改走其他生圖途徑**。
 
-**模式判定（每次任務只判一次，在 Phase 4 Step 2 之後）**：Key 存在 → **API 模式**（Phase 5 直接生成）；否則 **Prompt 模式**（跳過 Phase 5，走 Phase 5.5 交付 prompt）。
-
-**標準指令**（wrapper 自動讀 key、組 payload、存 PNG，不需手動處理 base64 / curl；參數詳見 `--help`）：
+**標準指令**（draw-engines.md §3）：
 
 ```bash
-python ~/.claude/skills/imagen/bin/generate.py \
+python ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
+  --count 1 \
   --prompt "$(cat prompt-final.txt)" \
-  --ratio 3:4 --size 1K \
-  --ref reference/style.jpg \
-  --output {output_path}
+  --reference reference/style.jpg \
+  --output {output_dir}
 ```
 
-- `--ratio` 只接受：`1:1` `2:3` `3:2` `3:4` `4:3` `4:5` `5:4` `9:16` `16:9` `21:9`；`--size` 只接受：`1K` `2K` `4K`
-- `--ref` 可重複，最多 6 張（§5）
+- **沒有 `--ratio` / `--size` flag**：長寬比與解析度寫進 prompt 文字（例：`3:4 portrait aspect ratio, 2K resolution`）。
+- `--reference` 可重複，最多 6 張（§5）。
+- 需要透明背景 → 加 `--remove-background` 直出透明 PNG；要切 sheet 的仍走 magenta chroma-key（見各 SKILL.md）。
+- `--count` 預設 1；每批只發一次請求，**不自動重試**。
+- 檔名由 client 產生（`image-studio-tab-*.png`），存完依 §7 改名。
 
-**Prompt 模式交付格式（Phase 5.5）**：
+**只交付 prompt 文字（Phase 5.5）**：使用者明說只要 prompt、不要實際生圖時採用（非引擎故障的退路）。
 
 ```
 ## 生成資訊
 
 📝 英文 Prompt：
-> [完整英文 prompt]
+> [完整英文 prompt，長寬比 / 解析度已寫在文字裡]
 
 📐 建議長寬比：[ratio]
 📏 建議解析度：[size]
-🖼️ 參考圖：[幾張，提醒一起上傳到 AI Studio]
-
-💡 使用方式：到 Google AI Studio 貼上 prompt，上傳參考圖，選擇對應的長寬比即可生成。
+🖼️ 參考圖：[幾張，提醒一起帶上]
 ```
 
-**通用錯誤處理**（各 skill 的領域錯誤另列在自己的 SKILL.md）：
+**通用錯誤處理**（整批失敗的診斷分流見 draw-engines.md §4；各 skill 的領域錯誤另列在自己的 SKILL.md）：
 
 | 錯誤 | 處理方式 |
 |------|---------|
-| API Key 無效 | 提示使用者檢查 `.env` 中的 `GEMINI_API_KEY` |
-| 生成失敗（安全過濾） | 告知使用者，建議調整 prompt 中可能觸發過濾的詞彙 |
+| 生成失敗（安全過濾 / 版權過濾） | 告知使用者，指出可能觸發的詞彙並提改寫版，確認後才重生 |
+| 出圖比例 / 解析度不對 | prompt 文字裡的比例 / 解析度敘述講得更明確，重新生成 |
 | 參考圖格式不支援 | 支援 JPG/PNG/WebP/GIF，提示使用者轉換格式 |
-| 網路錯誤 | 提示檢查網路連線，可重試一次 |
+| 網路 / 連線中斷 | 先確認使用者的 Image Studio 分頁是否仍在跑（重送會產生重複工單），再問要不要重試一次 |

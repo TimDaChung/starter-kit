@@ -1,6 +1,6 @@
 ---
 name: generate2dsprite
-description: "Generate + postprocess 2D game sprites/animation sheets via Nano Banana Pro + local chroma-key processor: pixel-art or cel-shaded chibi (Q版 / gacha-style, art_style=cel_shaded_chibi) characters, props, creatures, spells, impacts, transparent GIF exports."
+description: "Generate + postprocess 2D game sprites/animation sheets via the image-studio draw engine + local chroma-key processor: pixel-art or cel-shaded chibi (Q版 / gacha-style, art_style=cel_shaded_chibi) characters, props, creatures, spells, impacts, transparent GIF exports."
 ---
 
 # Generate2dsprite
@@ -42,20 +42,19 @@ Read [references/modes.md](references/modes.md) when the request is ambiguous.
 The lock rules shared by all five image skills live in [`../imagen/references/consistency-rules.md`](../imagen/references/consistency-rules.md) — §1 default visual rules, §2 project asset inheritance, §3 batch consistency mode, §4 hand-off to `art-style-guard`. Summary plus the sprite-only deltas:
 
 - **Default visual rules (§1)**: female → fair luminous skin; all characters → refined attractive features (mobile gacha aesthetic), no western cartoon / Disney / Pixar / caricature drift; canvas full-bleed to all four edges via a positive composition instruction. Explicit user requests override. **[HD / chibi]** "refined" also means big expressive eyes and a well-proportioned chibi body.
-- **Project asset inheritance (§2, REQUIRED pre-flight)**: scan `assets/sprites/`, `sprites/`, `assets/sprites/monsters/`, `assets/maps/`, `assets/tiles/`. If same-category sprites exist: LOCK art style, head-body proportions, view angle, anchor (bottom / center), pixel / HD scale, line weight, shading style, facing direction, lighting direction; pass at least one existing sprite as `--ref` next to the subject ref; embed the "visually rhyme" Strict Rule; confirm the lock with the user.
-  - **[chibi]** The `--ref` must be a frame-1 PNG of an existing project chibi — descriptive words alone are NOT enough. Strict Rules must say: "STRICT 2.5-head means head approximately 40% of total body height, NOT taller adult-leaning proportions even if the character concept is mature." Mature / elegant archetypes (aristocrat, sage, refined merchant) reliably drift to 3–3.5 heads without a visual anchor.
+- **Project asset inheritance (§2, REQUIRED pre-flight)**: scan `assets/sprites/`, `sprites/`, `assets/sprites/monsters/`, `assets/maps/`, `assets/tiles/`. If same-category sprites exist: LOCK art style, head-body proportions, view angle, anchor (bottom / center), pixel / HD scale, line weight, shading style, facing direction, lighting direction; pass at least one existing sprite as `--reference` next to the subject reference; embed the "visually rhyme" Strict Rule; confirm the lock with the user.
+  - **[chibi]** The `--reference` must be a frame-1 PNG of an existing project chibi — descriptive words alone are NOT enough. Strict Rules must say: "STRICT 2.5-head means head approximately 40% of total body height, NOT taller adult-leaning proportions even if the character concept is mature." Mature / elegant archetypes (aristocrat, sage, refined merchant) reliably drift to 3–3.5 heads without a visual anchor.
 - **Batch consistency mode (§3, 2+ same-category sprites)**: unified spec first — art style, sheet shape, head/body proportion (2.5-head chibi / true-scale HD), view, lighting direction, **facing direction (left / right)** for non-symmetric idle, anchor, margin policy; locked = style / proportion / view / facing / sheet shape / anchor, variable = colors / weapons / costume / FX color; identical Strict Rules wording in every prompt; mandatory per-asset or batch-end verification. Rarity tiers (R / SR / SSR monsters) keep proportion unified — the gap goes into accessory density / FX intensity / silhouette complexity.
-  - **Facing lock**: without an explicit left / right rule, even `3/4 view` lets Banana mirror frames between assets.
-  - **[chibi]** Also lock the head-to-body ratio explicitly (head ≈ 40% of total height, body ≥ 1.5× head height) — Banana tends to enlarge the head, shrink the body, and flip symmetric costumes to front-facing.
+  - **Facing lock**: without an explicit left / right rule, even `3/4 view` lets the model mirror frames between assets.
+  - **[chibi]** Also lock the head-to-body ratio explicitly (head ≈ 40% of total height, body ≥ 1.5× head height) — the model tends to enlarge the head, shrink the body, and flip symmetric costumes to front-facing.
 - **Hand-off (§4)**: second batch onward in the same project, or any style doubt → run `art-style-guard` first (Style Bible + contact-sheet QC).
 
 ## Agent Rules
 
 - Decide the asset plan yourself. Do not force the user to spell out sheet size, frame count, or bundle structure when the request already implies them.
 - Write the art prompt yourself. Do not default to the prompt-builder script; if a legacy prompt-builder command exists, treat it as historical compatibility only, not the normal skill workflow.
-- Engine routing: when the personal `image-studio` skill is installed, prefer the GPT line for raw images — see `../imagen/references/draw-engines.md` (§3: aspect ratio goes into the prompt text; `--remove-background` can replace magenta chroma-key for transparency, while frame splitting / scaling / QC scripts still apply; §4: a batch fails only when 0 images saved — report the cause and let the user decide before falling back). Never mix engines within one sheet or batch.
-- Gemini line: use `~/.claude/skills/imagen/bin/generate.py` (Nano Banana Pro / gemini-3-pro-image-preview) for every raw image. The wrapper resolves the API key from `GEMINI_API_KEY` env, then `~/.claude/skills/imagen/.env`.
-- When the user provides or implies a visual reference, first Read the reference image with the Read tool so you can see it, then pass the same path to `imagen/bin/generate.py` via one or more `--ref <path>` flags. Banana embeds the reference as inline_data and uses it as the visual anchor — do not rely on a filesystem path string inside the text prompt.
+- Engine routing: every raw image comes from the personal `image-studio` skill (the GPT line) — the only engine, see `../imagen/references/draw-engines.md` (§1 availability, §3 call contract: aspect ratio and resolution go into the prompt text, `--remove-background` can replace magenta chroma-key for transparency while frame splitting / scaling / QC scripts still apply; §4 failure handling: a batch fails only when 0 images saved — report the cause and let the user decide). If `image-studio` is not installed or its credentials expired, image generation stops: tell the user to get the installer from the team lead. There is no other generation route, and no fallback to look for.
+- When the user provides or implies a visual reference, first Read the reference image with the Read tool so you can see it, then pass the same path to the client via one or more `--reference <path>` flags. The client embeds the reference as the visual anchor — do not rely on a filesystem path string inside the text prompt.
 - Do not force pixel art when the asset is a map prop for `generate2dmap` or when the user/project requests a different style. Match the map or reference style first.
 - Use the script only as a deterministic processor: magenta cleanup, frame splitting, component filtering, scaling, alignment, QC metadata, transparent sheet export, and GIF export.
 - Treat script flags as execution primitives chosen by the agent, not user-facing hardcoded workflow.
@@ -95,45 +94,32 @@ Choose `art_style` before writing the prompt:
 
 **[chibi]** When `art_style = cel_shaded_chibi`, use the `cel_shaded_chibi` style block from prompt-rules.md **Style Rules** verbatim unless the user overrides it. Never write `16-bit`, `retro JRPG`, or `chunky pixel-art` in a chibi prompt.
 
-If a reference is involved, follow prompt-rules.md **Reference Rules**: Read the image first and pass the same path with `--ref` (a freshly generated reference is already on disk — pass that path); state the reference role explicitly (preserve identity / style, animation sheet of the same subject, evolution / variant, matching prop / FX); keep silhouette, palette, face / eye features, costume marks, major accessories, and material language fixed; let only the requested action or evolution change — do not redesign the subject unless the user asks.
+If a reference is involved, follow prompt-rules.md **Reference Rules**: Read the image first and pass the same path with `--reference` (a freshly generated reference is already on disk — pass that path); state the reference role explicitly (preserve identity / style, animation sheet of the same subject, evolution / variant, matching prop / FX); keep silhouette, palette, face / eye features, costume marks, major accessories, and material language fixed; let only the requested action or evolution change — do not redesign the subject unless the user asks.
 
 Always restate the strict parts from prompt-rules.md **Global Rules** and **Containment Rules**: solid `#FF00FF` background, exact sheet shape, same identity / bounding box / pixel scale across frames, nothing may cross a cell edge.
 
 ### 3. Generate the raw image
 
-Call `~/.claude/skills/imagen/bin/generate.py`. Pick `--ratio` and `--size` from the sheet shape:
-
-- `1:1` for square sheets (`2x2`, `3x3`, `4x4`)
-- `4:3` for `2x3` (e.g. `cast`, `talk` / dialogue)
-- `4:1` for `1x4` projectiles
-- default `--size 2K` for production sheets, `1K` for quick iterations
-
-Example:
+Call the `image-studio` client — see `../imagen/references/draw-engines.md` §3 for the full contract.
 
 ```bash
-python ~/.claude/skills/imagen/bin/generate.py \
+python ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
+  --count 1 \
   --prompt "$(cat assets/sprites/<name>/prompt-used.txt)" \
-  --ratio 1:1 --size 2K \
-  --ref reference/path.jpg \
-  --output assets/sprites/<name>/raw-sheet.png
+  --reference reference/path.jpg \
+  --output assets/sprites/<name>/
 ```
 
-For reference-conditioned generation, repeat `--ref <path>` per reference image. The wrapper writes the file directly to `--output`; there is no separate cache directory to look up.
+The client takes no aspect-ratio or resolution flags: state the sheet's aspect ratio and target resolution **inside the prompt text**, matching the sheet shape:
 
-#### Style reality note (Nano Banana Pro)
+- `square 1:1 canvas` for square sheets (`2x2`, `3x3`, `4x4`)
+- `4:3 landscape canvas` for `2x3` (e.g. `cast`, `talk` / dialogue)
+- `wide 4:1 landscape canvas` for `1x4` projectiles
+- add `high resolution, at least 2048 px on the long edge` for production sheets; a smaller target is fine for quick iterations
 
-Banana's interpretation of "pixel art" / "16-bit" / "retro JRPG" tends to render as **painterly hi-res 2D RPG (Octopath Traveler / Triangle Strategy / Live A Live HD-2D vibe)**, not chunky chunked-pixel sprites. Set user expectations accordingly:
+For reference-conditioned generation, repeat `--reference <path>` per reference image. `--output` is a directory and the saved filenames are client-generated (`image-studio-tab-*.png`) — rename the result to `raw-sheet.png` in the asset folder before postprocessing.
 
-- if the user is fine with hi-res painterly RPG — proceed as normal, the result is high quality
-- if the user explicitly wants true chunky 16-bit, plan a downscale step in postprocess (e.g. resize cells to 64–96 px width via Pillow) and warn that fine details will collapse
-- prompts asking for "chunky pixels", "16-bit", "retro JRPG" still help nudge the look but will not break Banana out of its painterly bias on their own
-
-#### Banana quirks to expect
-
-- it often draws **black grid borders between cells** even when explicitly told not to. The chroma-key step removes them as long as the magenta backdrop is otherwise clean and `--component-mode largest` is used. Do not regenerate just for this.
-- it sometimes repeats two adjacent frames (especially mid-sequence in `2x3` talking / casting sheets) — if the animation must look distinct, write more dramatic frame-to-frame deltas in the prompt
-- **the API only outputs JPEG** (confirmed against both generateContent and the interactions endpoint — `image/png` is rejected), so `raw-sheet.png` is JPEG bytes regardless of extension. Chroma subsampling puts artifacts exactly on the magenta/subject hard edges: if the cutout shows purple fringing, raise `--edge-clean-depth`; if it bites into the body, loosen `--threshold` instead of regenerating
-- a failed generation now exits non-zero (with `finishReason` in the message). `IMAGE_RECITATION` = prompt too generic/derivative — rephrase with more specific original details; do NOT retry the identical prompt, and check the output file timestamp before postprocessing (a stale sheet from a previous run may still be on disk)
+One POST per batch, never an automatic retry. A batch that saved 0 images is a failure: diagnose it and report per draw-engines.md §4 — there is no other engine to switch to.
 
 ### 4. Postprocess locally
 

@@ -43,7 +43,7 @@ Read [prop-pack-contract.md](prop-pack-contract.md) before batching props.
 For generated layered raster maps, use a dressed reference pass before final prop extraction:
 
 1. Generate the base as ground-only terrain.
-2. Make the base visible to yourself first by Read-ing it, then pass the same path to `~/.claude/skills/imagen/bin/generate.py` with `--ref`. Do not expect a filesystem path inside the text prompt to work as a visual reference.
+2. Make the base visible to yourself first by Read-ing it, then pass the same path to the `image-studio` draw client with `--reference`. Do not expect a filesystem path inside the text prompt to work as a visual reference.
 3. Ask for a dressed-reference version of the same map by adding props only.
 4. Preserve exact camera, framing, dimensions, terrain, paths, water, anchor pads, collision-relevant boundaries, and map edges.
 5. Use the dressed reference to choose prop identities and placement coordinates, but compose the final runtime preview from the original base plus extracted transparent props.
@@ -93,7 +93,7 @@ python ~/.claude/skills/generate2dmap/scripts/extract_prop_pack.py \
   --reject-edge-touch
 ```
 
-The extractor crops to the prop's alpha bounds and does not rescale; size the prop in the generation step (`--size`) or in placement JSON (`w` / `h`) for buildings, trees, gates, statues, or large signs.
+The extractor crops to the prop's alpha bounds and does not rescale; size the prop by asking for the target resolution in the generation prompt, or in placement JSON (`w` / `h`) for buildings, trees, gates, statues, or large signs.
 
 ## Prop Metadata
 

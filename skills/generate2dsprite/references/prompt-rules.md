@@ -18,6 +18,7 @@ Always keep these constraints:
 - no borders or frames between cells
 - same asset identity across frames
 - same bounding box and same pixel scale across frames
+- state the canvas aspect ratio and target resolution in the prompt text itself (the draw client has no flags for them)
 
 ## Style Rules
 
@@ -36,7 +37,7 @@ Do not write `16-bit`, `retro JRPG`, or `chunky pixel-art` unless the user asks 
 
 Use these rules when the user attaches a reference, points to a local image, asks for consistency with an earlier generated image, or asks for an evolution/variant of an existing sprite:
 
-- Make the reference image visible to yourself first by Read-ing it (Claude Code can see images directly), then pass the same path to `~/.claude/skills/imagen/bin/generate.py` via `--ref <path>`. The wrapper embeds the file as inline_data so banana sees it. Do not assume a path string in the text prompt is a visual input.
+- Make the reference image visible to yourself first by Read-ing it (Claude Code can see images directly), then pass the same path to the `image-studio` client via `--reference <path>`. The client uploads the file itself, so the model actually sees it. Do not assume a path string in the text prompt is a visual input.
 - In the prompt, say `use the image just shown as the visual reference`.
 - State what must stay fixed: silhouette family, palette, face/eyes, costume or markings, accessories, material language, and art style.
 - State what may change: pose, animation phase, action energy, size progression, evolution traits, or FX intensity.

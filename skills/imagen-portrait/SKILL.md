@@ -2,7 +2,7 @@
 name: imagen-portrait
 version: 1.0.0
 description: |
-  Nano Banana Pro 生成 RPG 手遊角色立繪。預設米哈遊（原神 / 崩鐵 / 絕區零）/ 明日方舟 / NIKKE / 碧藍航線等高營收手遊風格 — 內建 6 風格庫 + 英文 boilerplate。
+  生成 RPG 手遊角色立繪。預設米哈遊（原神 / 崩鐵 / 絕區零）/ 明日方舟 / NIKKE / 碧藍航線等高營收手遊風格 — 內建 6 風格庫 + 英文 boilerplate。
   觸發：「立繪」「角色立繪」「角色卡」「半身像」「米哈遊風」「方舟風」「gacha 立繪」。
 allowed-tools:
   - Bash
@@ -17,7 +17,7 @@ allowed-tools:
 
 > **執行角色：美術**——關注風格一致、角色辨識度、立繪規格（構圖 / 尺寸 / 命名）。
 
-使用 Gemini 的 Nano Banana Pro (`gemini-3-pro-image-preview`) 生成 RPG 手遊角色立繪，預設套用高營收手遊（米哈遊、明日方舟等）的視覺語言。三支 imagen skill 的共用流程、格式、指令集中在 `../imagen/references/common.md`（下文以「common.md §N」引用）。
+生成 RPG 手遊角色立繪，預設套用高營收手遊（米哈遊、明日方舟等）的視覺語言。三支 imagen skill 的共用流程、格式、指令集中在 `../imagen/references/common.md`（下文以「common.md §N」引用）；生圖引擎（唯一引擎＝image-studio GPT 線、呼叫契約、失敗處理）見 `../imagen/references/draw-engines.md`。
 
 ---
 
@@ -33,8 +33,8 @@ allowed-tools:
 ## 一致性規則（生圖前必讀）
 
 - **預設視覺規則**：女性白皮膚、所有角色美型（[EXCLUSION] 排除 western cartoon 漂移）、背景滿版四邊用正向指令鎖；使用者明說即覆蓋。詳見 common.md §1。
-- **專案既存資產優先（pre-flight 必做）**：先掃 `立繪/`、`assets/portraits/`、`portraits/`、`assets/sprites/`；有既有立繪就鎖畫風代號 / 頭身比 / 視角 / 光源 / 構圖留白 / 面向當預設，**不從風格庫重新挑**，代表作當 `--ref`，Strict Rules 明寫 visually rhyme，跟使用者確認 lock。詳見 common.md §2。
-  - 立繪特別容易在**頭身比**飄（成熟系角色被 Banana 自動拉長身），ref + Strict Rules 雙鎖才穩。
+- **專案既存資產優先（pre-flight 必做）**：先掃 `立繪/`、`assets/portraits/`、`portraits/`、`assets/sprites/`；有既有立繪就鎖畫風代號 / 頭身比 / 視角 / 光源 / 構圖留白 / 面向當預設，**不從風格庫重新挑**，代表作當 `--reference`，Strict Rules 明寫 visually rhyme，跟使用者確認 lock。詳見 common.md §2。
+  - 立繪特別容易在**頭身比**飄（成熟系角色常被自動拉長身），reference + Strict Rules 雙鎖才穩。
 - **批次一致性模式（≥ 2 張立繪，例：4 個角色、一組職業、SR/SSR 角色組）**：先訂統一規格（立繪多訂一項**背景處理強度**）→ 分鎖死 / 可變 → 同一段 Strict Rules 寫進每張 prompt → 生完必確認；單張跳過。詳見 common.md §3。
   - 頭身比、面向方向、視角不寫進 Strict 必飄。
   - R / SR / SSR 角色組：**頭身比仍要統一**，差距走配件密度 / 光效 / 服裝細節，不走頭身比。
@@ -126,7 +126,7 @@ allowed-tools:
 跟 [遊戲名] 的 [角色名] 視覺語言相近——金屬質感 / 配件密度 / 光影方向。
 
 ### 注意事項
-- [Banana Pro 對某些主題的限制，例如過度暴露 / 武器尺寸]
+- [生圖模型對某些主題的限制，例如過度暴露 / 武器尺寸]
 - [風格融合的潛在風險]
 
 可以進入 prompt 階段嗎？
@@ -190,17 +190,19 @@ extremely high detail density, decorative naval / military elements, soft painte
 ornate costume design, vibrant accent colors, refined linework, 2D production-quality
 ```
 
-### Step 3：判定模式
+### Step 3：確認引擎可用
 
-先依 draw-engines.md §2 判引擎（整個任務只判一次）：**GPT 線可用** → Phase 5 改用 image-studio client（draw-engines.md §3；`--size` / `--ratio` 需求改寫進 prompt 文字），整批失敗照 §4 先回報原因、由使用者決定是否換線。**GPT 線不可用** → 依 common.md §9 判定：**API 模式** → Phase 5；**Prompt 模式** → 以 §9「生成資訊」格式交付英文 prompt + 建議參數 + 參考圖上傳提醒。
+依 draw-engines.md §1 確認引擎可用（整個任務只判一次）：**可用** → Phase 5；**不可用** → 生圖停止，請使用者向主任索取安裝包，不改走其他生圖途徑。立繪常用的長寬比與解析度**沒有對應 flag**，一律寫進 prompt 文字（例：`3:4 portrait aspect ratio, 2K resolution`）。
+
+使用者只要 prompt 文字、不要實際生圖 → 以 common.md §9「生成資訊」格式交付英文 prompt + 建議參數 + 參考圖提醒。
 
 ---
 
-## Phase 5｜圖片生成（API 模式）
+## Phase 5｜圖片生成
 
 1. **存放位置與檔名**：依 common.md §7（fallback `<cwd>/imagen-portrait/`；檔名 `{角色名或主題}_{風格代號}_{日期}_{序號}.png`，例 `ice_mage_mihoyo_genshin_20260430_01.png`）。
-2. **執行**：英文 prompt Write 到 `prompt-final.txt`，呼叫 `~/.claude/skills/imagen/bin/generate.py`（標準指令 common.md §9）；立繪預設 `--size 2K`，`--ref` 可同時傳角色 + 風格 + 服裝參考。
-3. **生成後**：依 common.md §6——Read 看圖 → 回報絕對資料夾路徑 → 問「滿意嗎？要調整 prompt？要做不同表情 / 姿態變體？」；調整只改使用者明確指出的部分。
+2. **執行**：英文 prompt Write 到 `prompt-final.txt`，呼叫 image-studio client（標準指令 common.md §9 / draw-engines.md §3）；立繪預設在 prompt 文字寫 `2K resolution`，`--reference` 可同時傳角色 + 風格 + 服裝參考。
+3. **生成後**：依 common.md §6——Read 看圖 → 回報絕對資料夾路徑 → 問「滿意嗎？要調整 prompt？要做不同表情 / 姿態變體？」；調整只改使用者明確指出的部分。整批失敗見 draw-engines.md §4。
 
 ---
 
@@ -236,7 +238,7 @@ ornate costume design, vibrant accent colors, refined linework, 2D production-qu
 
 ## 錯誤處理
 
-通用錯誤（API Key / 安全過濾 / 參考圖格式 / 網路）見 common.md §9；立繪特有：
+通用錯誤（安全過濾 / 參考圖格式 / 網路）見 common.md §9，整批失敗分流見 draw-engines.md §4；立繪特有：
 
 | 錯誤 | 處理 |
 |------|------|
@@ -244,7 +246,7 @@ ornate costume design, vibrant accent colors, refined linework, 2D production-qu
 | 風格融合失敗（看起來像 SDXL 通用 anime）| 加強 boilerplate，強調具體遊戲名 + 視覺特徵 |
 | 角色臉部變形 | 加 `well-drawn anatomically correct face` + 排除 `malformed face` |
 | 武器 / 配件設計混亂 | 拆條目單獨描述，每個配件給獨立形容詞 |
-| 跟參考圖差異大 | 確認 `--ref` 有正確傳，描述 must-keep 特徵 |
+| 跟參考圖差異大 | 確認 `--reference` 有正確傳，描述 must-keep 特徵 |
 
 ## 銜接
 

@@ -30,8 +30,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 - `~/.claude/agents/` 現有清單
 - `%USERPROFILE%\starter-kit` 已 clone？（已有就 `git pull`，記 CHANGELOG 新增段落）
 - secretary(skills/secretary)→ 歸「自有」，本精靈完全不碰
-- `skills/imagen/.env` 存在？（影響生圖類能不能用）
-- **image-studio 已裝？**（生圖 GPT 線，主任另行發放、不在 kit 內）：`~/.claude/skills/image-studio/` 目錄存在？`~/.config/image-studio/credentials.json` 存在且 `expiresAt` 未過期？——**只偵測、不能代裝、不給安裝路徑**；缺或過期就結算表提醒一行「生圖 GPT 線未裝／憑證過期 → 找主任拿安裝包，裝好前五支生圖 skill 自動走 Gemini 線，功能不受影響」
+- **image-studio 已裝？**（生圖的唯一引擎，主任另行發放、不在 kit 內）：`~/.claude/skills/image-studio/` 目錄存在？`~/.config/image-studio/credentials.json` 存在且 `expiresAt` 未過期？——**只偵測、不能代裝、不給安裝路徑與憑證細節**；缺或過期＝**沒有替代線**，結算表提醒一行「生圖引擎未裝／憑證過期 → 五支生圖 skill（imagen、imagen-portrait、imagen-ui、generate2dsprite、generate2dmap）完全不能用，必須找主任拿安裝包」
 - **環境依賴**（企劃 / 原型類 6 支不需要，只影響生圖、測試、試玩迴圈；data-report-builder 生成的報表 skill 另需 pandas + plotnine，用到再裝）：
   - `python --version` 有 3.10+？
   - `python -c "import PIL"`、`python -c "import playwright"` 各自過不過？
@@ -55,7 +54,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 | 這支 | 依賴 | 用到什麼 |
 |---|---|---|
 | imagen-ui | generate2dsprite | 去背腳本 `scripts/generate2dsprite.py` |
-| imagen-portrait、imagen-ui、generate2dsprite、generate2dmap、art-style-guard | imagen | `references/common.md`、`references/consistency-rules.md`、`bin/generate.py` |
+| imagen-portrait、imagen-ui、generate2dsprite、generate2dmap、art-style-guard | imagen | `references/common.md`、`references/consistency-rules.md`、`references/draw-engines.md` |
 | game-prototype | game-develop | `templates/*.template.md` |
 | game-develop | imagen、imagen-ui、generate2dsprite、generate2dmap、webapp-testing、art-style-guard、image-to-prompt | 生圖 / 後製 / QA 全部轉派這些 sub-skill |
 | playtest-loop | agents dialogue-writer、game-balance-auditor | 收割後的文筆 / 數值修正轉派 |
@@ -75,9 +74,8 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
    ```
    本精靈自己（`skills/starter-setup/`）也是 skills/ 內的一支，一樣走 junction 裝進 `~/.claude/skills/starter-setup`——這樣之後「starter 升級」「starter 健檢」口令才有 skill 可觸發，不用再手動讀檔
 3. **Agents 用拷貝**（散檔無法 junction）：複製「沒有」的 `agents/*.md` 到 `~/.claude/agents/`。`templates/my-voice.example.md` 是範本不是 agent，不裝，結算表提示一句。升級時 agents 有 diff → 歸「自改過」進最終健檢
-4. **imagen 設定**：`.env` 不存在就把 `.env.example` 複製成 `.env`，結算表提醒去 https://aistudio.google.com/apikey 拿 key 填入
-5. **略過清單**：使用者說「X 不要裝」「不要 X」→ 把 X 的名字寫進 `~/.claude/starter-skip.md`（一行一個，可加一句原因），之後安裝與升級都跳過它；說「裝回 X」→ 從檔案移除該行並立即裝。沒有這個檔就代表沒有略過任何東西
-6. **環境依賴**（開場健檢有缺才做）：列一張「缺什麼 → 影響哪些 skill → 指令」的表，**問一次**「要不要我順手裝？」。這是 kit 檔案以外唯一會動到使用者環境（Python 套件、MCP 設定）的動作，所以不套「新增不問」；同意才依序執行，不同意或失敗就結算表列「未裝，影響 X」，不重試第三次。指令固定用這幾條：
+4. **略過清單**：使用者說「X 不要裝」「不要 X」→ 把 X 的名字寫進 `~/.claude/starter-skip.md`（一行一個，可加一句原因），之後安裝與升級都跳過它；說「裝回 X」→ 從檔案移除該行並立即裝。沒有這個檔就代表沒有略過任何東西
+5. **環境依賴**（開場健檢有缺才做）：列一張「缺什麼 → 影響哪些 skill → 指令」的表，**問一次**「要不要我順手裝？」。這是 kit 檔案以外唯一會動到使用者環境（Python 套件、MCP 設定）的動作，所以不套「新增不問」；同意才依序執行，不同意或失敗就結算表列「未裝，影響 X」，不重試第三次。指令固定用這幾條：
    ```
    pip install -r %USERPROFILE%\starter-kit\requirements.txt
    python -m playwright install chromium
@@ -85,8 +83,8 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
    ```
    Claude in Chrome 擴充功能沒有指令能裝，不列進這張表，只在結算表 🧩 那行給連結與 `/chrome` 兩步。
    **缺 Python / Node runtime → 直接問一次「要不要我幫你裝？」**，同意就代跑 `winget install Python.Python.3.12` / `winget install OpenJS.NodeJS.LTS`（裝完提醒**完全重開終端**再打「starter 升級」續裝，setx/PATH 對舊視窗不生效）；不同意就給上述指令請他自己裝。winget 也沒有（罕見）→ 給官網下載連結（python.org / nodejs.org），不硬裝。裝了 MCP 要提醒：Chrome 需以 `--remote-debugging-port=9222` 啟動 playtest-loop 才讀得到玩家分頁，且新 MCP 要重開 Claude Code 才生效
-7. **生成個人 skill map**（裝機與升級收尾必做）：在**當前 session 的 memory 目錄**（Claude 自己知道路徑）寫 `reference_skill_map.md`——「工作情境 → 首選工具」對照表，內容 = 本次實際裝上的 + 使用者自有的 skills/agents（略過的不列）；已存在就更新到現況。同時在 MEMORY.md 索引加一行，並於頂部寫「上次 starter 健檢：<今天>」。這張表是使用者的個人地圖，之後健檢會拿它對帳
-8. **設定資產版控**（選配，問一次）：「要不要幫你的 `~/.claude` 開 git 版控？改壞規則可回滾、換電腦可還原。」同意才做：`git init` + 拷 `templates/claude-config.gitignore` 為 `~/.claude/.gitignore`，並把本次 junction 的 skill 名逐行補進 gitignore（junction 內容歸 kit repo 版控，不重複記帳），首次 commit。不同意就跳過，結算表不再追問
+6. **生成個人 skill map**（裝機與升級收尾必做）：在**當前 session 的 memory 目錄**（Claude 自己知道路徑）寫 `reference_skill_map.md`——「工作情境 → 首選工具」對照表，內容 = 本次實際裝上的 + 使用者自有的 skills/agents（略過的不列）；已存在就更新到現況。同時在 MEMORY.md 索引加一行，並於頂部寫「上次 starter 健檢：<今天>」。這張表是使用者的個人地圖，之後健檢會拿它對帳
+7. **設定資產版控**（選配，問一次）：「要不要幫你的 `~/.claude` 開 git 版控？改壞規則可回滾、換電腦可還原。」同意才做：`git init` + 拷 `templates/claude-config.gitignore` 為 `~/.claude/.gitignore`，並把本次 junction 的 skill 名逐行補進 gitignore（junction 內容歸 kit repo 版控，不重複記帳），首次 commit。不同意就跳過，結算表不再追問
 
 ## 4. CLAUDE.md 併入
 
@@ -115,7 +113,8 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 
 ### 環境
 
-- **仍缺的依賴**：第 3 節第 6 步沒裝或裝失敗的 → 逐項列「缺 X → Y skill 不能跑 / 退到 Z fallback」（例：缺 chrome-devtools MCP → playtest-loop 退到手貼 `exportDevNotes()`；缺 playwright → webapp-testing 不能跑，game-develop 的玩法 QA 走 chrome-devtools fallback）
+- **仍缺的依賴**：第 3 節第 5 步沒裝或裝失敗的 → 逐項列「缺 X → Y skill 不能跑 / 退到 Z fallback」（例：缺 chrome-devtools MCP → playtest-loop 退到手貼 `exportDevNotes()`；缺 playwright → webapp-testing 不能跑，game-develop 的玩法 QA 走 chrome-devtools fallback）
+- **生圖引擎缺席**：image-studio 未裝或 `credentials.json` 過期 → 列一行「五支生圖 skill 全部停用（沒有替代線）→ 找主任拿安裝包」；kit 不代裝、不寫安裝路徑與憑證細節
 - **僅健檢模式**（第 1 節 + 第 5 節）：一樣列出來，附指令，不裝
 
 ### skills
@@ -133,7 +132,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 
 ### memory / skill map
 
-- **skill map 對帳**：`reference_skill_map.md` 與 `~/.claude/skills/`、`agents/` 實況比對——表上有但已不存在的（如 kit 合併掉的）、實際有但表上漏列的，各列一句建議更新；沒有這張表就建議生成（第 3 節第 7 步）
+- **skill map 對帳**：`reference_skill_map.md` 與 `~/.claude/skills/`、`agents/` 實況比對——表上有但已不存在的（如 kit 合併掉的）、實際有但表上漏列的，各列一句建議更新；沒有這張表就建議生成（第 3 節第 6 步）
 - **MEMORY.md 健康度**：索引超過 40 行 → 建議把過期專案條目歸檔；有索引指向不存在的檔 → 列出
 - **健檢標記**：更新 MEMORY.md 頂部「上次 starter 健檢」為今天
 
@@ -160,7 +159,8 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 
 ```
 🩺 開場健檢:CLAUDE.md 96 行 / skills 0 / agents 0 / secretary 無
-🧰 環境:Python 3.13 ✔ / Pillow ✔ / Playwright ✔(本次裝) / chrome-devtools MCP ✘(你說先不裝→playtest-loop 退手貼模式) / Gemini key ✘(.env 待填)
+🧰 環境:Python 3.13 ✔ / Pillow ✔ / Playwright ✔(本次裝) / chrome-devtools MCP ✘(你說先不裝→playtest-loop 退手貼模式)
+🎨 生圖引擎 image-studio:✘ 未裝 → 五支生圖 skill(imagen / imagen-portrait / imagen-ui / generate2dsprite / generate2dmap)完全不能用,沒有替代線,找主任拿安裝包
 🧩 Claude in Chrome:未裝 → 自己點一下 https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn,裝完在 Claude Code 打 /chrome 選 Enabled by default
 ✅ 新裝 skills(N,junction):starter-setup、product-planning、imagen …
 ✅ 新裝 agents(3):dialogue-writer、game-balance-auditor、planning-doc-auditor
@@ -174,7 +174,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
   1. CLAUDE.md「資料分析」段 12 行只在統計任務用到 → 可搬成 skill,省 12 行
   2. 換版:你的 my-imagen vs kit imagen → 建議 C(kit 版為底 + 你的 2 條客製寫進 CLAUDE.md);理由:kit 版觸發詞多 3 組、有 magenta 去背流程且會升級
   3. 換版:你的 CLAUDE.md「絕不推 main」vs starter「協作 repo 不直推」→ 建議換 starter 的;理由:更具體,solo repo 不受限
-提醒:agents 新裝要重開 Claude Code;imagen 要填 .env
+提醒:agents 新裝要重開 Claude Code;生圖前先確認 image-studio 已裝且憑證未過期
 ```
 
 結算表後補一句選配指引（已裝 secretary 的人跳過）：
@@ -205,5 +205,5 @@ https://github.com/TimDaChung/secretary-kit」
 - **刪改必問**：刪除、覆蓋、衝突處理、自改過的合併，列建議等使用者說了才動
 - 任何刪除/覆蓋前先備份到 `~/.claude/skills-backup/`
 - CLAUDE.md 原有內容一字不刪、不改寫、不重排
-- 不碰 settings.json、使用者既有的 memory 內容、與 kit 無關的任何檔案。例外三個，各有邊界：本精靈自建的 skill map 與健檢標記（只增改自己建的檔與 MEMORY.md 對應行）、Python 套件與 MCP 設定（問過才裝，第 3 節第 6 步）、設定資產版控（問過才 init，第 3 節第 8 步）
+- 不碰 settings.json、使用者既有的 memory 內容、與 kit 無關的任何檔案。例外三個，各有邊界：本精靈自建的 skill map 與健檢標記（只增改自己建的檔與 MEMORY.md 對應行）、Python 套件與 MCP 設定（問過才裝，第 3 節第 5 步）、設定資產版控（問過才 init，第 3 節第 7 步）
 - 同一步卡兩次 → 停止重試，整理錯誤請使用者找 Tim

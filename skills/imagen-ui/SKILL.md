@@ -2,7 +2,7 @@
 name: imagen-ui
 version: 1.0.0
 description: |
-  Nano Banana Pro 生成 RPG 手遊 UI 素材（button / icon / frame / banner / popup / rarity_glow 等 15 種元件）。預設米哈遊 / 方舟 / NIKKE 等高營收手遊風格 — 6 風格庫 + 英文 boilerplate。
+  生成 RPG 手遊 UI 素材（button / icon / frame / banner / popup / rarity_glow 等 15 種元件）。預設米哈遊 / 方舟 / NIKKE 等高營收手遊風格 — 6 風格庫 + 英文 boilerplate。
   觸發：「UI 素材」「icon」「卡框」「頭像框」「banner」「技能 icon」「稀有度光效」「米哈遊 UI」「方舟 UI」。
 allowed-tools:
   - Bash
@@ -17,7 +17,7 @@ allowed-tools:
 
 > **執行角色：美術**——關注風格一致、可讀性、UI 資產規格；產出後切**工程**視角核對切圖與尺寸可直接使用。
 
-使用 Gemini 的 Nano Banana Pro (`gemini-3-pro-image-preview`) 生成 RPG 手遊 UI 元件，預設套用高營收手遊（米哈遊、明日方舟等）的 UI 視覺語言。三支 imagen skill 的共用流程、格式、指令集中在 `../imagen/references/common.md`（下文以「common.md §N」引用）。
+生成 RPG 手遊 UI 元件，預設套用高營收手遊（米哈遊、明日方舟等）的 UI 視覺語言。三支 imagen skill 的共用流程、格式、指令集中在 `../imagen/references/common.md`（下文以「common.md §N」引用）；生圖引擎（唯一引擎＝image-studio GPT 線、呼叫契約、失敗處理）見 `../imagen/references/draw-engines.md`。
 
 ---
 
@@ -26,7 +26,7 @@ allowed-tools:
 1. **Prompt 忠於討論結果** — 不擅自加裝飾元素。
 2. **預設手遊高品質 UI 審美** — 金屬質感 / 漸層 / 半透明 / 細節描邊，但**不喧賓奪主**（UI 元件背後通常會放文字或其他內容）。
 3. **每次都問元件類型** — UI 是功能性設計，必須先確定要做哪一類元件。
-4. **去背優先** — 大多數 UI 元件都要去背才能融入遊戲畫面；Gemini 輸出沒有 alpha，所以生成時鎖純品紅 `#FF00FF` 滿版背景，Phase 5 再用 magenta chroma-key 後製去背。
+4. **去背優先** — 大多數 UI 元件都要去背才能融入遊戲畫面。單件元件直接加 `--remove-background` 出透明 PNG；**一張圖含多個元件要切開時**（多稀有度同版、icon 集合版）仍鎖純品紅 `#FF00FF` 滿版背景，Phase 5 走 magenta chroma-key 後製切圖。
 5. **記錄偏好** — 寫入 `<project-dir>/docs/imagen_history.md`（common.md §8）。
 
 ---
@@ -34,7 +34,7 @@ allowed-tools:
 ## 一致性規則（生圖前必讀）
 
 - **預設視覺規則**：女性白皮膚、角色美型（[EXCLUSION] 排除 western cartoon 漂移）、元件若含背景場景須滿版四邊用正向指令鎖；使用者明說即覆蓋。詳見 common.md §1。
-- **專案既存資產優先（pre-flight 必做）**：先掃 `assets/ui/`、`ui/`、`assets/icons/`、`assets/frames/`；有既有 UI 就鎖風格代號 / 邊框粗細 / 轉角圓度 / 光效強度 / 配色主軸 / 稀有度視覺系統當預設，**不從風格庫重新挑**，代表作當 `--ref`，Strict Rules 明寫 visually rhyme，跟使用者確認 lock。詳見 common.md §2。
+- **專案既存資產優先（pre-flight 必做）**：先掃 `assets/ui/`、`ui/`、`assets/icons/`、`assets/frames/`；有既有 UI 就鎖風格代號 / 邊框粗細 / 轉角圓度 / 光效強度 / 配色主軸 / 稀有度視覺系統當預設，**不從風格庫重新挑**，代表作當 `--reference`，Strict Rules 明寫 visually rhyme，跟使用者確認 lock。詳見 common.md §2。
   - UI 元件常組成系列同畫面出現（角色卡 + 稀有度框、技能列、banner 牆），新做的 1 個風格飄掉直接破壞整個 HUD。
 - **批次一致性模式（≥ 2 個同類元件，例：6 個技能 icon、4 種稀有度卡框、banner 系列、多語系 popup）**：先訂統一規格（UI 多訂：元件比例、邊框風格、光效強度、字體 / 文字配置、是否去背 magenta 底、稀有度視覺系統）→ 鎖死 = 風格 / 比例 / 邊框 / 光效系統 / 配色主軸，可變 = 圖標符號 / 主題色 / 文字內容 → 同一段 Strict Rules 寫進每張 prompt → 生完必確認（建議組成 grid 或實際擺到模擬 UI 上看）；單張跳過。詳見 common.md §3。
   - 邊框粗細、轉角圓度、光效強度不寫進 Strict 必飄。
@@ -200,20 +200,23 @@ mobile RPG game UI asset, Azur Lane-style, deep navy with gold trim, naval / mil
 soft painted gradient, ornate but readable, solid #FF00FF magenta background, edge-to-edge, production-quality 2D game UI
 ```
 
-### Step 3：判定模式
+### Step 3：確認引擎可用
 
-先依 draw-engines.md §2 判引擎（整個任務只判一次）：**GPT 線可用** → Phase 5 改用 image-studio client（draw-engines.md §3；`--size` / `--ratio` 需求改寫進 prompt 文字；去背直接加 `--remove-background`，免走 magenta chroma-key），整批失敗照 §4 先回報原因、由使用者決定是否換線。**GPT 線不可用** → 依 common.md §9 判定：**API 模式** → Phase 5；**Prompt 模式** → 以 §9「生成資訊」格式交付英文 prompt + 建議參數 + 參考圖上傳提醒。
+依 draw-engines.md §1 確認引擎可用（整個任務只判一次）：**可用** → Phase 5；**不可用** → 生圖停止，請使用者向主任索取安裝包，不改走其他生圖途徑。長寬比與解析度**沒有對應 flag**，一律寫進 prompt 文字（例：`21:9 ultrawide aspect ratio, 1K resolution`）。單件元件去背直接加 `--remove-background`；要切多件的版面才保留 magenta 底 + chroma-key。
+
+使用者只要 prompt 文字、不要實際生圖 → 以 common.md §9「生成資訊」格式交付英文 prompt + 建議參數 + 參考圖提醒。
 
 ---
 
-## Phase 5｜圖片生成（API 模式）
+## Phase 5｜圖片生成
 
 1. **存放位置與檔名**：依 common.md §7（fallback `<cwd>/imagen-ui/`；檔名 `{元件代號}_{風格代號}_{日期}_{序號}.png`，例 `icon_skill_mihoyo_genshin_20260430_01.png`）。
-2. **執行**：英文 prompt Write 到 `prompt-final.txt`，呼叫 `~/.claude/skills/imagen/bin/generate.py`（標準指令 common.md §9）；UI 預設 `--size 1K`。寬元件（button / tab / progress_bar / divider）用 `--ratio 21:9` 生成，去背後再裁到目標比例。
+2. **執行**：英文 prompt Write 到 `prompt-final.txt`，呼叫 image-studio client（標準指令 common.md §9 / draw-engines.md §3）；UI 預設在 prompt 文字寫 `1K resolution`。寬元件（button / tab / progress_bar / divider）在 prompt 文字寫 `21:9 ultrawide aspect ratio`，去背後再裁到目標比例。
 
-### 去背（magenta chroma-key）
+### 去背
 
-imagen-ui 本身沒有去背功能，借用 generate2dsprite 的後製：
+- **單件元件**：生成時加 `--remove-background`，直出透明 PNG，不必走下面的 chroma-key。
+- **一張圖含多件要切開**：prompt 鎖 magenta 底，再借用 generate2dsprite 的後製切圖：
 
 ```bash
 python ~/.claude/skills/generate2dsprite/scripts/generate2dsprite.py process --target asset --mode single --rows 1 --cols 1 --input <png> --output-dir <dir>
@@ -221,7 +224,7 @@ python ~/.claude/skills/generate2dsprite/scripts/generate2dsprite.py process --t
 
 ### 多稀有度變體（常見需求）
 
-如果要白藍紫金紅五階稀有度，**用同一個 base prompt + 改色相詞 + 改光效強度**生 5 張，每張獨立呼叫 API，保持構造一致只變色：
+如果要白藍紫金紅五階稀有度，**用同一個 base prompt + 改色相詞 + 改光效強度**生 5 張，每張獨立呼叫一次 client，保持構造一致只變色：
 
 ```
 common (white): muted gray-white palette, soft minimal glow
@@ -274,7 +277,7 @@ mythic (red): crimson palette, fiery red aura with flame motif
 
 ## 錯誤處理
 
-通用錯誤（API Key / 安全過濾 / 參考圖格式 / 網路）見 common.md §9；UI 特有：
+通用錯誤（安全過濾 / 參考圖格式 / 網路）見 common.md §9，整批失敗分流見 draw-engines.md §4；UI 特有：
 
 | 錯誤 | 處理 |
 |------|------|

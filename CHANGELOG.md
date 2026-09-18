@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## v3.0.0 (2026-09-18)
+
+> **資安事件應對＋breaking change：Gemini 生圖線全面移除，生圖只剩 image-studio（GPT 線）一條。**
+
+起因：有同事的 Gemini API key 被盜。該 API **按件計費、無上限**，key 一旦外流就是開放式帳單，風險不可接受。
+
+- **刪除** `skills/imagen/bin/generate.py`（Gemini/Nano Banana Pro 呼叫端）與 `skills/imagen/.env.example`。kit 內不再有任何需要個人 API key 的生圖途徑
+- **`draw-engines.md` 由雙引擎路由改為單引擎**：唯一引擎 = image-studio；**沒有 fallback**——沒裝或憑證過期就是生圖停工、請使用者找主任拿安裝包，不得改走其他生圖途徑。失敗處理表移除所有「換 Gemini」選項（改 prompt／等額度／找主任換憑證／問要不要重跑，全留在 GPT 線）
+- **新增封印條款（draw-engines.md §5）**：載明移除原因，明文禁止未來把按件計費無上限的生圖 API 加回來、禁止從 git 歷史還原 `generate.py`；真要加第二引擎必須先有硬性額度上限與主任決策
+- 五支生圖 skill＋art-style-guard／game-develop／image-to-prompt 全面改寫：移除 generate.py 呼叫、`--ratio`／`--size`／`--ref` flag（改用 client 契約，長寬比寫進 prompt 文字）、`.env` 與 key 檢查、以及 Nano Banana Pro 專屬的模型特性段（只出 JPEG、IMAGE_RECITATION、畫格線、painterly bias 等，對 GPT 線不成立）
+- **common.md 的 API mode／Prompt mode 雙模式判定移除**：那套判定的本質是「有沒有 Gemini key」，已無意義
+- **art-style-guard 的 STYLE_BIBLE `engine` 欄**：新專案一律 `gpt`；舊 bible 若寫 `gemini` 視為歷史紀錄，改走 GPT 線重生並更新欄位（跨批一致性靠 prompt 與參考圖比對）
+- starter-setup：移除 `.env` 建立步驟與 Gemini key 健檢；image-studio 檢查的措辭從「缺就走 Gemini，功能不受影響」改為「**缺就五支生圖 skill 完全不能用**」。維持只偵測不代裝、kit 內不寫安裝路徑與憑證細節
+- 後製能力**完全不受影響**：chroma-key 去背、sheet 切割、shared-scale、GIF 匯出、QC、風格守則、prompt 規則全部保留
+
+### ⚙️ 升級動作
+
+1. **刪除 `~/.claude/skills/imagen/.env`**（若存在）——裡面是明文 Gemini key，且已無任何 skill 會讀它
+2. 刪除後**一定要提醒使用者**（這步不可省略，檔案刪掉不等於 key 失效）：
+   「你本機那把 Gemini API key 已從硬碟移除，但**雲端那把還有效**。請立刻到 https://aistudio.google.com/apikey 把它 revoke／刪除；若該 key 綁的是 Google Cloud 專案，順便去帳單設定確認有無異常用量與支出上限。」
+3. 若使用者的環境變數（`GEMINI_API_KEY`）或 shell profile 有設過這把 key，一併提醒清除（`setx GEMINI_API_KEY ""` 或到系統環境變數移除）
+4. 檢查 image-studio 是否已安裝（`~/.claude/skills/image-studio/` 與 `~/.config/image-studio/credentials.json`）——沒裝就提醒：**現在沒有備用生圖線了**，生圖 5 支在裝好前不能運作,安裝包向主任索取
+
 ## v2.5.5 (2026-09-17)
 
 - **CLAUDE.starter Git 基本盤新增「禁推機密」**：含 token / API key / 密碼的內容一律不得 commit 進有遠端的 repo；push 前掃金鑰特徵；已進歷史視同外洩（revoke 換新→清歷史）。全域與 kit 同步收錄

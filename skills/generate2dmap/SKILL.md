@@ -1,6 +1,6 @@
 ---
 name: generate2dmap
-description: "Generate/revise 2D game maps via Nano Banana Pro (imagen/bin/generate.py): RPG maps, tactical arenas, battle backgrounds, side-scrollers, tilemaps, prop packs, collision zones, map previews."
+description: "Generate/revise 2D game maps via the image-studio draw engine: RPG maps, tactical arenas, battle backgrounds, side-scrollers, tilemaps, prop packs, collision zones, map previews."
 ---
 
 # Generate2dmap
@@ -25,30 +25,30 @@ Read [references/map-strategies.md](references/map-strategies.md) when the pipel
 The lock rules shared by all five image skills live in [`../imagen/references/consistency-rules.md`](../imagen/references/consistency-rules.md) — §1 default visual rules, §2 project asset inheritance, §3 batch consistency mode, §4 hand-off to `art-style-guard`. Summary plus the map-only deltas:
 
 - **Default visual rules (§1)**: map / background full-bleed to all four edges via a positive composition instruction ("scene extends full-bleed to all four edges of canvas" — pure negation can trigger frame design); any character or NPC on the map → refined attractive features (mobile gacha aesthetic), female → fair luminous skin, no western cartoon / Disney / Pixar drift. Explicit user requests override.
-- **Project asset inheritance (§2, REQUIRED pre-flight)**: scan `assets/maps/`, `assets/backgrounds/`, `maps/`, `backgrounds/` (maps), `assets/tiles/`, `assets/props/`, `tiles/` (tilesets / props), and `assets/sprites/` (the character sprites that will sit on the map — their scale + style is the lock for prop scale). If same-category map assets exist: LOCK art style, perspective angle, palette family, lighting direction, scale / pixel-density target, atmosphere; pass at least one existing map / prop as `--ref`; embed in Strict Rules "same perspective, same palette family, same lighting direction, same scale; props from this asset must sit on the existing maps without scale or palette clash"; confirm the lock with the user.
+- **Project asset inheritance (§2, REQUIRED pre-flight)**: scan `assets/maps/`, `assets/backgrounds/`, `maps/`, `backgrounds/` (maps), `assets/tiles/`, `assets/props/`, `tiles/` (tilesets / props), and `assets/sprites/` (the character sprites that will sit on the map — their scale + style is the lock for prop scale). If same-category map assets exist: LOCK art style, perspective angle, palette family, lighting direction, scale / pixel-density target, atmosphere; pass at least one existing map / prop as `--reference`; embed in Strict Rules "same perspective, same palette family, same lighting direction, same scale; props from this asset must sit on the existing maps without scale or palette clash"; confirm the lock with the user.
 - **Batch consistency mode (§3, 2+ same-category map assets — a prop pack of 8 trees, 6 floor-tile variants, a parallax layer set, several battle backgrounds for one biome)**: unified spec first — art style code (`clean_hd` / `pixel_inspired` / project-native), aspect ratio, perspective (top-down / 3/4 isometric / side / parallax depth), lighting direction (sun angle, time of day), **palette family**, scale / pixel-density target, composition rules (e.g. all props centered, all tiles seamless 256×256); locked = style / perspective / palette / scale / lighting, variable = subject (which tree, which prop) / detail composition; identical Strict Rules wording in every prompt; mandatory verification, preferably by assembling the assets onto a test scene and checking the assembled image.
-  - Maps especially need explicit **palette + lighting-direction** locks — without them Banana mixes warm / cool atmospheres or lights adjacent props from different angles, which is visible at first glance on a shared scene.
+  - Maps especially need explicit **palette + lighting-direction** locks — without them the model mixes warm / cool atmospheres or lights adjacent props from different angles, which is visible at first glance on a shared scene.
 - **Hand-off (§4)**: second batch onward in the same project, or any style doubt → run `art-style-guard` first (Style Bible + contact-sheet QC).
 
 ## Image Generation First
 
-This skill is image-generation-first for visual assets. Call `~/.claude/skills/imagen/bin/generate.py` (Nano Banana Pro / gemini-3-pro-image-preview) as the default creative art source for base maps, dressed references, prop sheets, prop sprites, tileset art, parallax layers, battle backgrounds, and other visible map assets. The agent writes the creative prompts itself — scripts never generate creative prompts or procedurally draw final visual art. Scripts may assemble, slice, chroma-key, crop, validate, compose previews, emit JSON metadata, and wire image-generated assets into engine-native files such as Godot `.tscn` scenes.
+This skill is image-generation-first for visual assets. Call the `image-studio` client as the default creative art source for base maps, dressed references, prop sheets, prop sprites, tileset art, parallax layers, battle backgrounds, and other visible map assets. The agent writes the creative prompts itself — scripts never generate creative prompts or procedurally draw final visual art. Scripts may assemble, slice, chroma-key, crop, validate, compose previews, emit JSON metadata, and wire image-generated assets into engine-native files such as Godot `.tscn` scenes.
 
-**Engine routing**: when the personal `image-studio` skill is installed, the GPT line is preferred for all raw art — see `../imagen/references/draw-engines.md` (§3 call contract: aspect ratio goes into the prompt text; §4 failure handling: a batch fails only when 0 images saved, and fallback to `generate.py` happens only after reporting the cause and getting the user's go-ahead). Without it, `generate.py` below applies unchanged.
+**Engine routing**: all raw art comes from the personal `image-studio` skill (the GPT line) — the only engine, see `../imagen/references/draw-engines.md` (§1 availability; §3 call contract: aspect ratio and resolution go into the prompt text; §4 failure handling: a batch fails only when 0 images saved — report the cause and let the user decide). If `image-studio` is not installed or its credentials expired, image generation stops: tell the user to get the installer from the team lead, and do not look for another generation route. Everything else in this skill — prompt writing, extraction, placement, previews, metadata, validation — still works on art the project already has.
 
 Only use procedural drawing or scripted placeholder art when the user explicitly asks for placeholders, test fixtures, debug maps, or engine scaffolding without final art. For an engine target such as `Godot_TileMap`, generate or reuse the visual tileset art first, then use scripts/code only to build tile layers, collision, zones, and scene wiring.
 
-### Calling generate.py
+### Calling the draw client
 
 ```bash
-python ~/.claude/skills/imagen/bin/generate.py \
+python ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
+  --count 1 \
   --prompt "<creative prompt>" \
-  --ratio <1:1|16:9|4:3|...> --size <1K|2K|4K> \
-  --output <path/to/out.png> \
-  [--ref <path>]...
+  --output <assets/map/> \
+  [--reference <path>]...
 ```
 
-Pick `--ratio` from the map shape (battle bg → `16:9`, square arena → `1:1`, top-down RPG → `1:1` or `4:3`). Use `--size 2K` for production maps, `1K` for fast iterations and prop packs. Banana embeds each `--ref` as inline_data; pass the file path, not just the description.
+The client takes no aspect-ratio or resolution flags: write both into the prompt text. State the canvas shape from the map shape (battle bg → `16:9 widescreen canvas`, square arena → `square 1:1 canvas`, top-down RPG → `square 1:1 canvas` or `4:3 landscape canvas`) and ask for `high resolution, at least 2048 px on the long edge` for production maps; a smaller target is fine for fast iterations and prop packs. `--output` is a directory and filenames are client-generated — rename each saved file to the deliverable name below. The client uploads each `--reference`; pass the file path, not just a description.
 
 ## Parameter Contract
 
@@ -59,14 +59,14 @@ User-facing parameters may be stated in natural language:
 - `size`: pixel dimensions, tile dimensions, or camera-relative size
 - `perspective`: top-down | 3/4 top-down | side-view | isometric-like
 - `art_style`: clean_hd | pixel_inspired | retro_pixel | project-native
-- `visual_asset_source`: banana_pro | existing_assets | procedural_placeholder
+- `visual_asset_source`: image_studio | existing_assets | procedural_placeholder
 - `collision_precision`: none | coarse | precise | tile | walkmesh
 - `prop_generation`: none | one_by_one | prop_pack_2x2 | prop_pack_3x3 | prop_pack_4x4
 - `output_format`: PNG only | layered preview | manifest JSON | engine-native map data
 
 When unspecified:
 
-- Use `banana_pro` as the visual asset source.
+- Use `image_studio` as the visual asset source.
 - Use `baked_raster + coarse_shapes` for battle backgrounds, title/menu scenes, cutscenes, and fixed arenas.
 - Use `layered_raster + y_sorted_props + precise_shapes` for top-down RPG exploration with tall props, occlusion, interactables, or reusable props.
 - Use `tilemap` or `layered_tilemap` only when the engine/editor already uses tiles or the user asks for editable tiles.
@@ -86,10 +86,10 @@ When unspecified:
 2. Choose the pipeline axes.
    - Select `visual_model`, `runtime_object_model`, `collision_model`, and `engine_target`.
    - Select `art_style`. Prefer readable gameplay shapes over decorative texture density.
-   - Select `visual_asset_source`. Default to `banana_pro`; use `existing_assets` only when the project already has suitable art; use `procedural_placeholder` only when explicitly requested.
+   - Select `visual_asset_source`. Default to `image_studio`; use `existing_assets` only when the project already has suitable art; use `procedural_placeholder` only when explicitly requested.
    - Treat `hybrid` as a result of combining axes, not as a primary category.
 
-3. Produce assets (creative prompts written by hand, art from `generate.py` — see Image Generation First).
+3. Produce assets (creative prompts written by hand, art from the draw client — see Image Generation First).
    - For baked raster maps, generate one background, or edit/use an existing image when supplied, then add optional collision/zones metadata.
    - For layered raster maps, follow the reference pipeline in Prop Generation Rules (ground-only base → dressed reference from the visible base → props → placement).
    - For tilemaps, generate or reuse tileset art first, then follow the engine/editor format for layers, objects, collision, and scene files. Do not script-draw the tileset as the final art source.
@@ -118,7 +118,7 @@ Prop packs save image-generation calls and prompt overhead, but reduce per-prop 
 For layered maps with generated props, prefer this reference pipeline:
 
 1. Generate `assets/map/<name>-base.png` as ground-only terrain.
-2. Make the base image visible in conversation context. Use the Read tool on the local PNG so you can see it, then pass the same path to `~/.claude/skills/imagen/bin/generate.py` via `--ref`. Do not rely on a path string inside the text prompt as the reference.
+2. Make the base image visible in conversation context. Use the Read tool on the local PNG so you can see it, then pass the same path to the draw client via `--reference`. Do not rely on a path string inside the text prompt as the reference.
 3. Generate `assets/map/<name>-dressed-reference.png` from the visible base, preserving camera, terrain, size, road/water shapes, anchor pads, and boundaries. Treat this as a planning/reference image, not the final runtime map.
 4. Generate one-by-one props or a prop pack based on the dressed reference.
 5. Place extracted props over the original base and compose a flattened preview.

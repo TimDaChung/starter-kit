@@ -18,7 +18,7 @@ description: 遊戲美術風格一致性守門。Use when 遊戲/demo 專案批�
 - 畫風關鍵詞（含使用者的原話定義，例：「留白＝筆觸之間的小空隙，不是白色」）
 - 色板（hex）、線條粗細、上色法、光源方向
 - 3–5 張核准素材路徑當黃金樣本
-- 生圖引擎（`engine: gpt / gemini`）——首批核准時記下用的線；之後同專案批次鎖這條線，換線須經使用者拍板並同步更新（`../imagen/references/draw-engines.md` §2）
+- 生圖引擎（`engine: gpt`）——新專案一律 `gpt`；舊 bible 若寫別的值視為歷史紀錄，該批素材要補要改就走 GPT 線重生並把欄位更新成 `gpt`，一致性比對靠 prompt 與參考圖，不靠引擎（`../imagen/references/draw-engines.md` §1 / §2）
 - 禁忌清單（被打回過的方向逐條記錄）
 
 之後每批生圖 prompt **從 bible 組裝**，不憑記憶重寫風格詞。使用者口頭糾正風格 → 當場更新 bible。
@@ -39,7 +39,7 @@ description: 遊戲美術風格一致性守門。Use when 遊戲/demo 專案批�
 
 ## 委派判斷（subagent）
 
-- 批次生圖（>3 張）→ 派背景 agent 跑 bible `engine` 欄對應的生成指令（GPT 線＝image-studio client／Gemini 線＝`~/.claude/skills/imagen/bin/generate.py`，見 draw-engines.md），prompt 由本終端從 bible 組好塞進 agent prompt。
+- 批次生圖（>3 張）→ 派背景 agent 跑 GPT 線的生成指令（image-studio client，呼叫格式見 draw-engines.md §3），prompt 由本終端從 bible 組好塞進 agent prompt；引擎不可用就依 draw-engines.md §1 停下回報，不找替代路徑。
 - Contact sheet 判讀＝本終端親自 Read 看圖，不委派（風格判斷是主觀瓶頸，agent 回報文字會失真）。
 - 多角色/多批並行 → 每 agent 只寫自己的輸出資料夾，不重疊。
 

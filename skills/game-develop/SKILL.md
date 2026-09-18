@@ -57,7 +57,7 @@ allowed-tools:
 2. **不外包就自己做**：遇到對應 sub-skill / agent → invoke；沒對應的（音效 / 自訂特效 / 動效 / 粒子）→ 用原生 web 技術做（Web Audio API / CSS animation / Canvas）
 3. **單檔不拆**：HTML 維持單檔。改動 100% 用 Edit + section marker，不重寫整檔
 4. **每張生圖獨立 checkpoint**：Phase 3 每張生完立即更新 TODO（含路徑、版本、決策註解），但**不打擾 user**
-5. **同類批次一致性**：呼叫生圖 sub-skill 前，把 SPEC 的 style-lock（風格代號 / 比例 / 視角 / 面向 / 光源）一併傳過去（規則：同類別資產 style-lock 一致）。同類別第 1 張 baseline 自我驗證通過後，剩餘張數**並行 background bash** 一次發完（generate.py 是 IO-bound，並行省時間）
+5. **同類批次一致性**：呼叫生圖 sub-skill 前，把 SPEC 的 style-lock（風格代號 / 比例 / 視角 / 面向 / 光源）一併傳過去（規則：同類別資產 style-lock 一致）。同類別第 1 張 baseline 自我驗證通過後，剩餘張數**並行 background bash** 一次發完（生圖是 IO-bound，並行省時間）
 6. **行數監控**：HTML 5000 行→提醒 grep marker；8000 行→提醒瘦身（不強制拆檔）
 7. **section-by-section 整合**：Phase 4 每次 Edit 針對 single section，多 section 改動拆多次 Edit
 
@@ -177,17 +177,13 @@ for p in sys.argv[1:]:
 
 ### 並行範例
 
-```bash
-# Two portraits in parallel: prompts prepared beforehand in prompts/*.txt, Bash call run_in_background=true.
-cd "<project-dir>" && \
-python ~/.claude/skills/imagen/bin/generate.py --prompt "$(cat prompts/hero_a.txt)" --ratio 3:4 --output assets/portrait/hero_a.png & \
-python ~/.claude/skills/imagen/bin/generate.py --prompt "$(cat prompts/hero_b.txt)" --ratio 3:4 --output assets/portrait/hero_b.png & \
-wait
-```
+生圖指令本身不寫在這支 skill——**一律走 sub-skill 的既有流程**（portrait → imagen-portrait、UI → imagen-ui、sprite → generate2dsprite、map → generate2dmap、其他 → imagen），引擎與呼叫格式以 `~/.claude/skills/imagen/references/draw-engines.md` §1 / §3 為準（唯一引擎＝image-studio 的 GPT 線）。
 
-（sprite / UI / map 類也一律呼叫 `~/.claude/skills/imagen/bin/generate.py` 生圖——那三支 sub-skill 沒有自己的 generate.py；prompt 規範照各自 SKILL.md，後製（去背 / 切格 / 組圖）才用各 sub-skill 的 `scripts/`，參數以 `--help` 為準。）完成通知收齊後一次 Read 所有張數驗證。
+作法：prompt 先照各 sub-skill 的規範備好（例：`prompts/hero_a.txt`、`prompts/hero_b.txt`），同類別的每張各派一個 **background bash**（`run_in_background=true`）同時發，一張一次呼叫、不自動重試；後製（去背 / 切格 / 組圖）才用各 sub-skill 的 `scripts/`，參數以 `--help` 為準。完成通知收齊後一次 Read 所有張數驗證。
 
-generate.py 一次 60–90 秒，並行 5 張 ≈ 串行 1 張的時間。**不要序列跑同類別**。
+引擎缺席（image-studio 未裝或憑證過期）→ 依 draw-engines.md §1 **停止生圖**並回報，Phase 3 不另尋替代路徑；Phase 4 之後可用既有素材續跑。
+
+一張約 60–90 秒，並行 5 張 ≈ 串行 1 張的時間。**不要序列跑同類別**。
 
 ---
 

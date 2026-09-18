@@ -53,10 +53,10 @@ If a cell should stay empty, explicitly say `empty magenta cell`.
 
 ## Extraction
 
-`scripts/extract_prop_pack.py` includes hard chroma-key removal as part of its pipeline (`--threshold` / `--edge-threshold` / `--edge-clean-depth`), which is sufficient when the banana sheet has clean magenta fringes. If the sheet shows soft anti-aliased magenta halos around props, do one of:
+`scripts/extract_prop_pack.py` includes hard chroma-key removal as part of its pipeline (`--threshold` / `--edge-threshold` / `--edge-clean-depth`), which is sufficient when the generated sheet has clean magenta fringes. If the sheet shows soft anti-aliased magenta halos around props, do one of:
 
 - regenerate the sheet with stronger background language: `100% solid flat #FF00FF magenta with NO anti-aliasing on prop edges, hard pixel boundary, no glow, no soft falloff`;
-- or generate at a higher `--size` (`2K` or `4K`) so anti-alias pixels are a smaller fraction of each prop;
+- or regenerate with a higher resolution requested in the prompt text (e.g. `at least 4096 px on the long edge`) so anti-alias pixels are a smaller fraction of each prop;
 - or composite-test against a dark base first and adjust `--edge-clean-depth` upward (3-5).
 
 Then run `~/.claude/skills/generate2dmap/scripts/extract_prop_pack.py` directly:
