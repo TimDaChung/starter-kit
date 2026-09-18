@@ -14,6 +14,7 @@
 - **art-style-guard 的 STYLE_BIBLE `engine` 欄**：新專案一律 `gpt`；舊 bible 若寫 `gemini` 視為歷史紀錄，改走 GPT 線重生並更新欄位（跨批一致性靠 prompt 與參考圖比對）
 - starter-setup：移除 `.env` 建立步驟與 Gemini key 健檢；image-studio 檢查的措辭從「缺就走 Gemini，功能不受影響」改為「**缺就五支生圖 skill 完全不能用**」。維持只偵測不代裝、kit 內不寫安裝路徑與憑證細節
 - 後製能力**完全不受影響**：chroma-key 去背、sheet 切割、shared-scale、GIF 匯出、QC、風格守則、prompt 規則全部保留
+- **plan-dept14-writer §八 去 API 化**（同批追加）：原「Notion 技術注意」整節是 API／MCP 回寫的操作細節（`update_content`／`replace_content` 參數、block 型別限制、巢狀編號成因等），組員手上沒有回寫通道、讀了也用不到，已移出 kit。改為 §八「交付與貼上 Notion」：產出一律本地 Markdown 由 PM 自行貼上，保留真正影響產出的三條——**md 不寫「目錄」章與「調整紀錄」章**（用範本頁自帶）、標題行屬性由 PM 手動補、上色與兩欄語法；貼上後自檢巢狀編號／表格／標記。無升級動作
 
 ### ⚙️ 升級動作
 
