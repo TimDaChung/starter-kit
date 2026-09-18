@@ -24,7 +24,10 @@
 
 - **違規回寫**：已經寫進檔案的規則仍被違反 2 次 → 把實際案例一句話補在該規則旁邊（「已重犯兩次：…」），讓規則自帶前科
 - **教訓歸 memory、規則歸這裡**：CLAUDE.md 只放「怎麼做事」的規則；專案脈絡、工作教訓、外部資源讓 Claude 寫進內建 memory（一個檔一件事，feedback 類要含 Why 與 How to apply，並更新 MEMORY.md 索引）
-- **月度健檢**：MEMORY.md 頂部記「上次 starter 健檢：<日期>」，超過 30 天 Claude 要主動提議跑「starter 健檢」，跑完更新日期
+  - ⚠️ **memory 是 per-project 的**（實際落點 `~/.claude/projects/<工作目錄 slug>/memory/`，**沒有全域層**）：換個資料夾開 session 就讀不到前一個專案寫的 memory。所以**跨專案都該成立的工作習慣與鐵則寫這份 CLAUDE.md**（它永遠載入），只有綁定該專案的脈絡才寫 memory
+  - 最容易中的坑：沒開任何專案資料夾就啟動 session，落點會是一次性的臨時工作目錄，事後該目錄被清掉 → memory 檔還在但**永遠不會再被讀到**。習慣固定在同一個資料夾開 session 可以避開
+- **工具地圖**：`~/.claude/starter-skill-map.md` 是「工作情境 → 該用哪支 skill／agent」的對照表（由 starter 精靈產生與更新）。**派工或挑工具前先查這張**，不要憑印象猜
+- **月度健檢**：`~/.claude/starter-skill-map.md` 頂部記「上次 starter 健檢：<日期>」，超過 30 天 Claude 要主動提議跑「starter 健檢」，跑完更新日期
 - **異常走 SOP**：kit 的 skill／腳本出異常 → 走 `issue-triage` 回報模式產出標準回報轉給維護者，不自行修改 junction 內的 kit 檔案
 
 ---

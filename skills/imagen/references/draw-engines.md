@@ -53,6 +53,6 @@ python ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 
 ## 5. Why there is no second engine
 
-This kit used to carry a Gemini (Nano Banana Pro) line via `imagen/bin/generate.py` with a personal `GEMINI_API_KEY`. **It was removed in v2.6.0 after a colleague's key was stolen**: that API is metered per request with no spending cap, so a leaked key is an open-ended bill. Every trace of it — the wrapper, `.env`, the key checks — is gone on purpose.
+This kit used to carry a Gemini (Nano Banana Pro) line via `imagen/bin/generate.py` with a personal `GEMINI_API_KEY`. **It was removed in v3.0.0 after a colleague's key was stolen**: that API is metered per request with no spending cap, so a leaked key is an open-ended bill. Every trace of it — the wrapper, `.env`, the key checks — is gone on purpose.
 
 **Do not reintroduce a per-request-billed image API, and do not restore `generate.py` from git history**, even when the GPT line is down and the user is in a hurry. If a second engine is ever wanted, it needs a hard spending cap and a team-lead decision first — raise it, don't implement it.

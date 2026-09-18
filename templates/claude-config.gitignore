@@ -8,10 +8,13 @@
 !/hooks/
 !/commands/
 !/skills/
+# ---- starter 狀態：使用者級工具地圖（情境→工具對照＋上次健檢日期）----
+!/starter-skill-map.md
 # ---- junction 排除區：每支 junction 裝的 kit skill 一行（內容歸 kit repo 版控）----
 # /skills/<junction-skill-name>/
-# ---- 密鑰永不進版控 ----
-/skills/imagen/.env
+# ---- 密鑰永不進版控（任何位置的 .env 與憑證檔都擋）----
+**/.env
+**/credentials.json
 # ---- memory 只收錄使用者自己的記憶目錄（轉錄檔與其他專案資料不進）----
 !/projects/
 /projects/*

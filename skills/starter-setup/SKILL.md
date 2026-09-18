@@ -30,7 +30,8 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 - `~/.claude/agents/` 現有清單
 - `%USERPROFILE%\starter-kit` 已 clone？（已有就 `git pull`，記 CHANGELOG 新增段落）
 - secretary(skills/secretary)→ 歸「自有」，本精靈完全不碰
-- **image-studio 已裝？**（生圖的唯一引擎，主任另行發放、不在 kit 內）：`~/.claude/skills/image-studio/` 目錄存在？`~/.config/image-studio/credentials.json` 存在且 `expiresAt` 未過期？——**只偵測、不能代裝、不給安裝路徑與憑證細節**；缺或過期＝**沒有替代線**，結算表提醒一行「生圖引擎未裝／憑證過期 → 五支生圖 skill（imagen、imagen-portrait、imagen-ui、generate2dsprite、generate2dmap）完全不能用，必須找主任拿安裝包」
+- **image-studio 已裝？**（生圖的唯一引擎，主任另行發放、不在 kit 內）：`~/.claude/skills/image-studio/` 目錄存在？`~/.config/image-studio/credentials.json` 存在？——**只偵測、不能代裝、不給安裝路徑與憑證細節**；未裝或憑證過期＝**沒有替代線**，結算表提醒一行「生圖引擎未裝／憑證過期 → 五支生圖 skill（imagen、imagen-portrait、imagen-ui、generate2dsprite、generate2dmap）完全不能用，必須找主任拿安裝包」
+  - **憑證剩餘天數**：讀 `credentials.json` 的 `expiresAt`（ISO 8601、UTC，例 `2026-10-05T16:00:00.000Z`），與今天相減取天數，三段處理——已過期 → 同上，五支生圖全停；**剩 ≤14 天 → 結算表提醒一行**「憑證剩 N 天到期，現在還能用，但換憑證要等主任發，先去要新的，別等到期當天卡住生圖工作」；剩 >14 天 → 不提，保持安靜。措辭一律「找主任拿」，**不寫任何取得憑證的網址或流程**
 - **環境依賴**（企劃 / 原型類 6 支不需要，只影響生圖、測試、試玩迴圈；data-report-builder 生成的報表 skill 另需 pandas + plotnine，用到再裝）：
   - `python --version` 有 3.10+？
   - `python -c "import PIL"`、`python -c "import playwright"` 各自過不過？
@@ -43,7 +44,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 | 分類 | 判定 | 動作 | 問不問 |
 |---|---|---|---|
 | **沒有** | 使用者無同名資產 | 直接裝 | 不問 |
-| **舊版** | 有同名且內容是 kit 同源舊版（diff 只有 kit 後續更新） | 備份到 `~/.claude/skills-backup/<名>-<日期>` 後直接升級 | 不問，結算表列出 |
+| **舊版** | 有同名且內容是 kit 同源舊版（diff 只有 kit 後續更新） | 備份到 `~/.claude/skills-backup/<名>-<日期>`（已版控則跳過備份，見鐵則）後直接升級 | 不問，結算表列出 |
 | **自改過** | 有同名但內容與 kit 新舊版都不同 | 不動；進最終健檢的「換版評估」 | 問 |
 | **近似** | 名稱不同但功能高度重疊（description / 觸發詞 / 流程相近） | 不動；進最終健檢的「換版評估」 | 問 |
 | **自有** | kit 沒有的資產 | 不動 | 不問，結算表列「保留」 |
@@ -83,13 +84,19 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
    ```
    Claude in Chrome 擴充功能沒有指令能裝，不列進這張表，只在結算表 🧩 那行給連結與 `/chrome` 兩步。
    **缺 Python / Node runtime → 直接問一次「要不要我幫你裝？」**，同意就代跑 `winget install Python.Python.3.12` / `winget install OpenJS.NodeJS.LTS`（裝完提醒**完全重開終端**再打「starter 升級」續裝，setx/PATH 對舊視窗不生效）；不同意就給上述指令請他自己裝。winget 也沒有（罕見）→ 給官網下載連結（python.org / nodejs.org），不硬裝。裝了 MCP 要提醒：Chrome 需以 `--remote-debugging-port=9222` 啟動 playtest-loop 才讀得到玩家分頁，且新 MCP 要重開 Claude Code 才生效
-6. **生成個人 skill map**（裝機與升級收尾必做）：在**當前 session 的 memory 目錄**（Claude 自己知道路徑）寫 `reference_skill_map.md`——「工作情境 → 首選工具」對照表，內容 = 本次實際裝上的 + 使用者自有的 skills/agents（略過的不列）；已存在就更新到現況。同時在 MEMORY.md 索引加一行，並於頂部寫「上次 starter 健檢：<今天>」。這張表是使用者的個人地圖，之後健檢會拿它對帳
+6. **生成個人 skill map**（裝機與升級收尾必做）：固定寫在 `~/.claude/starter-skill-map.md`——與 `starter-kit-version.txt`、`starter-skip.md` 同層，是本精靈既有的狀態檔位置。這是**跨專案恆真的使用者級資產**，而 Claude Code 的 memory 是 per-project（落點 `~/.claude/projects/<專案>/memory/` 隨當下工作目錄變動、沒有全域層），**一律不可寫進 memory 目錄**——寫進去換個專案就讀不到，健檢時找不到舊表又會再生一份。檔案格式：
+   ```
+   <!-- 上次 starter 健檢：YYYY-MM-DD -->
+   # 個人 skill map
+   | 工作情境 | 首選工具 |
+   ```
+   第一行固定是健檢日期註解（好 grep、好更新，每次健檢只改這一行），第二行起是「工作情境 → 首選工具」對照表，內容 = 本次實際裝上的 + 使用者自有的 skills/agents（略過的不列）；檔案已存在就更新到現況並把日期改成今天。這張表是使用者的個人地圖，之後健檢會拿它對帳
 7. **設定資產版控**（選配，問一次）：「要不要幫你的 `~/.claude` 開 git 版控？改壞規則可回滾、換電腦可還原。」同意才做：`git init` + 拷 `templates/claude-config.gitignore` 為 `~/.claude/.gitignore`，並把本次 junction 的 skill 名逐行補進 gitignore（junction 內容歸 kit repo 版控，不重複記帳），首次 commit。不同意就跳過，結算表不再追問
 
 ## 4. CLAUDE.md 併入
 
 - **沒有 CLAUDE.md** → 直接拷 `CLAUDE.starter.md` 為 `~/.claude/CLAUDE.md`，結束本節
-- **有** → 先備份到 `~/.claude/skills-backup/CLAUDE.md-<日期>`，再對照 `CLAUDE.starter.md` 逐條做**語意比對**（不是字串比對），分三類：
+- **有** → 先備份到 `~/.claude/skills-backup/CLAUDE.md-<日期>`（先跑鐵則的版控判斷：`~/.claude` 已是 git repo 且 CLAUDE.md 已被追蹤 → 跳過備份，結算表註明「已版控，改由 commit 留歷史」），再對照 `CLAUDE.starter.md` 逐條做**語意比對**（不是字串比對），分三類：
 
 | 類別 | 判定 | 動作 |
 |---|---|---|
@@ -115,6 +122,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 
 - **仍缺的依賴**：第 3 節第 5 步沒裝或裝失敗的 → 逐項列「缺 X → Y skill 不能跑 / 退到 Z fallback」（例：缺 chrome-devtools MCP → playtest-loop 退到手貼 `exportDevNotes()`；缺 playwright → webapp-testing 不能跑，game-develop 的玩法 QA 走 chrome-devtools fallback）
 - **生圖引擎缺席**：image-studio 未裝或 `credentials.json` 過期 → 列一行「五支生圖 skill 全部停用（沒有替代線）→ 找主任拿安裝包」；kit 不代裝、不寫安裝路徑與憑證細節
+- **憑證即將到期**（第 1 節讀到的 `expiresAt` 剩 ≤14 天）：列一行「憑證剩 N 天，現在還能用；換憑證要等主任發，先去要新的」——健檢模式只跑第 1、5 節，這行是定期健檢的人唯一會看到預警的地方，不可略過；剩 >14 天不列
 - **僅健檢模式**（第 1 節 + 第 5 節）：一樣列出來，附指令，不裝
 
 ### skills
@@ -122,7 +130,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 - **近似 / 自改過**（第 2 節）：每一對進「換版評估」
 - **自有對自有近似**：使用者自己兩支功能重疊 → 列出，建議合併或刪其一（不做換版評估，kit 沒有對應版本）
 - **失效**：junction 目標不存在、資料夾沒有 SKILL.md、frontmatter 缺 name/description → 列出
-- **缺角色標頭**：SKILL.md 的 H1 之後沒有 `> **執行角色：X**` 一行 → 列出，建議補（kit 的 skill 不會缺；自有 skill 缺的話附一句建議寫法）
+- **缺角色標頭**：SKILL.md 的 H1 之後沒有 `> **執行角色：X**` 一行 → 列出，建議補（kit 的 skill 不會缺；自有 skill 缺的話附一句建議寫法）。**排除第三方／上游發佈的 skill**：判斷線索為非 kit junction、且目錄內有 LICENSE、frontmatter 標明外部來源、或使用者說明過是外部安裝的（例：Anthropic 官方的 frontend-design、主任發放的 image-studio）——那些不由使用者維護，改了下次換版就被覆蓋，列了也沒人能修；改在結算表以中性一行帶過「第三方 skill N 支未套 kit 撰寫規範，不列入建議」。使用者自己寫的 skill 缺標頭仍照列
 - **依賴斷裂**：已裝的 skill 在第 2 節依賴表中的目標未裝或在略過清單 → 列出「X 依賴 Y（未裝 / 略過）→ 某功能不能跑」
 
 ### agents
@@ -130,11 +138,11 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 - **職責重疊**：description 高度相近 → 使用者 agent 對 kit agent 進「換版評估」；自有對自有只列出
 - **孤兒**：CLAUDE.md 與任何 skill 都沒提到、也沒有觸發描述 → 提示「這支目前只能手動叫」
 
-### memory / skill map
+### skill map / memory
 
-- **skill map 對帳**：`reference_skill_map.md` 與 `~/.claude/skills/`、`agents/` 實況比對——表上有但已不存在的（如 kit 合併掉的）、實際有但表上漏列的，各列一句建議更新；沒有這張表就建議生成（第 3 節第 6 步）
-- **MEMORY.md 健康度**：索引超過 40 行 → 建議把過期專案條目歸檔；有索引指向不存在的檔 → 列出
-- **健檢標記**：更新 MEMORY.md 頂部「上次 starter 健檢」為今天
+- **skill map 對帳**（對象固定是 `~/.claude/starter-skill-map.md`，使用者級、跨專案共用）：與 `~/.claude/skills/`、`agents/` 實況比對——表上有但已不存在的（如 kit 合併掉的）、實際有但表上漏列的，各列一句建議更新；**只有這個檔不存在**才建議生成（第 3 節第 6 步），不去 memory 目錄找、也不另建一份
+- **健檢標記**：更新 `~/.claude/starter-skill-map.md` 第一行的「上次 starter 健檢」為今天
+- **MEMORY.md 健康度**（檢查的是**當前專案**的 memory，`~/.claude/projects/<專案>/memory/MEMORY.md`，與上面使用者級的 skill map 不同層、不互相取代）：索引超過 40 行 → 建議把過期專案條目歸檔；有索引指向不存在的檔 → 列出
 
 ### 換版評估（同名自改過 / 近似 skill / agent 重疊 / CLAUDE.md 重複、衝突、舊版）
 
@@ -149,7 +157,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 4. **預設偏向 A / C**，理由要講：kit 版會隨「starter 升級」持續更新，自有版不會；junction 裝的 kit 版不占他的維護成本
 5. **客製內容的落點**（選 C 時）：通用的 → 建議回饋給 Tim 進 kit；個人的 → 寫進他的 CLAUDE.md 對應段落（永遠載入，效果等同寫在 skill 裡）；不想動 CLAUDE.md → 保留自有複本不裝 junction，結算表標「放棄自動升級」
 6. **CLAUDE.md 的規則對**同樣三選一：留他的 / 換 starter 的 / 改寫成一條；判準：更具體、附案例、較新的優先
-7. 使用者選了才動；改用或覆蓋前備份到 `~/.claude/skills-backup/`；選 B 的在結算表標「保留自有，不升級」
+7. 使用者選了才動；改用或覆蓋前備份到 `~/.claude/skills-backup/`（同樣先跑鐵則的版控判斷，已被追蹤就跳過備份並在結算表註明）；選 B 的在結算表標「保留自有，不升級」
 
 輸出格式：每對一小節，「比較表 → 建議 A/B/C + 理由 → 選 C 時客製怎麼搬」，不超過 15 行。
 
@@ -161,11 +169,13 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 🩺 開場健檢:CLAUDE.md 96 行 / skills 0 / agents 0 / secretary 無
 🧰 環境:Python 3.13 ✔ / Pillow ✔ / Playwright ✔(本次裝) / chrome-devtools MCP ✘(你說先不裝→playtest-loop 退手貼模式)
 🎨 生圖引擎 image-studio:✘ 未裝 → 五支生圖 skill(imagen / imagen-portrait / imagen-ui / generate2dsprite / generate2dmap)完全不能用,沒有替代線,找主任拿安裝包
+   (已裝但憑證快到期時改成這行)⏳ 生圖引擎憑證:剩 17 天到期(2026-10-05),現在還能用;換憑證要等主任發,先去要新的
 🧩 Claude in Chrome:未裝 → 自己點一下 https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn,裝完在 Claude Code 打 /chrome 選 Enabled by default
 ✅ 新裝 skills(N,junction):starter-setup、product-planning、imagen …
 ✅ 新裝 agents(3):dialogue-writer、game-balance-auditor、planning-doc-auditor
-⬆️ 升級:game-prototype(舊版→v1.1,原版備份於 skills-backup/)
-📝 CLAUDE.md:併入 5 條(meta 規則、UI 繁中 …),原內容未動,備份於 skills-backup/
+⬆️ 升級:game-prototype(舊版→v1.1;已版控,改由 commit 留歷史,未另存備份)
+📝 CLAUDE.md:併入 5 條(meta 規則、UI 繁中 …),原內容未動;已版控,改由 commit 留歷史(未另存備份)
+🧷 gitignore:補 1 行(plan-dept14-writer)、移除 1 行(plan-dept1-writer);kit junction 14 支共 30 檔已 git rm --cached 脫離追蹤(檔案未刪,自有 skill 不動)
 ✋ 保留不動:你的 my-analyzer、secretary
 ⏭️ 未裝:templates/my-voice.example.md(想要個人分身就複製成 ~/.claude/agents/my-voice.md 再客製)
 ⛔ 略過(依 starter-skip.md):generate2dmap、imagen-ui(要裝就說「裝回 X」;連帶:game-develop 的地圖 / UI 生圖會跳過)
@@ -191,7 +201,12 @@ https://github.com/TimDaChung/secretary-kit」
 2. 摘要 CHANGELOG 新增段落
 3. **執行 CHANGELOG「⚙️ 升級動作」**（有標才有,多數版本沒有）:各版本下的「⚙️ 升級動作」區塊 = pull 完精靈自動執行的清單。規則:(a) 只跑比 `~/.claude/starter-kit-version.txt`（一行版號）記錄新的版本,由舊到新逐版跑,跑完寫回最新版號;檔案不存在（舊裝機首次）→ 全部版本的動作都檢查一遍——**升級動作一律寫成冪等**（「缺才補」句型,重跑無害） (b) 純補檔/補設定的直接做;**要使用者選擇的（開新功能、要憑證/scope）問一句才做,不擅自開** (c) 失敗不硬解,顯示錯誤請使用者找 Tim
 4. 重跑第 1 到 6 節：junction 裝的自動生效；新出現的、以及使用者先前沒裝的 skills/agents 直接補裝（`starter-skip.md` 內的除外）；CLAUDE.starter.md 新增的規則直接併；agents 有 diff 進最終健檢
-5. **kit 已移除或更名的 skill**（junction 指向 kit 內但目標已消失）→ **直接刪除失效 junction，不問**（它已無任何功能，刪除零風險），並查 CHANGELOG 判斷去向，在結算表交代清楚（例：plan-dept1-writer → v2.4.0 更名 plan-dept14-writer，新版已裝；generate2dsprite-chibi → v1.3.0 併入 generate2dsprite）。**只自動刪失效 junction**；實體資料夾（非 junction，zip 備援安裝）分兩種：名稱在 CHANGELOG 更名／併入紀錄中、且內容與 kit 舊版同源（diff 只有 kit 後續更新）→ 視同「舊版」處理：備份到 `skills-backup/` 後刪除舊名資料夾、裝上新名（不問，結算表列出）——否則新舊兩支會並存搶觸發詞；內容有使用者自改 → 不動，進最終健檢換版評估
+5. **kit 已移除或更名的 skill**（junction 指向 kit 內但目標已消失）→ **直接刪除失效 junction，不問**（它已無任何功能，刪除零風險），並查 CHANGELOG 判斷去向，在結算表交代清楚（例：plan-dept1-writer → v2.4.0 更名 plan-dept14-writer，新版已裝；generate2dsprite-chibi → v1.3.0 併入 generate2dsprite）。**只自動刪失效 junction**；實體資料夾（非 junction，zip 備援安裝）分兩種：名稱在 CHANGELOG 更名／併入紀錄中、且內容與 kit 舊版同源（diff 只有 kit 後續更新）→ 視同「舊版」處理：備份到 `skills-backup/`（已版控則跳過備份，見鐵則）後刪除舊名資料夾、裝上新名（不問，結算表列出）——否則新舊兩支會並存搶觸發詞；內容有使用者自改 → 不動，進最終健檢換版評估
+6. **同步 gitignore 排除區**（只在 `~/.claude` 是 git repo 時才跑，不是就整步跳過）：排除行是裝機當下依現況寫入的（第 3 節第 7 步），kit skill 新增或更名後不會自己更新，該 skill 落在白名單 `!/skills/` 內又沒有排除行，junction 內容就被重複追蹤一份
+   - **對帳**：比對 `~/.claude/.gitignore` 的排除區與 `~/.claude/skills/` 實際的 junction 清單——缺的補上、指向已不存在 kit skill 的移除（例：v2.4.0 更名後補 `plan-dept14-writer`、移除 `plan-dept1-writer`）
+   - **補排除行不足以停止追蹤**：gitignore 對「已經 add 進索引」的檔案無效。逐支 junction 跑 `git -C %USERPROFILE%\.claude ls-files "skills/<名>"`，有輸出＝已被追蹤 → `git -C %USERPROFILE%\.claude rm --cached -r --quiet skills/<名>`（只從索引移除，**不刪檔案**）
+   - **只處理 junction（kit 來源）的路徑，使用者自有 skill 一律不碰**——自有 skill 本來就該進版控
+   - 歸屬：補排除行與 `git rm --cached` 都不動使用者的檔案內容、不動自有資產，屬**安全動作直接做**（同「新增不問」），結算表交代補／移了幾行、幾支脫離追蹤
 
 ## 健檢（「starter 健檢」/「新手包健檢」）
 
@@ -203,7 +218,7 @@ https://github.com/TimDaChung/secretary-kit」
 
 - **新增不問**：新裝 skills/agents、併入 CLAUDE.md 缺的規則，直接做，結算表交代
 - **刪改必問**：刪除、覆蓋、衝突處理、自改過的合併，列建議等使用者說了才動
-- 任何刪除/覆蓋前先備份到 `~/.claude/skills-backup/`
+- **任何刪除/覆蓋前先備份到 `~/.claude/skills-backup/`——但備份前先判斷目標是否已版控**：`git -C %USERPROFILE%\.claude ls-files "<目標路徑>"` 有 stdout 輸出（＝已被 git 追蹤）就**跳過備份**（全檔統一用這個無旗標寫法判追蹤，不用 `--error-unmatch`），結算表註明「已版控，改由 commit 留歷史」；未追蹤、或 `~/.claude` 不是 git repo，才照原行為複製一份。這條通用於所有備份點（第 2 節舊版升級、第 4 節 CLAUDE.md、第 5 節換版評估、升級節失效資產處理）
 - CLAUDE.md 原有內容一字不刪、不改寫、不重排
-- 不碰 settings.json、使用者既有的 memory 內容、與 kit 無關的任何檔案。例外三個，各有邊界：本精靈自建的 skill map 與健檢標記（只增改自己建的檔與 MEMORY.md 對應行）、Python 套件與 MCP 設定（問過才裝，第 3 節第 5 步）、設定資產版控（問過才 init，第 3 節第 7 步）
+- 不碰 settings.json、使用者既有的 memory 內容、與 kit 無關的任何檔案。例外四個，各有邊界：本精靈自建的 skill map 與健檢標記（只增改 `~/.claude/starter-skill-map.md` 這一個檔，不寫進任何專案的 memory）、Python 套件與 MCP 設定（問過才裝，第 3 節第 5 步）、設定資產版控（問過才 init，第 3 節第 7 步）、gitignore 排除區與 git 索引（只處理 kit junction 路徑，升級節第 6 步）
 - 同一步卡兩次 → 停止重試，整理錯誤請使用者找 Tim

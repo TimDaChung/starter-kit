@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## v3.1.0 (2026-09-18)
+
+組員異常回報收單（5 條，感謝實測與根因定位）。前兩條是結構性的，不修會持續產生損害。
+
+- **skill map 與健檢日期改存固定路徑 `~/.claude/starter-skill-map.md`**（原本寫進「當前 session 的 memory 目錄」）：Claude Code 的 memory 是 **per-project** 的（`~/.claude/projects/<cwd-slug>/memory/`，**沒有全域層**），換個專案開 session 就讀不到前一份 → 第 5 節對帳判定「沒有這張表」再生一份，**自我繁殖**；`CLAUDE.starter.md` 的「超過 30 天主動提議健檢」也因此在多數專案不會觸發。最壞情境是 session 未開專案資料夾啟動，落點是一次性臨時工作目錄，事後被清掉 → 檔案還在但永遠讀不到（實測回報者與維護者本機都中，維護者本機另有 30 個 memory 檔分散在讀不到的 slug）
+- **CLAUDE.starter 同步兩條**：「教訓歸 memory」加註 per-project 的射程限制——**跨專案恆真的鐵則寫 CLAUDE.md，只有綁該專案的脈絡才寫 memory**，並提醒固定在同一資料夾開 session；新增「工具地圖」條指路 `starter-skill-map.md`（原本靠 MEMORY.md 自動載入才會被看見，搬家後需明文指路）
+- **升級流程補「同步 gitignore 排除區」**：設定資產版控的排除行是裝機當下依現況寫入的，kit 的 gitignore 範本本身不含 skill 名 → v2.4.0 的 `plan-dept1-writer` → `plan-dept14-writer` 更名後，舊名沒機制更新、新名沒被加入，該 skill 被使用者 repo 追蹤。**補排除行救不了已被追蹤的檔案**（gitignore 對已追蹤檔無效），升級時一併對 junction 路徑跑 `git rm --cached`。只處理 kit 來源的 junction，自有 skill 一律不碰
+- **備份前先判斷是否已版控**：`~/.claude` 已開 git 時，CLAUDE.md 併入與換版評估不再無條件複製一份到 `skills-backup/`（已版控者靠 commit 留歷史），結算表註明
+- **健檢不再要求第三方 skill 補角色標頭**：非 kit 來源、由上游發佈的 skill（如 Anthropic 官方 skill、主任另行發放的 image-studio）改了下次換版會被覆蓋，等於每次健檢都報一條沒人能修的建議；改為結算表中性一行帶過。使用者自寫的 skill 缺標頭仍會列
+- **image-studio 憑證到期預警**（回報者在附註提出但自評不列入，維護端判斷該做）：v3.0.0 移除 fallback 後憑證過期＝五支生圖 skill 硬停，原本只在「已過期」才報，等於使用者一定是在要生圖的當下才發現不能用，而換憑證要等主任發、不是自己能立刻解決的。改為**剩 ≤14 天就在結算表提醒**，第 1 節與第 5 節都加（健檢模式只跑這兩節），三個口令的執行路徑都涵蓋
+- **gitignore 範本兩項**：新增 `!/starter-skill-map.md` 白名單（工具地圖是使用者級資產，換電腦該還原）；密鑰排除從寫死的 `/skills/imagen/.env` 改為 `**/.env` 與 `**/credentials.json`（任何位置都擋，不必為每支 skill 補一行）
+- draw-engines.md §5 封印條款的版號更正為 v3.0.0（撰寫時暫定 v2.6.0，發版改 major bump 後未同步）
+
+### ⚙️ 升級動作
+
+1. **skill map 搬家**（冪等）：若 `~/.claude/starter-skill-map.md` 不存在，而任一 `~/.claude/projects/*/memory/reference_skill_map.md` 存在 → 取**最後修改時間最新**的那份搬過去（原檔保留不刪，避免動到使用者的 memory），並把健檢日期一併寫進新檔頂部；若多份內容分歧，結算表列出來源路徑與日期讓使用者知道採用了哪份
+2. **gitignore 同步**（僅當 `~/.claude` 是 git repo）：比對 `.gitignore` 排除區與 `~/.claude/skills/` 實際 junction 清單，缺的補、指向已不存在 kit skill 的移除；接著對每個 junction 路徑檢查 `git -C ~/.claude ls-files 'skills/<名>'`，有輸出就跑 `git rm --cached -r --quiet 'skills/<名>'`（只退出索引，不刪檔）。**自有 skill 不在此列，一律不碰**；做完提醒使用者 commit 一次
+3. `~/.claude/CLAUDE.md` 若含舊條「**月度健檢**：MEMORY.md 頂部記…」——**完全同文才改**——替換為指向 `starter-skill-map.md` 的新版；並檢查「教訓歸 memory」條是否已含 per-project 警語、以及有無「工具地圖」條，缺的併入（冪等：已含「per-project」／「工具地圖」字樣即跳過）
+4. `~/.claude/.gitignore` 若存在且缺 `!/starter-skill-map.md` → 補上（否則搬過去的工具地圖不會進版控）；密鑰排除若仍是寫死的 `/skills/imagen/.env` → 換成 `**/.env` 與 `**/credentials.json`
+
 ## v3.0.0 (2026-09-18)
 
 > **資安事件應對＋breaking change：Gemini 生圖線全面移除，生圖只剩 image-studio（GPT 線）一條。**
