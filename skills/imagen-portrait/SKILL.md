@@ -17,7 +17,7 @@ allowed-tools:
 
 > **執行角色：美術**——關注風格一致、角色辨識度、立繪規格（構圖 / 尺寸 / 命名）。
 
-生成 RPG 手遊角色立繪，預設套用高營收手遊（米哈遊、明日方舟等）的視覺語言。三支 imagen skill 的共用流程、格式、指令集中在 `../imagen/references/common.md`（下文以「common.md §N」引用）；生圖引擎（唯一引擎＝image-studio GPT 線、呼叫契約、失敗處理）見 `../imagen/references/draw-engines.md`。
+生成 RPG 手遊角色立繪，預設套用高營收手遊（米哈遊、明日方舟等）的視覺語言。四支 imagen skill 的共用流程、格式、指令集中在 `../imagen/references/common.md`（下文以「common.md §N」引用）；生圖引擎（唯一引擎＝image-studio GPT 線、呼叫契約、失敗處理）見 `../imagen/references/draw-engines.md`。
 
 ---
 

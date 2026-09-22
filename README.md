@@ -1,6 +1,6 @@
 # Claude Code Starter Kit
 
-給團隊的 Claude Code 起手包:一份會自己長大的全域設定 + 15 支實戰 skills + 3 支品管 agents。
+給團隊的 Claude Code 起手包:一份會自己長大的全域設定 + 20 支實戰 skills + 3 支品管 agents。
 不含 Slack 秘書——要秘書另裝 [secretary-kit](https://github.com/TimDaChung/secretary-kit)。
 
 ## 最快安裝法
@@ -26,7 +26,7 @@
 | 全域設定種子 | `CLAUDE.starter.md`(含最重要的 meta 規則:被糾正的事寫回檔案) |
 | 企劃 | plan-dept14-writer(一＋四部 house style,範本驅動,寫/改)、plan-doc-qa(一致性審查)、product-planning(通用版,跨部門/無範本/反寫 demo 的 fallback)、data-report-builder(一輪訪談→生成「定期分析某報表」的專屬 skill) |
 | 遊戲開發 | game-prototype、game-develop、playtest-loop、card-game |
-| 美術生圖 | imagen、imagen-portrait、imagen-ui、generate2dsprite(像素 / HD / cel-shaded chibi 用 art_style 切)、generate2dmap、image-to-prompt、batch-image-brief、art-style-guard(生圖引擎 image-studio 由主任另行發放,缺它這幾支不能生圖) |
+| 美術生圖 | imagen、imagen-portrait、imagen-ui、imagen-banner(廣宣 / banner 生圖與驗收,20 條鐵則;**鐵則只約束廣宣圖,不外溢立繪 / UI / 插畫**)、generate2dsprite(像素 / HD / cel-shaded chibi 用 art_style 切)、generate2dmap、image-to-prompt、batch-image-brief、art-style-guard(生圖引擎 image-studio 由主任另行發放,缺它這幾支不能生圖) |
 | 測試 | webapp-testing(需 Python + Playwright) |
 | 異常處理 | issue-triage(回報模式:標準異常回報;收單模式:維護端驗證修復 SOP) |
 | Agents | dialogue-writer(對白)、game-balance-auditor(數值模擬)、planning-doc-auditor(企劃vs實作對照)、my-voice 範本(自己的分身自己建) |

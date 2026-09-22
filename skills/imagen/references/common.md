@@ -1,6 +1,8 @@
-# imagen 家族共用規則（imagen / imagen-portrait / imagen-ui）
+# imagen 家族共用規則（imagen / imagen-portrait / imagen-ui / imagen-banner）
 
-三支 imagen skill 的共用流程、格式與指令集中在此，各 SKILL.md 只留 2–4 行摘要 + 該 skill 的差異。章節編號固定，引用寫「見 common.md §N」。§1–§3 的完整條文在同目錄 `consistency-rules.md`（五支生圖 skill 共用，英文正文 + 繁中摘要），此處只放繁中摘要與 imagen 家族的參數表。
+四支 imagen skill 的共用流程、格式與指令集中在此，各 SKILL.md 只留 2–4 行摘要 + 該 skill 的差異。章節編號固定，引用寫「見 common.md §N」。§1–§3 的完整條文在同目錄 `consistency-rules.md`（六支生圖 skill 共用，英文正文 + 繁中摘要），此處只放繁中摘要與 imagen 家族的參數表。
+
+`imagen-banner`（廣宣 / banner）只取本檔的 §5 參考圖、§7 存檔、§9 引擎呼叫；它的 20 條廣宣鐵則**只在廣宣圖內部生效**，不適用其他生圖 skill。
 
 | § | 章節 | 何時讀 |
 |---|------|--------|

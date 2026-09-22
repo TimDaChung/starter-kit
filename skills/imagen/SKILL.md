@@ -19,7 +19,7 @@ allowed-tools:
 
 > **執行角色：美術**——關注風格一致、可讀性、資產規格（尺寸 / 切圖 / 命名）。
 
-通用生圖 skill。三支 imagen skill 的共用流程、格式、指令集中在 `references/common.md`（下文以「common.md §N」引用）；五支生圖 skill 共用的一致性鎖規則在 `references/consistency-rules.md`；生圖引擎（唯一引擎＝image-studio GPT 線、可用性判定、呼叫契約、失敗處理）在 `references/draw-engines.md`。
+通用生圖 skill。四支 imagen skill 的共用流程、格式、指令集中在 `references/common.md`（下文以「common.md §N」引用）；六支生圖 skill 共用的一致性鎖規則在 `references/consistency-rules.md`；生圖引擎（唯一引擎＝image-studio GPT 線、可用性判定、呼叫契約、失敗處理）在 `references/draw-engines.md`。
 
 ---
 

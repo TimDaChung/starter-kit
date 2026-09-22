@@ -55,12 +55,13 @@ description: 遊戲美術風格一致性守門。Use when 遊戲/demo 專案批�
 
 ## 銜接（誰會把工作交過來）
 
-以下 5 支生圖 skill 在「同專案第二批以後的生圖」或「風格疑慮」時先過本 skill；共用的交接規則見 `../imagen/references/consistency-rules.md` §4：
+以下 6 支生圖 skill 在「同專案第二批以後的生圖」或「風格疑慮」時先過本 skill；共用的交接規則見 `../imagen/references/consistency-rules.md` §4：
 
 - `imagen`（通用生圖）
 - `imagen-portrait`（角色立繪）
 - `imagen-ui`（UI 元件）
+- `imagen-banner`（廣宣 / banner；風格守門照走，但**本 skill 不套用它的廣宣鐵則**，鐵則只在廣宣圖內部生效）
 - `generate2dsprite`（sprite / 動畫 sheet）
 - `generate2dmap`（地圖 / 場景 / prop pack）
 
-分工：那五支負責**單次生圖時的 prompt 鎖**（預設視覺規則 / 專案資產繼承 / 批次 Strict Rules）；本 skill 負責**跨批的 Style Bible 與生成後的 contact sheet 守門**。首批＝定調批，核准後立刻落地 bible，再回原 skill 從 bible 組 prompt 繼續生。
+分工：那六支負責**單次生圖時的 prompt 鎖**（預設視覺規則 / 專案資產繼承 / 批次 Strict Rules）；本 skill 負責**跨批的 Style Bible 與生成後的 contact sheet 守門**。首批＝定調批，核准後立刻落地 bible，再回原 skill 從 bible 組 prompt 繼續生。

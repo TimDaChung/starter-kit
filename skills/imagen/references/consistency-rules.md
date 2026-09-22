@@ -1,6 +1,6 @@
 # Consistency Rules
 
-Shared lock rules for the five image-generation skills in this kit: `imagen`, `imagen-portrait`, `imagen-ui`, `generate2dsprite`, `generate2dmap`. Each SKILL.md keeps a short summary plus its own domain deltas; the canonical wording lives here. Section numbers are stable — cite as「consistency-rules.md §N」.
+Shared lock rules for the six image-generation skills in this kit: `imagen`, `imagen-portrait`, `imagen-ui`, `imagen-banner`, `generate2dsprite`, `generate2dmap`. Each SKILL.md keeps a short summary plus its own domain deltas; the canonical wording lives here. `imagen-banner`'s 20 promo-art rules are **scoped to promo banners only** and never apply to the other five. Section numbers are stable — cite as「consistency-rules.md §N」.
 
 | § | Section | Read when |
 |---|---------|-----------|

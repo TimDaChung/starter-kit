@@ -17,7 +17,7 @@ allowed-tools:
 
 > **執行角色：美術**——關注風格一致、可讀性、UI 資產規格；產出後切**工程**視角核對切圖與尺寸可直接使用。
 
-生成 RPG 手遊 UI 元件，預設套用高營收手遊（米哈遊、明日方舟等）的 UI 視覺語言。三支 imagen skill 的共用流程、格式、指令集中在 `../imagen/references/common.md`（下文以「common.md §N」引用）；生圖引擎（唯一引擎＝image-studio GPT 線、呼叫契約、失敗處理）見 `../imagen/references/draw-engines.md`。
+生成 RPG 手遊 UI 元件，預設套用高營收手遊（米哈遊、明日方舟等）的 UI 視覺語言。四支 imagen skill 的共用流程、格式、指令集中在 `../imagen/references/common.md`（下文以「common.md §N」引用）；生圖引擎（唯一引擎＝image-studio GPT 線、呼叫契約、失敗處理）見 `../imagen/references/draw-engines.md`。
 
 ---
 
@@ -69,7 +69,7 @@ allowed-tools:
 | `icon_currency` | 貨幣 / 資源 icon | 1:1，金屬光澤強 |
 | `frame_card` | 卡牌 / 角色卡框 | 3:4，中央透空 |
 | `frame_avatar` | 頭像框（圓 / 方）| 1:1，中央透空 |
-| `banner` | 標題橫幅 / 活動 banner | 16:9 或 21:9 |
+| `banner` | 標題橫幅 / 活動 banner**底板**（會被文字或內容蓋上的裝飾橫幅）| 16:9 或 21:9 |
 | `popup_bg` | 彈窗背景 | 4:3 或 3:4 |
 | `slot_item` | 道具格 / 裝備格 | 1:1，可含發光 |
 | `rarity_glow` | 稀有度光效 / 邊框 | 1:1 或 3:4，多色版本 |
@@ -78,6 +78,8 @@ allowed-tools:
 | `tab` | 分頁標籤 | 以 21:9 生成 → 後製裁到 3:1 或 4:1 |
 | `badge` | 徽章 / 成就 / 等級標 | 1:1 |
 | `mission_card` | 任務 / 活動卡 | 4:3 |
+
+> **與 `imagen-banner` 的分界**：本 skill 的 `banner` 是**空的裝飾底板**（上面還要疊文字或內容）。使用者要的若是**本身就是完整廣告**的宣傳圖——含主角 / Logo / 利益訊息 / CTA，投放在 lobby、活動彈窗、商店截圖或外部廣告——改走 `imagen-banner`（那支有 20 條廣宣鐵則與驗收流程）。反之，廣宣鐵則不適用於本 skill 的 UI 元件，不要拿去審 icon 或卡框。
 
 ---
 
