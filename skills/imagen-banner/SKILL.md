@@ -77,7 +77,8 @@ allowed-tools:
 |---|---|
 | 類別 | 機台宣傳／節慶促銷／改版活動 |
 | 王者 | 機台＝主角是誰；節慶＝優惠數字是多少；改版＝走提案模式先定 |
-| 利益句 | 一句話，Level 2 用（例：TRIPLE BONUS FEATURE WINS） |
+| 三級文字的**實際字樣** | Level 1 Logo／標題、Level 2 利益句（例：TRIPLE BONUS FEATURE WINS）、Level 3 CTA（PLAY NOW／GET IT）。字樣要逐字拿到——要生進圖裡的，錯一個字母就得重抽 |
+| 字體與配色方向 | Logo 要什麼造型感（厚重立體／霓虹／東方奇幻）、CTA 用什麼顏色。沒講就照題材主色配，並在 prompt 寫明 |
 | 版位與尺寸 | lobby banner／彈窗／store 截圖／外部投放，各自比例不同 |
 | **UI 疊圖區** | 版位上會被系統 UI（頂部金額列、底部功能列、關閉鈕）蓋住的範圍——**先扣掉再構圖**，主角與 CTA 不得落在這些帶狀區 |
 | 節慶／題材識別碼 | 節慶：國旗／南瓜／紅包／月亮；機台：題材代表物 |
@@ -94,20 +95,44 @@ allowed-tools:
 [BACKGROUND]  題材場景，暗→亮、外→內，對比與銳利度低於前景（A4）
 [WEALTH]      金幣三層：前景大模糊飛幣／中景清晰／底部堆（A5）
 [COLOR]       主色＋輔色＋金，亮度飽和集中在王者與 CTA 附近（A6）
-[LAYOUT]      文字三級的**留白區**位置（A7 A8）
+[TYPOGRAPHY]  文字三級的實際字樣、字體風格、顏色、位置（A7 A8 S2 F1）
 [EXCLUSION]   排除項（見下）
 [SPEC]        比例與解析度寫進文字（引擎沒有 --ratio flag）
 ```
 
-### Phase 3｜文字一律留位，不讓 AI 生字
+### Phase 3｜預設把字一起生出來
 
-**這是與原 deck 最大的差異**：原規範假設美術用 PS 上字，AI 生圖則會拼錯字、做出假字母。
+**預設連字一起生。** 字體造型、顏色、大小、位置是構圖的一部分——鐵則 S2 要求 Logo 做成 Graphic Asset（字體造型＋描邊＋厚度＋漸層＋主題裝飾），節慶鐵則 F1 更直接把優惠數字當視覺王者。留白生成等於把這兩條抽掉，出來的圖沒辦法評、也看不出三級層級對不對。
 
-- prompt 只描述**留白區塊**：`clean empty banner area in the lower third reserved for the CTA button`、`negative space at upper right reserved for the game logo`
-- Logo、Selling Line、CTA、優惠數字**一律後製上字**（優惠數字尤其不能交給 AI，錯一位數是事故）
-- 例外：確定要一次到位的草稿版可讓 AI 塞假字佔位，但交付前必須換掉，且**不得直接對外**
+prompt 的 `[TYPOGRAPHY]` 段要寫明每一級的**實際字樣＋造型方向＋位置**：
 
-`[EXCLUSION]` 固定含：`no text, no lettering, no numbers, no watermark, no UI frame`，再加 common.md §1 的西風排除詞。
+```
+Level 1 logo "DRAGON DRUM TRIO" — chunky 3D beveled letterforms, gold outline,
+  red-to-orange gradient, oriental cloud ornament, upper right, largest text on canvas
+Level 2 line "BEAT THE DRUMS FOR TRIPLE BONUS WINS" — clean bold sans, white with
+  dark outline, under the logo, clearly smaller than Level 1
+Level 3 CTA "PLAY NOW" — large green rounded button, white uppercase, bottom centre
+```
+
+**成功率差很多，依字串長度分流**：
+
+| 字串 | 交給 AI | 做法 |
+|---|---|---|
+| 短字（Logo 1–3 字、PLAY NOW、GET IT）| ✅ 通常可用 | 直接生，驗收時逐字核對 |
+| 中等 Selling Line（5–10 字）| ⚠️ 會崩 | 生，但預期要重抽或後製修 |
+| 長句、多語系、小字法遵字樣 | ❌ 不要 | 該級留白，後製上字 |
+| **優惠數字（200%、4.5X）與日期** | ❌ **一律人工確認** | 可以生出來看版面，但**交付前必須逐位核對或直接後製替換**——錯一位數是事故 |
+
+**生出來的字視為「示意稿」**：版面、字體風格、配色可以直接採用；字本身在交付前一律核對過，不確定就後製替換。
+
+**改走留白的四種情況**（此時 `[TYPOGRAPHY]` 改寫成留白區描述，如 `clean empty area in the lower third reserved for the CTA`）：
+
+- 文案還沒定案
+- 同一張底圖要套多組數字（不同檔次的優惠）或多語系版本
+- 該級是長句或法遵字樣
+- 美術明確要自己上字
+
+`[EXCLUSION]` 固定含：`no watermark, no UI frame, no extra text beyond the specified copy`（**不再整段排除文字**），再加 common.md §1 的西風排除詞。走留白模式時才加 `no text, no lettering, no numbers`。
 
 ### Phase 4｜生成與存檔
 
@@ -116,6 +141,8 @@ allowed-tools:
 ### Phase 5｜自我驗收（交付前必做）
 
 跑一次驗收模式。**沒過不交付**，或明確標註哪一條沒過、為什麼接受。
+
+圖上有 AI 生的字時，額外做**逐字核對**：放大原圖看每個字母與每一位數字，對照 Phase 1 收到的字樣。拼錯、多字母、假字、位數錯 → 重抽或後製替換，**絕不靠縮圖看過去就算過**。
 
 ---
 
@@ -135,9 +162,10 @@ allowed-tools:
    | 縮圖 | 全部 | 1 秒四問：什麼主題／主角是誰／名稱在哪／按哪裡 |
    | 灰階 | A6 A8 | 拿掉顏色後還有沒有主從？**CTA 是否整個糊掉**（只靠色相撐的 CTA 在這格會現形） |
    | 模糊 | A1 A3 | 瞇眼看只剩幾個亮塊？兩個以上勢均力敵＝視覺王者不只一個 |
-   | 原圖 | A5 A7 | 金幣是否三層有虛實；文字是否超過三級 |
-3. 節慶圖加做**遮字測試**：想像遮掉所有文字，還看得出是什麼節日嗎？
-4. 逐條對 `references/rules.md` 給結論。
+   | 原圖 | A5 A7 S2 | 金幣是否三層有虛實；文字是否超過三級；**Logo 是否被當成 Graphic Asset 設計**（造型／描邊／厚度／漸層），還是只是打了一行字 |
+3. **逐字核對**（圖上有字就一定做）：放大原圖，每個字母與每一位數字都對過 Phase 1 的字樣。AI 生的字常見拼錯、多一個字母、假字、`%` 變形、位數錯位——縮圖看不出來，一定要看原圖。優惠數字與日期錯了就是事故，寧可後製替換
+4. 節慶圖加做**遮字測試**：想像遮掉所有文字，還看得出是什麼節日嗎？
+5. 逐條對 `references/rules.md` 給結論。
 
 ### 報告格式
 
@@ -193,7 +221,9 @@ allowed-tools:
 |---|---|
 | 拿鐵則去打回立繪、插畫、UI 元件 | 適用邊界寫在最上面，超出就轉出，不要用廣宣標準審非廣宣圖 |
 | 對方已給企劃還在提案改王者 | 點出衝突一句話就好，照企劃做 |
-| 讓 AI 生 Logo 文字或優惠數字 | 拼錯字、錯位數。一律留白後製上字 |
+| 生完沒逐字核對就交付 | AI 生的字會拼錯、多字母、錯位數。放大原圖對過每個字元，優惠數字與日期一律人工確認 |
+| 整張留白不生字 | 字體造型、顏色、位置本來就是構圖的一部分（S2 A7）。留白只用在文案未定、多語系、長句、法遵字樣這四種情況 |
+| 長 slogan 硬要 AI 寫 | 5 字以上就開始崩。該級改留白後製，不要一直重抽 |
 | 只看原圖就交付 | 原圖尺寸下什麼都清楚。一律看 lobby 縮圖那格 |
 | 指標好看就放行 | 指標是輔助。縮圖 1 秒看不懂就是沒過 |
 | 沒問版位就構圖 | 主角被系統 UI 蓋掉。Phase 1 必問 UI 疊圖區 |
