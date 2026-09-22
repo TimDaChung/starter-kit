@@ -17,7 +17,7 @@ allowed-tools:
 > **執行角色：美術（廣宣）**——關注 1 秒辨識、視覺動線、轉換導向；產出後切**企劃**視角核對是否偏離需求文檔與活動規則。
 
 廣宣圖不是 Key Art 比賽，是**轉換導向的入口廣告**。判準是「1 秒看懂嗎」，不是「漂亮嗎」。
-鐵則全文（20 條＋驗收問句）：`references/rules.md`。生圖引擎、參考圖、存檔慣例沿用 imagen 家族：`../imagen/references/common.md` §5 §7 §9、`../imagen/references/draw-engines.md`。
+鐵則全文（20 條＋驗收問句）：`references/rules.md`。實測過的 prompt 骨架（機台 / 節慶 / 繁中三組）：`references/prompt-examples.md`。生圖引擎、參考圖、存檔慣例沿用 imagen 家族：`../imagen/references/common.md` §5 §7 §9、`../imagen/references/draw-engines.md`。
 
 ---
 
@@ -114,22 +114,20 @@ Level 2 line "BEAT THE DRUMS FOR TRIPLE BONUS WINS" — clean bold sans, white w
 Level 3 CTA "PLAY NOW" — large green rounded button, white uppercase, bottom centre
 ```
 
-**成功率差很多，依字串長度分流**：
+**長句與繁中都照生，不必分級。** 2026-09-22 在 image-studio GPT 線實測 6 張（機台 2、節慶 2、繁中節慶 2，prompt 見 `references/prompt-examples.md`）：
 
-| 字串 | 交給 AI | 做法 |
-|---|---|---|
-| 短字（Logo 1–3 字、PLAY NOW、GET IT）| ✅ 通常可用 | 直接生，驗收時逐字核對 |
-| 中等 Selling Line（5–10 字）| ⚠️ 會崩 | 生，但預期要重抽或後製修 |
-| 長句、多語系、小字法遵字樣 | ❌ 不要 | 該級留白，後製上字 |
-| **優惠數字（200%、4.5X）與日期** | ❌ **一律人工確認** | 可以生出來看版面，但**交付前必須逐位核對或直接後製替換**——錯一位數是事故 |
+- 45 字元的英文長 Selling Line「BEAT THE DRUMS FOR TRIPLE BONUS FEATURE WINS!」**兩張都全對**
+- `200%` 四張都正確，沒有錯位數或 `%` 變形
+- **繁體中文四字標題（中秋加碼／更多金幣／立即領取）1:1 檢視筆畫正確**，沒有簡體、沒有假字
+- Logo 的立體斜角、金邊、漸層、雲紋裝飾品質足以直接當 Graphic Asset（S2 成立）
 
-**生出來的字視為「示意稿」**：版面、字體風格、配色可以直接採用；字本身在交付前一律核對過，不確定就後製替換。
+**但仍然逐字核對**：n=6 不等於 100%，而且**優惠數字與日期錯一位就是事故**。核對成本遠低於發錯圖，驗收模式已列為必做步驟。
 
-**改走留白的四種情況**（此時 `[TYPOGRAPHY]` 改寫成留白區描述，如 `clean empty area in the lower third reserved for the CTA`）：
+**改走留白的情況**（此時 `[TYPOGRAPHY]` 改寫成留白區描述，如 `clean empty area in the lower third reserved for the CTA`）——理由都是**業務面，不是 AI 寫不好**：
 
 - 文案還沒定案
 - 同一張底圖要套多組數字（不同檔次的優惠）或多語系版本
-- 該級是長句或法遵字樣
+- 大段法遵字樣（小字多、又不能有任何錯字，後製比較快）
 - 美術明確要自己上字
 
 `[EXCLUSION]` 固定含：`no watermark, no UI frame, no extra text beyond the specified copy`（**不再整段排除文字**），再加 common.md §1 的西風排除詞。走留白模式時才加 `no text, no lettering, no numbers`。
@@ -222,8 +220,8 @@ Level 3 CTA "PLAY NOW" — large green rounded button, white uppercase, bottom c
 | 拿鐵則去打回立繪、插畫、UI 元件 | 適用邊界寫在最上面，超出就轉出，不要用廣宣標準審非廣宣圖 |
 | 對方已給企劃還在提案改王者 | 點出衝突一句話就好，照企劃做 |
 | 生完沒逐字核對就交付 | AI 生的字會拼錯、多字母、錯位數。放大原圖對過每個字元，優惠數字與日期一律人工確認 |
-| 整張留白不生字 | 字體造型、顏色、位置本來就是構圖的一部分（S2 A7）。留白只用在文案未定、多語系、長句、法遵字樣這四種情況 |
-| 長 slogan 硬要 AI 寫 | 5 字以上就開始崩。該級改留白後製，不要一直重抽 |
+| 整張留白不生字 | 字體造型、顏色、位置本來就是構圖的一部分（S2 A7）。留白只用在文案未定、多套數字／多語系、大段法遵字樣、美術要自己上字 |
+| 以為長句或中文一定會崩就先留白 | 實測 6 張長句與繁中都全對（見 `references/prompt-examples.md`）。先生，核對過再決定要不要後製 |
 | 只看原圖就交付 | 原圖尺寸下什麼都清楚。一律看 lobby 縮圖那格 |
 | 指標好看就放行 | 指標是輔助。縮圖 1 秒看不懂就是沒過 |
 | 沒問版位就構圖 | 主角被系統 UI 蓋掉。Phase 1 必問 UI 疊圖區 |
