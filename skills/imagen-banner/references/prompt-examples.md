@@ -2,7 +2,9 @@
 
 以下三組在 image-studio GPT 線實測過（2026-09-22，各 2 張，共 6 張），**文字全部正確**：長句、`200%`、繁體中文標題都沒有崩。
 
-⚠️ **比例注意**：實測當時跑的是 21:9，下面的 prompt 已改成**部門統一規格 16:9**（2026-09-23）。改比例後**尚未重測**——引擎當時配額用罄（HTTP 429）。16:9 版面較高，主角與文字的相對關係會變，第一次用請特別看縱向留白與 CTA 位置；重測後再把這段拿掉。
+⚠️ **比例注意**：實測當時跑的是 21:9，下面的 prompt 已改成**部門預設 8:5（800 × 500 交付）**（2026-09-23）。改比例後**尚未重測**——引擎當時配額用罄（HTTP 429）。8:5 比 21:9 高得多，主角與文字的相對關係會明顯改變，第一次用要特別看：主角會不會被裁到、文字三級還塞不塞得下、CTA 有沒有被擠出安全區。重測後再把這段拿掉。
+
+企劃有指定尺寸就以企劃為準（例：《218 小惡魔轉盤︰機台廣宣》指定 800 × 500 jpg）。生成後一律照 SKILL.md Phase 4 的腳本裁到交付尺寸。
 拿來當骨架改寫時，`[TYPOGRAPHY]` 段的字樣換成自己的文案即可，其餘段落對應的鐵則見 `rules.md`。
 
 注意：引擎沒有 `--ratio` flag，長寬比與解析度必須寫在 prompt 文字裡（見每組第一行）。
@@ -15,7 +17,7 @@
 小瑕疵：其中一張「Drum」與「Trio」字距偏緊，可在 prompt 補 `generous letter spacing between words`。
 
 ```
-Mobile social-casino promotional banner, 16:9 aspect ratio, 2K resolution, glossy high-saturation casino art style.
+Mobile social-casino promotional banner, 8:5 aspect ratio (800 x 500 px deliverable), 2K resolution, glossy high-saturation casino art style.
 
 [HERO] Three ornate Chinese festival drums stacked diagonally on the left half of the canvas: the largest red drum with gold dragon relief and gold studs sits front and centre and is the single biggest object in frame; a green and a blue drum tucked behind it, crossed drumsticks with red and blue tips.
 
@@ -43,7 +45,7 @@ Level 3 - a large green rounded call-to-action button at lower right with white 
 小瑕疵：其中一張數字右緣壓到吉祥物，可在 prompt 補 `keep the mascot clear of the number, no overlap`。
 
 ```
-Mobile social-casino Fourth of July sale banner, 16:9 aspect ratio, 2K resolution, glossy high-saturation casino art style, celebratory and loud.
+Mobile social-casino Fourth of July sale banner, 8:5 aspect ratio (800 x 500 px deliverable), 2K resolution, glossy high-saturation casino art style, celebratory and loud.
 
 [HERO] A giant offer number is the single visual king of the composition: "200%" rendered enormous at the centre, gold gradient with thick red outline and glossy highlights, larger than everything else in frame.
 
@@ -73,7 +75,7 @@ Level 3 - a large green rounded call-to-action button at bottom centre with whit
 關鍵是 `[TYPOGRAPHY]` 段明寫 **TRADITIONAL CHINESE characters**、`correct stroke shapes`，並在 `[EXCLUSION]` 排除 `no Japanese kana, no simplified Chinese, no gibberish characters`。
 
 ```
-Mobile social-casino Mid-Autumn Festival sale banner for a Taiwanese mahjong casino app, 16:9 aspect ratio, 2K resolution, glossy high-saturation casino art style, festive and loud.
+Mobile social-casino Mid-Autumn Festival sale banner for a Taiwanese mahjong casino app, 8:5 aspect ratio (800 x 500 px deliverable), 2K resolution, glossy high-saturation casino art style, festive and loud.
 
 [HERO] A giant offer number is the single visual king of the composition: "200%" rendered enormous at the centre, gold gradient with thick red outline and glossy highlights, larger than everything else in frame.
 

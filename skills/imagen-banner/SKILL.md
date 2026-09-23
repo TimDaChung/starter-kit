@@ -71,7 +71,7 @@ description: |
 
 | 來源 | 怎麼讀 |
 |---|---|
-| Notion 連結 | **優先用部門唯讀金鑰走 REST API**（位置與流程見 `../plan-dept14-writer/references/notion-access.md`），判不出部別就一部四部都試；個人 Notion MCP 只當備援。**讀不到就停**，回報實際錯誤（404 / 權限）請對方分享或貼內容，**絕不從標題猜內容** |
+| Notion 連結 | **用部門唯讀金鑰走 REST API**（位置與流程見 `../plan-dept14-writer/references/notion-access.md`；機台＝娛樂城線＝四部）。**讀不到就停**，回報實際錯誤（404 / 權限）請對方分享或貼內容，**絕不從標題猜內容** |
 | 本機檔（.md／匯出檔／截圖） | `Read`；截圖直接看圖抄文案 |
 | **企劃裡的圖片** | 企劃的文案與版面常常整段放在圖裡（排版示意、現有廣宣參考）。**一定要把 `image` 區塊下載下來看**，只讀文字層會漏掉整份文案 |
 | 直接貼上的文字 | 照用 |
@@ -107,7 +107,7 @@ description: |
 | 王者 | 機台＝主角是誰；節慶＝優惠數字是多少；改版＝走提案模式先定 |
 | 三級文字的**實際字樣** | Level 1 Logo／標題、Level 2 利益句（例：TRIPLE BONUS FEATURE WINS）、Level 3 CTA（PLAY NOW／GET IT）。字樣要逐字拿到——要生進圖裡的，錯一個字母就得重抽 |
 | 字體與配色方向 | Logo 要什麼造型感（厚重立體／霓虹／東方奇幻）、CTA 用什麼顏色。沒講就照題材主色配，並在 prompt 寫明 |
-| 版位與尺寸 | **預設 16:9**（部門統一規格，沒特別指定就用它）。lobby banner／彈窗／store 截圖／外部投放若另有規定比例，以該版位規定為準，並在 `[SPEC]` 寫明 |
+| 版位與尺寸 | **企劃有寫就照企劃**；企劃沒寫就用部門預設 **800 × 500 px（8:5）**。其他版位（彈窗／store 截圖／外部投放）另有規定才改，並在 `[SPEC]` 寫明 |
 | **UI 疊圖區** | 版位上會被系統 UI（頂部金額列、底部功能列、關閉鈕）蓋住的範圍——**先扣掉再構圖**，主角與 CTA 不得落在這些帶狀區 |
 | 節慶／題材識別碼 | 節慶：國旗／南瓜／紅包／月亮；機台：題材代表物 |
 | 既有素材 | 同系列既有 banner → 鎖風格當預設（common.md §2） |
@@ -126,7 +126,8 @@ description: |
 [TYPOGRAPHY]  文字三級的實際字樣、字體風格、顏色、位置（A7 A8 S2 F1）
 [EXCLUSION]   排除項（見下）
 [SPEC]        比例與解析度寫進文字（引擎沒有 --ratio flag）
-              **預設 `16:9 aspect ratio, 2K resolution`**；版位另有規定才改
+              **預設 `8:5 aspect ratio (800 x 500 px deliverable), 2K resolution`**
+              企劃有指定尺寸就照企劃寫
 ```
 
 ### Phase 3｜預設把字一起生出來
@@ -164,6 +165,21 @@ Level 3 CTA "PLAY NOW" — large green rounded button, white uppercase, bottom c
 ### Phase 4｜生成與存檔
 
 依 common.md §9 呼叫 image-studio；比例寫進 prompt 文字；`--count` 預設 1，不自動重試。存檔與命名見 common.md §7。
+
+**引擎不會剛好吐出交付尺寸**（沒有 `--size` flag，實際輸出由引擎決定），所以生成後**一律後製到規格**：
+
+```python
+from PIL import Image
+im = Image.open(src)
+w, h = im.size
+tw, th = 800, 500                      # 企劃規格；沒寫就用這組預設
+s = max(tw / w, th / h)                # 先等比放大到蓋滿，再置中裁掉多餘
+im = im.resize((round(w * s), round(h * s)), Image.LANCZOS)
+l, t = (im.size[0] - tw) // 2, (im.size[1] - th) // 2
+im.crop((l, t, l + tw, t + th)).save(out, quality=92)   # .jpg 依企劃指定
+```
+
+裁切會吃掉邊緣，所以 prompt 的 `[HERO]`／`[TYPOGRAPHY]` 要把主角與文字放在**中央安全區**，不要貼邊。裁完再跑驗收（Phase 5），**以裁切後的成品為準**，不是原圖。
 
 ### Phase 5｜自我驗收（交付前必做）
 
