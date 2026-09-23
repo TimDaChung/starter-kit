@@ -1,10 +1,13 @@
 # 實測過的 prompt 範例
 
-以下三組在 image-studio GPT 線實測過（2026-09-22，各 2 張，共 6 張），**文字全部正確**：長句、`200%`、繁體中文標題都沒有崩。
+以下四組都在 image-studio GPT 線實測過，**文字全部正確**：長句、`200%`、繁體中文標題與四字 CTA 都沒有崩。
 
-⚠️ **比例注意**：實測當時跑的是 21:9，下面的 prompt 已改成**部門預設 8:5（800 × 500 交付）**（2026-09-23）。改比例後**尚未重測**——引擎當時配額用罄（HTTP 429）。8:5 比 21:9 高得多，主角與文字的相對關係會明顯改變，第一次用要特別看：主角會不會被裁到、文字三級還塞不塞得下、CTA 有沒有被擠出安全區。重測後再把這段拿掉。
+- 第 1～3 組：2026-09-22，各 2 張共 6 張（當時跑 21:9，prompt 已改為部門預設 8:5）
+- 第 4 組：2026-09-23，照真實企劃跑 8:5，**一次到位**
 
-企劃有指定尺寸就以企劃為準（例：《218 小惡魔轉盤︰機台廣宣》指定 800 × 500 jpg）。生成後一律照 SKILL.md Phase 4 的腳本裁到交付尺寸。
+**8:5 已驗證**：prompt 寫 `8:5 aspect ratio (800 x 500 px deliverable)`，引擎實際吐出 1586 × 992（比例正好 1.60），**等比縮到 800 × 500 即可、裁切 0 px**。
+
+企劃有指定尺寸就以企劃為準（例：《218 小惡魔轉盤︰機台廣宣》指定 800 × 500 jpg）。生成後仍照 SKILL.md Phase 4 的腳本處理到交付尺寸——引擎不保證每次都給同一比例。
 拿來當骨架改寫時，`[TYPOGRAPHY]` 段的字樣換成自己的文案即可，其餘段落對應的鐵則見 `rules.md`。
 
 注意：引擎沒有 `--ratio` flag，長寬比與解析度必須寫在 prompt 文字裡（見每組第一行）。
@@ -95,4 +98,45 @@ Level 2 - directly under the giant "200%", a line reading 更多金幣 in bold w
 Level 3 - a large green rounded call-to-action button at bottom centre with white Chinese characters reading 立即領取.
 
 [EXCLUSION] No watermark, no UI frame, no Japanese kana, no simplified Chinese, no extra text beyond the specified copy, no gibberish characters.
+```
+
+---
+
+## 4. 機台廣宣・繁中在地化（照真實企劃、帶參考圖）
+
+2026-09-23 實測，來源《218 小惡魔轉盤︰機台廣宣》。企劃要求「使用機台 wow 現有廣宣翻譯、排版與字色與 wow 一致、按鈕色須維持原版設計」，所以**帶兩張參考圖**：wow 英文原版（鎖版面與配色）＋企劃的內文排版示意（鎖中文版面）。
+
+```bash
+python ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
+  --count 1 --prompt "$(cat prompt.txt)" \
+  --reference wow現有廣宣.jpg --reference 內文排版示意.png --output out
+```
+
+出圖結果：五段中文（角標／Logo／slogan／CTA／法遵小字）**逐字核對全對**，版面與 wow 原版一致，綠色 CTA 保留。
+驗收：縮圖 1 秒四問過、灰階下 CTA 靠白字＋亮邊框撐住、模糊只剩「主角＋Logo」兩塊。
+**唯一沒過的是 A6**：高飽和像素 61.7%（常見 10–35%）＝全畫面一起豔，背景暗部要壓深、把高飽和留給 Logo / CTA / 金幣。
+
+與企劃的落差（交付前要回報 PM）：角標做成金色圓徽（企劃示意是白底方標）、CTA 少了白色內板。
+
+```
+Mobile social-casino slot promotional banner, 8:5 aspect ratio (800 x 500 px deliverable), 2K resolution, glossy high-saturation casino art style. Localized Traditional Chinese version of the provided reference banner: keep the reference's layout, colour scheme and lettering style, only the copy becomes Chinese.
+
+[HERO] A cheeky red baby devil mascot on the left half — small white horns, brown tuft of hair, small bat wings, white diaper, holding a tall golden trident, other hand raised waving, grinning. Largest character in frame, fully inside the canvas, not cropped by the edges.
+
+[ENERGY CORE] Hot orange-red glow radiating from behind the devil, burning embers and flame licks.
+
+[BACKGROUND] Hellish volcanic cavern with molten lava river flowing toward the viewer, dark red rock walls, softly blurred and lower contrast than the foreground, darker at the outer edges and brighter toward the centre, extends full-bleed to all four edges.
+
+[WEALTH] A dense pile of gold coins running along the bottom edge as a base, a few crisp coins around the devil, one or two oversized blurred coins in the extreme foreground.
+
+[COLOR] Dominant red and orange, gold for the logo and coins, deep red shadows. Highest brightness concentrated on the logo and the button.
+
+[TYPOGRAPHY] All text in TRADITIONAL CHINESE characters, correct stroke shapes, spelled exactly as specified, placed in the right half so the devil stays clear:
+Level 1 - game logo reading 小惡魔轉盤 in chunky three-dimensional beveled Chinese letterforms, gold-to-yellow gradient fill with thick dark red outline and glossy highlights, sitting on a dark red plaque, the largest text on the canvas.
+Level 2 - a slogan band under the logo: solid yellow horizontal bar with bold black Chinese text reading 惡魔出動，烈焰狂賞！
+Level 3 - a large green rounded call-to-action button at lower right with bold black Chinese text reading 立即前往, white inner panel, gold rim.
+Corner badge - a small white rounded label at the upper left reading 全新VIP機台！in bold black Chinese text.
+Fine print - a small line along the bottom left in white Chinese text reading ※下注仍需消耗神幣/地主幣
+
+[EXCLUSION] No watermark, no UI frame, no English words, no Japanese kana, no simplified Chinese, no gibberish characters, no extra text beyond the specified copy.
 ```
