@@ -168,7 +168,8 @@ classDef page     fill:#f1f3f5,stroke:#495057,stroke-width:2px,color:#1a1a1a
 3. **上色語法** Notion 吃 `<span color="red">`／`<span color="blue">`，段落、清單、表格儲存格、標題內都有效；**mermaid 程式碼區塊內無法上色**（圖裡的「後補」不會變紅，要主動說明）
 4. Notion 兩欄寫法 `<columns><column>…</column></columns>`，高度差太多用 `<empty-block/>` 補齊
 5. 貼上後 PM 自檢：巢狀編號是否為 1.→a.→i.（不對就手動調樣式）、表格欄位沒跑掉、紅字與灰綠底標記還在
-6. **要用 Notion API 直接讀頁面時的金鑰**：位置、取用流程與使用紀律見 `references/notion-access.md`。**金鑰自己照該檔去拿，不要問使用者**；唯讀金鑰與範本庫同一處（依產品線判部別取對應 txt），**讀寫金鑰不發放**（只有主任持有，要回寫交主任處理）
+6. **Notion 金鑰**（讀頁面用唯讀、回寫用該線讀寫）：位置、取用流程與護欄見 `references/notion-access.md`。**金鑰自己照該檔去拿，不要問使用者**
+7. **回寫企劃頁的前置與紀律**：PM 先用範本「建立複本」→ 貼網址 → 才回寫（API 建不出範本頁的按鈕與資料庫 template）。回寫**只動自己建的複本頁**、先列改動區塊取得同意、**寫完一律回讀驗證**、調整紀錄註明實際操作人（`last_edited_by` 會變成 writer bot，不是人）
 
 ## 九、通用寫作規則
 
