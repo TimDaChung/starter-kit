@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## v3.3.0 (2026-09-23)
+
+- **`imagen-banner` 可以直接吃企劃了**。新增 Phase 0「有企劃就先吃企劃」：企劃本來就寫好**文案**與**想要的元素**，正是 prompt 最關鍵的兩段，有企劃就先讀完，不要一上來丟問題清單；Phase 1 降級成「補問企劃沒寫的」
+  - 三種來源：Notion 連結（用環境裡的 Notion MCP 讀）、本機檔 / 截圖（Read）、直接貼上的文字
+  - **讀不到就停**：Notion 常見 404 是該頁沒分享給 integration、或不在 MCP 認證的同一個 workspace。回報實際錯誤請對方分享或貼內容，**絕不從標題猜內容**
+  - 附「企劃欄位 → prompt 段落」對照表：主標→Level 1、賣點句→Level 2、按鈕文字→Level 3、優惠數字→Level 2 或王者、**想要的元素清單→HERO / MASCOT / WEALTH / BACKGROUND**、檔期→節慶識別碼、版位→SPEC ＋ UI 疊圖區、參考圖→`--reference`
+  - **三條紀律**：文案逐字照抄（有錯字照抄但回報）、**企劃列的元素不得自行刪減**（塞不下要先講並取得同意）、企劃寫了的不要再問一遍
+- **移除 `allowed-tools` 宣告**：原本鎖成 Bash / Read / Write / Glob / AskUserQuestion，等於連 Notion MCP 與 WebFetch 都不能用，**企劃在 Notion 就根本讀不到**。改為不宣告（與 `plan-dept14-writer` 等讀企劃的 skill 一致）——各人環境的 MCP server 名稱不同，kit 不寫死
+
+⚙️ **升級動作**：`git pull` 即生效。企劃放 Notion 的話，該頁要先分享給你的 Notion integration，否則 skill 讀不到（會明確報錯，不會亂猜）
+
 ## v3.2.1 (2026-09-22)
 
 - **修正 v3.2.0 的「文字一律留位」——改為預設連字一起生**。原規則把字全部留白後製，等於抽掉兩條鐵則：S2 要求 Logo 做成 Graphic Asset（字體造型＋描邊＋厚度＋漸層），F1 更直接把優惠數字當節慶圖的視覺王者。字體、顏色、位置本來就是構圖的一部分，留白出來的圖沒辦法評層級、也看不出 Logo 設計對不對
