@@ -3,3 +3,6 @@ skills/imagen/.env
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# skill working scratch (raw generations, intermediate prompts) stays local
+skills/*/_工作暫存/
