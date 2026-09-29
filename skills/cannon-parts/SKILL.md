@@ -26,7 +26,9 @@ allowed-tools:
 依賴：
 - `配件規格.md` — 各部件的版型與規格
 - `prompt模板.md` — 各批次的提示詞模板
+- `scripts/rotate.py` — 批 1 的事後轉向
 - `cannon-wing/scripts/recolor.py` — 特效調色（共用，不重複實作）
+- **`kit 根目錄/references/image-studio-共用須知.md`** — 算圖中斷的處置、憑證到期、平台偶發異常、模型固定偏誤、注意力零和。**這些是所有生圖 skill 共用的，遇到產圖層面的問題先查那份**
 
 ---
 
@@ -94,6 +96,16 @@ allowed-tools:
 ### Step 4 — 挑圖
 
 對照企劃逐條檢查，並確認風格與炮台翅膀定稿一致。常見異常同 `cannon-wing` Step 5（底色卡、貼紙風、雜訊背景）。
+
+### Step 4.5 — 轉向（僅批 1）
+
+批 1 是**直式生成**的（子彈朝上、彈紋正圓並排），出圖後要順時針轉 90° 才是交付版型：
+
+```sh
+python3 ~/.claude/skills/cannon-parts/scripts/rotate.py <素材.png> <轉向後.png>
+```
+
+原因見 `配件規格.md`——直接叫模型畫橫躺朝右的彈紋，圓框會被撐成橢圓。
 
 ### Step 5 — 特效調色（視需要）
 
