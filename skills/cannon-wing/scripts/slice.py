@@ -48,6 +48,13 @@ def main() -> None:
     ap.add_argument("--rows", type=int, default=2)
     ap.add_argument("--row-names", default="cannon,wing")
     ap.add_argument("--col-names", default="lv0,lv1,lv2")
+    ap.add_argument(
+        "--equal",
+        action="store_true",
+        help="split into equal cells instead of hunting blank bands. Required for "
+        "sheets with a painted background (storyboards) — those have no transparent "
+        "gutters, so the alpha projection finds nothing to cut on.",
+    )
     args = ap.parse_args()
 
     row_names = args.row_names.split(",")
@@ -61,6 +68,23 @@ def main() -> None:
     h, w = alpha.shape
     mask = alpha > ALPHA_MIN
     print(f"sheet {w}x{h}  grid {args.rows}x{args.cols}")
+
+    if args.equal:
+        # Keep the full cell — a storyboard panel is the background too, so
+        # trimming to the content box would be wrong here.
+        for ri in range(args.rows):
+            for ci in range(args.cols):
+                box = (
+                    round(w * ci / args.cols),
+                    round(h * ri / args.rows),
+                    round(w * (ci + 1) / args.cols),
+                    round(h * (ri + 1) / args.rows),
+                )
+                tile = im.crop(box)
+                name = f"{row_names[ri]}_{col_names[ci]}.png"
+                tile.save(os.path.join(args.out, name))
+                print(f"  {name}  {tile.size[0]}x{tile.size[1]}")
+        return
 
     # Column cuts: the widest blank bands in the whole-sheet vertical projection.
     # A wing row has a gap between its left and right piece, so take only the
