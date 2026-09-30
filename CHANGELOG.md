@@ -9,9 +9,9 @@
   - **B 表演背景**：捕獲／彩金表演、小遊戲的 16:9 滿版場景；中央留舞台、下方 1/5 留給 UI、不畫 Boss 本體（牆上火影這類場景化暗示可以）
   - 首次實測（晶龍晶礦邊框、幻狐古代祭壇）第一輪就成功，中央不透明 0.2–1%
 - `boss-design/scripts/fit_canvas.py` 新增 `--cover`（裁切填滿 16:9，給滿版背景用）
-- **`boss-demo` 新增步驟 6「定稿後擷取分鏡、寫回企劃」**：表演分鏡**從 demo 截，不另外生圖**（動畫太複雜，AI 靜態示意畫不準）。`scripts/capture_storyboard.py` 用 Playwright 強制播每種表演、在各分鏡 60% 處暫停截舞台，拼成帶「圖N＋秒數」標籤的分鏡圖，並產出企劃段落草稿
+- **`boss-demo` 新增步驟 6「定稿後擷取分鏡、寫回企劃」**：表演分鏡**從 demo 截，不另外生圖**（動畫太複雜，AI 靜態示意畫不準）。`scripts/capture_storyboard.py` 分兩步：`capture` 用 Playwright 強制播每種表演、每個分鏡在 35%／75% 處各截一張當候選；`compose` 從候選挑 **4 格（2×2）或 6 格（2×3）**拼成帶「圖N＋秒數」標籤的分鏡圖，並產出企劃段落草稿。自動初選只是起點，看過候選總覽後用 `--pick` 挑「畫面有明確變化」的瞬間
   - 新 demo 必須提供截圖介面 `window.DEMO_API`＋`demo:phase` 事件，舞台內的 debug 元素加 `class="demo-ui"`；舊 demo 用 `--shim` 注入轉接（附戰神賽特的範例）
-  - 以戰神賽特 demo 實測：小獎一次截出 7 格，秒數與 demo 設定一致
+  - 以戰神賽特 demo 實測：小獎 14 張候選挑 6 格、大獎 16 張挑 6 格，秒數加總與 demo 一致；自動初選偏好噴金幣格，人工改挑攻擊命中瞬間後明顯較好
   - 表演設計要符合 Spine 限制（引用 `boss-design` 法則第四節）
 - ⚙️ **升級動作**：建立 `~/.claude/skills/boss-scene` junction 指向 kit 的 `skills/boss-scene`
 
