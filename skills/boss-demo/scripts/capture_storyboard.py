@@ -37,6 +37,7 @@ import argparse
 import functools
 import http.server
 import json
+import re
 import pathlib
 import threading
 
@@ -49,31 +50,45 @@ FONT_CANDIDATES = [
     "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
 ]
 
-# Pauses each phase at every ratio in turn. Page timers keep running while the
-# demo is paused, so the next stop is only scheduled after Python resumes.
+# Records every phase, and stops for a screenshot either at each demo:beat (the
+# demo author marks key moments) or, for demos without beats, at fixed ratios of
+# each phase. Page timers keep running while the demo is paused, so the next
+# ratio stop is only scheduled after Python resumes, and paused time is
+# subtracted from beat offsets.
 HOOK_JS = """
-(ratios) => {
-  const cap = window.__cap = { ready: false, shot: null, phaseNo: 0, pending: null };
-  const stopAt = (phaseNo, name, ms, k) => {
-    const wait = ms * (ratios[k] - (k ? ratios[k - 1] : 0));
+({ ratios, useBeats }) => {
+  const cap = window.__cap = { ready: false, shot: null, phases: [], pending: null,
+                              phaseStart: 0, pausedAt: 0, pausedTotal: 0 };
+  const offset = () => performance.now() - cap.phaseStart - cap.pausedTotal;
+  const stop = (extra) => {
+    window.DEMO_API.pause();
+    cap.pausedAt = performance.now();
+    const ph = cap.phases[cap.phases.length - 1];
+    cap.shot = { phase: cap.phases.length - 1, name: ph.name, ms: ph.ms, offset: offset(), ...extra };
+    requestAnimationFrame(() => requestAnimationFrame(() => { cap.ready = true; }));
+  };
+  const stopAt = (phaseIdx, k) => {
+    const ms = cap.phases[phaseIdx].ms;
     cap.pending = setTimeout(() => {
-      if (cap.phaseNo !== phaseNo) return;
-      window.DEMO_API.pause();
-      cap.shot = { phaseNo, name, ms, k };
-      cap.ready = true;
-    }, wait);
+      if (cap.phases.length - 1 !== phaseIdx) return;
+      stop({ k });
+    }, ms * (ratios[k] - (k ? ratios[k - 1] : 0)));
   };
   cap.next = () => {
     const s = cap.shot;
     cap.ready = false;
+    cap.pausedTotal += performance.now() - cap.pausedAt;
     window.DEMO_API.resume();
-    if (s.k + 1 < ratios.length) stopAt(s.phaseNo, s.name, s.ms, s.k + 1);
+    if (!useBeats && s.k + 1 < ratios.length) stopAt(s.phase, s.k + 1);
   };
   window.addEventListener('demo:phase', (e) => {
     clearTimeout(cap.pending);
-    cap.phaseNo += 1;
-    stopAt(cap.phaseNo, e.detail.name, e.detail.ms, 0);
+    cap.phases.push({ name: e.detail.name, ms: e.detail.ms });
+    cap.phaseStart = performance.now();
+    cap.pausedTotal = 0;
+    if (!useBeats) stopAt(cap.phases.length - 1, 0);
   });
+  if (useBeats) window.addEventListener('demo:beat', (e) => stop({ caption: e.detail.caption }));
 }
 """
 
@@ -102,23 +117,22 @@ def seconds_text(ms: float) -> str:
 
 # ---------- capture ----------
 
-def capture_scenario(page, scenario: dict, frames_dir: pathlib.Path, skip: list[str]) -> list[dict]:
-    phases: list[dict] = []
+def capture_scenario(page, scenario: dict, frames_dir: pathlib.Path, skip: list[str]) -> tuple[list[dict], list[dict]]:
     shots: list[dict] = []
-    page.evaluate("id => { window.__done = false; window.DEMO_API.play(id).then(() => window.__done = true); }", scenario["id"])
+    page.evaluate("id => { window.__cap.phases = []; window.__done = false;"
+                  " window.DEMO_API.play(id).then(() => window.__done = true); }", scenario["id"])
     while True:
         page.wait_for_function("window.__cap.ready || window.__done", timeout=120_000)
         if page.evaluate("window.__done && !window.__cap.ready"):
             break
         shot = page.evaluate("window.__cap.shot")
-        if not phases or phases[-1]["no"] != shot["phaseNo"]:
-            phases.append({"no": shot["phaseNo"], "name": shot["name"], "ms": shot["ms"]})
         if not any(word in shot["name"] for word in skip):
             path = frames_dir / f"{scenario['id']}_{len(shots) + 1:02d}.png"
             page.locator("#stage").screenshot(path=str(path))
-            shots.append({"n": len(shots) + 1, "phase": len(phases) - 1, "file": path.name})
+            shots.append({"n": len(shots) + 1, "phase": shot["phase"], "offset_ms": round(shot["offset"]),
+                          "caption": shot.get("caption", ""), "file": path.name})
         page.evaluate("window.__cap.next()")
-    return [{"name": p["name"], "ms": p["ms"]} for p in phases], shots
+    return page.evaluate("window.__cap.phases"), shots
 
 
 def cmd_capture(args: argparse.Namespace) -> None:
@@ -143,13 +157,19 @@ def cmd_capture(args: argparse.Namespace) -> None:
             page.wait_for_function("window.DEMO_API && window.DEMO_API.scenarios")
             hidden = ",".join([".demo-ui"] + [s for s in args.hide.split(",") if s])
             page.add_style_tag(content=f"{hidden} {{ visibility: hidden !important; }}")
-            page.evaluate(HOOK_JS, ratios)
+            has_beats = page.evaluate("!!window.DEMO_API.beats")
+            use_beats = args.mode == "beats" or (args.mode == "auto" and has_beats)
+            if args.mode == "beats" and not has_beats:
+                raise SystemExit("--mode beats but the demo does not declare DEMO_API.beats = true")
+            print(f"mode: {'beats (demo-marked key frames)' if use_beats else 'ratios ' + args.at}")
+            page.evaluate(HOOK_JS, {"ratios": ratios, "useBeats": use_beats})
             wanted = [s for s in args.scenarios.split(",") if s]
             for scenario in page.evaluate("window.DEMO_API.scenarios"):
                 if wanted and scenario["id"] not in wanted:
                     continue
                 phases, shots = capture_scenario(page, scenario, frames_dir, skip)
-                result[scenario["id"]] = {"name": scenario["name"], "phases": phases, "shots": shots}
+                result[scenario["id"]] = {"name": scenario["name"], "mode": "beats" if use_beats else "ratios",
+                                          "phases": phases, "shots": shots}
                 total = sum(p["ms"] for p in phases)
                 print(f"[{scenario['id']}] {scenario['name']}: {len(phases)} phases, {len(shots)} candidates, total {seconds_text(total)}")
             browser.close()
@@ -201,8 +221,15 @@ def cmd_compose(args: argparse.Namespace) -> None:
     images = [Image.open(out_dir / "frames" / s["file"]) for s in shots]
     contact = out_dir / f"候選_{data['name']}.png"
     contact_sheet(images, shots, phases, contact)
-    picked = [int(n) - 1 for n in args.pick.split(",")] if args.pick else auto_dedupe(images, args.min_diff)
-    captions = [c.strip() for c in args.captions.split("|")] if args.captions else []
+    beats = data.get("mode") == "beats"
+    if args.pick:
+        picked = [int(n) - 1 for n in args.pick.split(",")]
+    else:
+        picked = list(range(len(shots))) if beats else auto_dedupe(images, args.min_diff)
+    if args.captions:
+        captions = [c.strip() for c in args.captions.split("|")]
+    else:
+        captions = [shots[i]["caption"] for i in picked] if beats else []
     if captions and len(captions) != len(picked):
         raise SystemExit(f"--captions has {len(captions)} entries, {len(picked)} frames picked")
 
@@ -240,18 +267,32 @@ def cmd_compose(args: argparse.Namespace) -> None:
     sheet_path = out_dir / f"分鏡_{data['name']}.png"
     sheet.save(sheet_path)
 
-    total = sum(s[2] for s in spans)
+    total = sum(p["ms"] for p in phases) if beats else sum(s[2] for s in spans)
     md = [f"### {data['name']}（共 {seconds_text(total)}）\n"]
-    for j, (start, end, ms) in enumerate(spans, 1):
-        names = "＋".join(p["name"] for p in phases[start:end])
-        caption = captions[j - 1] if captions else "畫面描述待補"
-        md.append(f"分鏡{j}（{caption}，{seconds_text(ms)}）")
-        md.append(f"  涵蓋 demo 分段：{names}\n")
+    if beats:
+        # plan style: one entry per demo phase with its seconds, then each key frame's offset in it
+        figure = {i: j + 1 for j, i in enumerate(picked)}
+        for n, phase in enumerate(phases):
+            title = re.sub(r"^分鏡\d+\s*", "", phase["name"])
+            md.append(f"分鏡{n + 1}（{title}，{seconds_text(phase['ms'])}）")
+            for i, shot in enumerate(shots):
+                if shot["phase"] != n:
+                    continue
+                caption = captions[picked.index(i)] if i in figure else shot["caption"]
+                tag = f"〔圖{figure[i]}〕" if i in figure else ""
+                md.append(f"  {seconds_text(round(shot['offset_ms'], -2))}：{caption}{tag}")
+            md.append("")
+    else:
+        for j, (start, end, ms) in enumerate(spans, 1):
+            names = "＋".join(p["name"] for p in phases[start:end])
+            caption = captions[j - 1] if captions else "畫面描述待補"
+            md.append(f"分鏡{j}（{caption}，{seconds_text(ms)}）")
+            md.append(f"  涵蓋 demo 分段：{names}\n")
     md.append(f"[分鏡圖：{sheet_path.name}]\n")
     md_path = out_dir / f"分鏡_{data['name']}_企劃草稿.md"
     md_path.write_text("\n".join(md), encoding="utf-8")
     print(f"kept candidates {[i + 1 for i in picked]} of {len(shots)} -> {sheet_path.name} ({cols}x{rows}, total {seconds_text(total)})")
-    if not args.pick:
+    if not args.pick and not beats:
         print(f"auto dedupe only: review {contact.name}, drop near-duplicates, rerun with --pick and --captions")
     print(f"wrote {md_path.name}")
 
@@ -264,7 +305,9 @@ def main() -> None:
     cap.add_argument("out_dir")
     cap.add_argument("--page", default="index.html")
     cap.add_argument("--scenarios", default="", help="comma list of scenario ids; default all")
-    cap.add_argument("--at", default="0.35,0.75", help="pause points within each phase (0-1), comma list")
+    cap.add_argument("--mode", choices=["auto", "beats", "ratios"], default="auto",
+                     help="beats: stop at the demo's demo:beat events; ratios: sample each phase; auto: beats if declared")
+    cap.add_argument("--at", default="0.35,0.75", help="ratios mode: pause points within each phase (0-1)")
     cap.add_argument("--shim", default="")
     cap.add_argument("--hide", default="", help="extra CSS selectors hidden during capture")
     cap.add_argument("--skip-phases", default="", help="phases whose name contains any of these words are not captured")

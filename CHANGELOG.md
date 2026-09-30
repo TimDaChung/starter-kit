@@ -19,7 +19,8 @@
   - 首次實測（晶龍晶礦邊框、幻狐古代祭壇）第一輪就成功，中央不透明 0.2–1%
 - `boss-design/scripts/fit_canvas.py` 新增 `--cover`（裁切填滿 16:9，給滿版背景用）
 - **`boss-demo` 新增步驟 6「定稿後擷取分鏡、寫回企劃」**：表演分鏡**從 demo 截，不另外生圖**（動畫太複雜，AI 靜態示意畫不準）。`scripts/capture_storyboard.py` 分兩步：`capture` 用 Playwright 強制播每種表演、每個分鏡在 35%／75% 處各截一張當候選；`compose` **不限格數**：看過候選總覽後刪掉太接近、看不出差別的，留下每個有變化的瞬間，拼成分鏡圖。**標籤寫「這格在演什麼」、不寫秒數**（秒數留在企劃文字與 demo）；企劃草稿列出每格的描述、秒數與涵蓋的 demo 分段
-  - 新 demo 必須提供截圖介面 `window.DEMO_API`＋`demo:phase` 事件，舞台內的 debug 元素加 `class="demo-ui"`；舊 demo 用 `--shim` 注入轉接（附戰神賽特的範例）
+  - **關鍵格由 demo 自己標**：做表演程式時，在每個值得入鏡的瞬間（出手、命中、爆開、特寫、結算）發出 `demo:beat`＋描述。截圖停在那一刻、標籤直接用描述，企劃草稿依分鏡寫出細拆秒數（例：「分鏡2（第一擊，2秒）0.6秒：閃電擊中右側 2 罐〔圖3〕」）——表演是自己寫的，不必事後猜哪格重要
+  - 新 demo 必須提供截圖介面 `window.DEMO_API`（含 `beats: true`）＋`demo:phase`／`demo:beat` 事件，舞台內的 debug 元素加 `class="demo-ui"`；舊 demo 沒有關鍵格時，用 `--shim` 注入轉接並改成「截全部候選 → 人工刪近似格」（附戰神賽特的範例）
   - 以戰神賽特 demo 實測：小獎 14 張候選刪掉 5 張近似的，留 9 格（3×3），秒數加總與 demo 一致；自動去重會誤刪小範圍變化，一定要人看過再挑
   - 表演設計要符合 Spine 限制（引用 `boss-design` 法則第四節）
 - ⚙️ **升級動作**：建立 `~/.claude/skills/boss-scene` junction 指向 kit 的 `skills/boss-scene`
