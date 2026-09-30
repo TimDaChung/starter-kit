@@ -2,6 +2,18 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.15.0 (2026-09-30)
+
+第二輪 prompt 審查（對照 Opus 5.5），修「兩份檔案對同一件事說法不同」與過度規定：
+
+- **生圖預設張數統一為 2**：`draw-engines.md`（09-18 寫預設 1、不多抽）與 `image-studio-共用須知` §三（09-29 寫每輪至少 2 張、平台偶發失敗挑較好的一張）打架，`common.md` §9、`imagen-banner` 也各說各的。以較新的共用須知為準：預設 2、驗收挑一張；使用者指定張數照指定，不自行加抽。`generate2dsprite`／`generate2dmap` 的範例指令仍是 `--count 1`（sprite sheet 與地圖一張通常夠）
+- **imagen／imagen-portrait／imagen-ui 改「缺什麼問什麼」**：原本「每次都問」＋兩輪問答→建議→確認框→生成後再問，spec 給全了照樣問四輪。現在使用者講明的不再問、缺的一次問完；說「直接生」就跳過建議與確認框，改附在結果一起回報（`imagen-banner` 09-23 已是這個寫法，三支補齊）
+- **憑證到期指引統一**：`starter-setup` 原本「剩 ≤14 天先去要新的」，但新一季憑證要等舊的失效才發、提前要不到；改成「到期當天再找主任拿、那天別排生圖」。`共用須知`、`boss-design`／`boss-scene`／`cannon-wing`／`pet-evolution` 原本指向 `image-studio/references/refresh-credentials.md`——那是維護者本機自建檔、kit 與官方 image-studio 都沒有，在組員機器上是死連結；一律改為「401 → 找主任拿」
+- **`playtest-loop` 死分支**：頻道偵測與 curate 流程引用 `exportLearned`／`learned_script`，但 kit 標準頻道 `dev-notes-channel.js` 沒有這兩個；改為只認 `exportDevNotes`，`learned_script` 只在專案自己另建時才走
+- **`plan-doc-qa` 讀企劃要下載圖來看**：原本只讀「圖片替代文字」，但文案與版面常整段放在圖裡（`notion-access.md` §1 已寫）
+- `starter-setup` 環境依賴說明「企劃／原型類 6 支」數字已失真，改為類別描述
+- ⚙️ **升級動作**：`git pull` 即生效，無設定變更。組員若習慣「畫一張」，現在會拿到兩張供挑；要固定一張就講「畫 1 張」
+
 ## v3.14.1 (2026-09-30)
 
 - **全 kit prompt 審查**（對照 Opus 5.5）：修掉引擎換線後的過時說明（imagen-ui「一律 magenta」改成單件 `--remove-background`、生圖 skill 數量、已刪的 prompt-builder）、錯誤指令（imagen-ui 多件切圖 `--rows 1 --cols 1`、cannon-storyboard 不存在的 `--equal`）、同檔矛盾（cannon-parts 雷射批次改回直式單張、cannon-storyboard 5 格殘留與攻擊格數、cannon-wing 驗收「鎏金」vs「不限金色」、pet-evolution 參考圖規則）、失效引用與相對路徑（pet-* 腳本改絕對路徑）

@@ -22,7 +22,7 @@ Usable only when that skill directory exists AND `~/.config/image-studio/credent
 
 ## 2. Generation rules
 
-1. **Default count: 1** — every generation run produces a single image, unless the user explicitly states a count（「畫 4 張」「來 3 個版本」）. Never generate extra candidates or variants on your own initiative.
+1. **Default count: 2** — the platform occasionally misfires on one of two identical runs (sticker look, colour card, stray text; see the kit's `references/image-studio-共用須知.md` §三), so each run asks for two and the agent picks the better one. When the user states a count（「畫 4 張」「來 3 個版本」）use exactly that. Never top up or regenerate beyond the requested count on your own initiative.
 2. Check engine availability **once per task**, before prompt work. Unavailable → stop and report per §1; never silently degrade.
 3. `docs/STYLE_BIBLE.md` may carry an `engine` field from older projects. New bibles record `gpt`; a bible that still says `gemini` is a historical record — regenerate on the GPT line and update the field, matching the old batch by prompt and reference instead.
 

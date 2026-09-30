@@ -108,7 +108,7 @@ Level 3 - a large green rounded call-to-action button at bottom centre with whit
 
 ```bash
 python ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
-  --count 1 --prompt "$(cat prompt.txt)" \
+  --count 2 --prompt "$(cat prompt.txt)" \
   --reference wow現有廣宣.jpg --reference 內文排版示意.png --output out
 ```
 

@@ -70,7 +70,7 @@
 沒問題的話我就轉英文並開始生成。要修改什麼嗎？
 ```
 
-使用者回「好」「OK」「沒問題」「可以」即視為確認，直接進 Step 2，不再追問。
+使用者回「好」「OK」「沒問題」「可以」即視為確認，直接進 Step 2，不再追問。使用者事先說「不用確認、直接生」時，確認框改為隨生成結果一起附上，不停下來等回覆。
 
 **Step 2 轉英文原則**：忠於中文 prompt，不增不減；自然英文；不加翻譯過程中想到的「補充」。portrait / ui 在英文版加上對應風格 boilerplate（英文原文不另翻進中文 prompt，確認框以 🧩 行標示）。長寬比與解析度沒有對應 flag，要一併寫進英文 prompt 文字。轉完依 §9 執行。
 
@@ -136,7 +136,7 @@
 
 ```bash
 python ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
-  --count 1 \
+  --count 2 \
   --prompt "$(cat prompt-final.txt)" \
   --reference reference/style.jpg \
   --output {output_dir}
@@ -145,7 +145,7 @@ python ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 - **沒有 `--ratio` / `--size` flag**：長寬比與解析度寫進 prompt 文字（例：`3:4 portrait aspect ratio, 2K resolution`）。
 - `--reference` 可重複，最多 6 張（§5）。
 - 需要透明背景 → 加 `--remove-background` 直出透明 PNG；要切 sheet 的仍走 magenta chroma-key（見各 SKILL.md）。
-- `--count` 預設 1；每批只發一次請求，**不自動重試**。
+- `--count` 預設 2（理由見 kit `references/image-studio-共用須知.md` §三；使用者指定張數就照指定）；每批只發一次請求，**不自動重試**。
 - 檔名由 client 產生（`image-studio-tab-*.png`），存完依 §7 改名。
 
 **只交付 prompt 文字（Phase 5.5）**：使用者明說只要 prompt、不要實際生圖時採用（非引擎故障的退路）。

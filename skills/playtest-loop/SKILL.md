@@ -18,7 +18,7 @@ description: 遊戲 demo 試玩迭代迴圈。Use when 使用者說「重開 ser
 ## 專案偵測
 
 1. 目標 = 使用者指名的專案，否則取對話中最近的遊戲專案（下稱 `<project-dir>/`）。
-2. Grep 入口 HTML 是否有 `exportDevNotes` / `exportLearned` → 確認回饋頻道存在。沒有的話，先提議注入標準頻道（localStorage `dev_notes` array + `開發者表示：` 前綴攔截），使用者同意才加。標準頻道程式碼在 `references/dev-notes-channel.js`，用 Edit 貼進入口 HTML 的 `<script>`（有 section marker 時放 `JS-EVENTS`），再依專案的輸入欄 id 呼叫 `attachDevNotesInterceptor(inputEl, sendBtn)`。
+2. Grep 入口 HTML 是否有 `exportDevNotes` → 確認回饋頻道存在。沒有的話，先提議注入標準頻道（localStorage `dev_notes` array + `開發者表示：` 前綴攔截），使用者同意才加。標準頻道程式碼在 `references/dev-notes-channel.js`，用 Edit 貼進入口 HTML 的 `<script>`（有 section marker 時放 `JS-EVENTS`），再依專案的輸入欄 id 呼叫 `attachDevNotesInterceptor(inputEl, sendBtn)`。
 
 ## 三個動作
 
@@ -48,7 +48,7 @@ cd "<project-dir>" && python -m http.server 8000   # run_in_background
 - 原始 JSON 存 `<project-dir>/playtest-notes/<YYYYMMDD-HHMM>.json` 留底。
 - 逐條歸類成表：**bug / 手感時序 / 文筆台詞 / 美術 / 數值難度 / 劇情設計**，附 node 與 context。
 - 批次修正（見委派判斷）→ 修完在同分頁執行 `clearDevNotes()`（沒 clear 下次會重複處理）→ 自動回到動作 1 重開。
-- learned_script 走 curate 流程：擋爛留好、烘焙進正式腳本節點（依專案 memory 的規則；無 memory 規則時：保留原句、去重、依日期排序）。
+- 專案自己另有 `learned_script`（玩家教遊戲說話一類的學習頻道，標準頻道不含、kit 不會幫建）時才走 curate 流程：擋爛留好、烘焙進正式腳本節點（依專案 memory 的規則；無 memory 規則時：保留原句、去重、依日期排序）；localStorage 沒這個 key 就跳過這步。
 
 ### 3. 守護
 

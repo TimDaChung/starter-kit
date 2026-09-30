@@ -44,7 +44,7 @@ allowed-tools:
 
 ## 前置需求
 
-1. **image-studio 憑證**：`~/.config/image-studio/credentials.json`。401 時照 `image-studio/references/refresh-credentials.md` 處理。
+1. **image-studio 憑證**：`~/.config/image-studio/credentials.json`。401 時見 kit `references/image-studio-共用須知.md`〈憑證〉（找主任拿，不提前要）。
 2. **Python 套件**：Pillow、numpy。
 3. **Notion 讀取權**：企劃在「道具之書」資料庫（四部）。token 檔位置見下方 Step 1。
    ⚠️ **Notion 一律走 REST，不走 MCP**（MCP 已移除）。

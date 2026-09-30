@@ -40,7 +40,7 @@ for t in tabs[-8:]:
 
 `~/.config/image-studio/credentials.json` 裡的 `expiresAt` 就是到期時間。過期後一律 401、生不了圖。
 
-- 換發方式見 `~/.claude/skills/image-studio/references/refresh-credentials.md`
+- 換發方式：到期或 401 後**找主任拿**新一季憑證，照主任給的 setup 流程裝上；kit 與 image-studio 官方 skill 都不含換發腳本
 - **不要提前換**：新一季的憑證要等舊的失效才會發布，提早抓只會拿到同一份
 - kit 不含任何憑證，組員缺裝時找主任拿
 

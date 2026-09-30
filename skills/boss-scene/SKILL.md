@@ -53,7 +53,7 @@ allowed-tools:
 
 ## 前置需求
 
-1. **image-studio 憑證**：`~/.config/image-studio/credentials.json`。401 時照 `image-studio/references/refresh-credentials.md` 處理
+1. **image-studio 憑證**：`~/.config/image-studio/credentials.json`。401 時見 kit `references/image-studio-共用須知.md`〈憑證〉（找主任拿，不提前要）
 2. **Notion 讀取權**：魚類之書（四部）。唯讀 token 在 `X:\grp.product.pm1\2. 產品改造\一四部企劃範本\四部readonly_token.txt`（X 讀不到換 Y:），自己去拿，不要問使用者。token 走環境變數 `NOTION_KEY`
 3. **Python 套件**：Pillow
 

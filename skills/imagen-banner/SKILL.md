@@ -164,7 +164,7 @@ Level 3 CTA "PLAY NOW" — large green rounded button, white uppercase, bottom c
 
 ### Phase 4｜生成與存檔
 
-依 common.md §9 呼叫 image-studio；比例寫進 prompt 文字；`--count` 預設 1，不自動重試。存檔與命名見 common.md §7。
+依 common.md §9 呼叫 image-studio；比例寫進 prompt 文字；`--count` 依 draw-engines.md §2（預設 2，驗收時挑較好的一張），不自動重試。存檔與命名見 common.md §7。
 
 **引擎不會剛好吐出交付尺寸**（沒有 `--size` flag，實際輸出由引擎決定），所以生成後**一律後製到規格**：
 
