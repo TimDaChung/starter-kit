@@ -170,6 +170,8 @@ python3 ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 
 **整張圖直接交付，不切格。** 檔名帶翅膀名與技能名（例：`春桃枝翼_桃花幻境_分鏡.png`）。開資料夾給使用者看。
 
+**主動問下一步**：這套的配件（子彈、彈紋、獎圈、雷射）還沒做就提 `cannon-parts`（同樣用炮台翅膀定稿當參考）。
+
 ---
 
 ## 維護說明

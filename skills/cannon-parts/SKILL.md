@@ -129,6 +129,8 @@ python3 ~/.claude/skills/cannon-parts/scripts/rotate.py <素材.png> <轉向後.
 
 直接交付，不做拼版合成。批 1／2 是去背 PNG、批 3 是灰底。檔名用該素材的 WID（子彈＋彈紋那張用子彈 WID，例如炮台 `107009` → `117009.png`）。開資料夾給使用者看。
 
+**主動問下一步**：這套的翅膀技能分鏡還沒做就提 `cannon-storyboard`（同樣用炮台翅膀定稿當參考）。
+
 ---
 
 ## 維護說明

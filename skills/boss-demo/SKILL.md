@@ -56,6 +56,7 @@ description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃
 
 - 走 `generate2dsprite` 管線：image-studio client 生圖（solid `#FF00FF` 背景，引擎規則見 `imagen/references/draw-engines.md`）→ `generate2dsprite.py process` 去背
 - 企劃附 boss 圖 → 先 Read 看圖，再以 `--reference` 傳入，preserve identity
+- **有 `boss-design`／`boss-scene`／`boss-props` 的定稿就直接用**，不重新生圖：Boss 定稿去背當本體、表演背景當場景、道具等級圖切件當表演元件。缺的才生圖或用佔位
 - **預設只生 1 張 boss 本體大圖**（idle 姿態、3/4 或 side view）——表演動態用 CSS transform（浮動/震動/翻肚/拉近特寫）做，夠驗證節奏。使用者看完想要真動畫幀再升級 sprite sheet，不預先做
 - 遵守 `generate2dsprite` 的 Default visual rules 與 project asset inheritance
 - **處理參數**：boss 大圖去背用 `--cell-size 1200 --fit-scale 0.97`（processor 預設 cell 128 會把 2K 圖縮成縮圖）

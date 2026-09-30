@@ -2,6 +2,17 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.14.0 (2026-09-30)
+
+- **新增 `pet-parts`**（寵物配件，`pet-evolution` 的下游）：以兩階定稿為參考延伸
+  - **動畫分鏡**：一般／上陣／虛弱**每個動畫一張 3–4 格**，一階二階各一套。**動作照企劃原文逐字拆格、不增不減**，循環動作每個姿勢各一格；企劃只寫靜態狀態時先把拆法給使用者確認。`scripts/label_frames.py` 加「圖N＋這格在做什麼」標籤，並擋下沒分格的失敗圖
+  - **技能 ICON**：技能 1、2 同張畫、`scripts/icon_check.py` 切正方形並產 256／128／64px 預覽，64px 看不懂就重抽
+  - **專屬背景**：16:9 滿版，中央留給寵物、下方 1/4 留給 UI
+  - 神弓手霍克實測：三批第一輪成功
+- **定稿後主動接續下游**：`pet-evolution`（新增 Step 8）→ `pet-parts`；`boss-design`（Step 10 改成表格）→ `boss-scene`／`boss-props` → `boss-demo`；`cannon-parts` ↔ `cannon-storyboard` 交付後互相提醒。**下游一律以前面的定稿延伸**，不重新發想
+- `boss-demo` 素材優先用 boss-design／scene／props 的定稿，缺的才生圖
+- ⚙️ **升級動作**：建立 `~/.claude/skills/pet-parts` junction 指向 kit 的 `skills/pet-parts`
+
 ## v3.13.0 (2026-09-30)
 
 - **新增 `boss-props`**（Boss 表演道具與等級系列，`boss-design` 的配套）：捕獲／彩金表演裡玩法用到的道具（幻石、罐子、老虎機、轉盤…）

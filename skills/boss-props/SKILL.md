@@ -99,7 +99,7 @@ python ~/.claude/skills/boss-props/scripts/lineup.py <原圖.png> <輸出.png> \
 2. **自己先逐條跑 `道具規格.md` 第五節驗收清單**，主動回報哪張好、好在哪
 3. 定稿交整理後的圖＋原圖＋最終提示詞
 4. 暴露了新規則或前科 → 回寫 `道具規格.md` 第六節或 `prompt模板.md`
-5. 主動提下游：`boss-demo` 可以把這組道具換掉 emoji 佔位
+5. **主動問下一步**：道具定稿後，還沒做背景就提 `boss-scene`；背景也好了就提 `boss-demo`（定稿的 Boss、背景、道具直接當 demo 素材，取代 emoji 佔位）
 
 ---
 
