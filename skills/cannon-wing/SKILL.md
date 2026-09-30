@@ -4,7 +4,7 @@ version: 1.0.0
 description: |
   捕魚機「炮台＋翅膀」套裝示意圖產出流程：讀 Notion 道具之書的既有企劃、
   或從零發想並先產一份 mini 企劃拍板 → 組提示詞 → image-studio 算一張去背素材
-  → 程式切格與合成 → 產出 3×3 總覽圖。
+  → 程式切格與合成 → 產出 3×3 總覽圖 → 定稿後從左下格後製套裝 ICON（不生圖）。
   下排組合由程式疊合，不交給 AI 畫，層序與素材一致性因此由程式保證。
   適用於：「炮台翅膀圖」「3x3 總覽圖」「套裝示意圖」「炮台翅膀示意圖」「算炮台翅膀」
   「發想一組炮台翅膀」「從零設計炮台翅膀」。
@@ -29,6 +29,7 @@ allowed-tools:
 - `prompt模板.md` — 提示詞模板與分支調整（改提示詞只改這份）
 - `參考素材索引.md` — 6 套參考庫索引
 - `scripts/slice.py`、`scripts/compose.py`、`scripts/recolor.py` — 切格、合成、特效調色
+- 共用：套裝 ICON 後製 `~/.claude/skills/pet-parts/scripts/item_icon.py`（三條生圖線共用，只吃 Pillow）
 
 以及 kit 層級的共用參照：
 
@@ -247,6 +248,17 @@ python3 ~/.claude/skills/cannon-wing/scripts/compose.py <tiles> <輸出目錄> "
 
 定稿圖輸出到使用者指定位置。若這次產出暴露了新的規則或前科，回寫到 `炮台翅膀設計法則.md` 或 `prompt模板.md`。
 
+### Step 9.5 — 套裝 ICON（後製，不生圖）
+
+總覽圖定稿後，道具 ICON 直接從定稿裁（Tim 定案 2026-09-30，寵物、武具線同規），不用 image-studio 另生。套裝 ICON 取**左下格（列 3 lv0 的組合）**；總覽圖底部有一列標籤，用 `--grid-bottom 0.06` 先排除：
+
+```sh
+python ~/.claude/skills/pet-parts/scripts/item_icon.py <總覽定稿.png> <輸出資料夾> --name <套裝名> \
+  --grid 3x3 --cell 3,1 --grid-bottom 0.06 [--badge <角標.png>]
+```
+
+產出 `ICON_<套裝名>.png`（512）＋`ICON_<套裝名>_尺寸預覽.png`（256／128／64）；給了 `--badge` 才多出碎片版 `ICON_<套裝名>_fragment.png`（同圖左上疊碎片角標）。**碎片角標素材不進 repo**（線上 UI 素材裁切、kit 是公開 repo）：向主任拿，放本機 `skills/pet-parts/_工作暫存/fragment_badge.png`（已 gitignore），腳本用 `--badge <路徑>` 指路；沒有角標就只出主圖不出碎片版。驗收看 64px 欄：要認得出是哪套（主色＋剪影）。
+
 ### Step 10 — 主動接續下游
 
 **使用者確認炮台翅膀定稿後，主動問要不要接著產這兩項：**
@@ -269,4 +281,5 @@ python3 ~/.claude/skills/cannon-wing/scripts/compose.py <tiles> <輸出目錄> "
 - 改設計規格／驗收標準 → `炮台翅膀設計法則.md`
 - 改提示詞 → `prompt模板.md`（流程不用動）
 - 改切格／合成／調色邏輯 → `scripts/`（`slice.py`、`compose.py`、`recolor.py`）
+- 改套裝 ICON 後製 → `pet-parts/scripts/item_icon.py`（三線共用，改那邊）
 - 新增參考套裝 → `參考素材索引.md`

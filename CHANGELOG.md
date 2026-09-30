@@ -7,10 +7,11 @@
 - **3D 生圖畫風改「魚樂園低模手繪風」**（weapon-design 首次實測定案，pet-evolution／pet-parts 同步）：舊寫法「成品渲染、立體、體積感強、材質分明」出來是寫實 3A／精緻 CG 質感；改寫「低面數、塊面大而簡潔、輪廓誇張、手繪風貼圖、自發光（武具）／毛髮畫成色塊（寵物）」後回到線上道具的質感，且裝飾沒被砍。寵物線的「已知未解：四輪都是精緻 CG」由此解掉，但寵物本身尚未用新寫法實測
 - **新增武具線兩支**（魚樂園陣營戰武具，結構比照 pet-evolution → pet-parts）：
   - **`weapon-design`**：讀功能之書〈武具系統〉§2.7／§2.9 的既有武具、或從零發想並先提案＋產 mini 道具企劃拍板 → 算一張 3D 成品感示意圖（3/4 視角、無角色、無 UI、無文字）→ `boss-design/scripts/fit_canvas.py --height 0.6 --max-width 0.7` 補成 16:9 灰底 → 驗收。**招牌部位要能成為登場動畫的動作來源**（企劃四把的動畫都圍繞一個部位：扇面旋轉、麒麟眼電光、盾面展開、雙劍交叉）。`參考素材索引.md` 記既有 4 把（只有玄暝雙龍劍有 wid 3300001，其餘三把企劃標「暫放」）與已知企劃問題（3 把無 wid 與屬性、2D／3D 未寫明）
-  - **`weapon-parts`**（下游，全部以定稿為參考圖）：① 武具 ICON（`pet-parts/scripts/icon_check.py` 切正方形＋64px 檢查）；② 碎片 ICON **不生圖**——新增 `scripts/fragment_badge.py`，把通用碎片角標縮到 ICON 邊長 35% 疊左上（`--scale`／`--corner`／`--margin` 可調），角標放 `assets/`；③ 登場動畫分鏡一張 2×2，**格序固定：中間出現 → 招牌動作 A → 招牌動作 B → 統一發光**（企劃 §2.9 PM 註記），`pet-parts/scripts/label_frames.py --cols 2 --rows 2` 加標籤；④ 3 星以上金色閃點版，閃點路徑依招牌部位；⑤ 追擊提示格選做，「追擊效果觸發」字樣後製不交給 AI
+  - **`weapon-parts`**（下游，全部以定稿為參考圖）：外觀 → 登場動畫分鏡（4 格）＋3 星金閃版；追擊提示格選做。分鏡一張 2×2，**格序固定：中間出現 → 招牌動作 A → 招牌動作 B → 統一發光**（企劃 §2.9 PM 註記），`pet-parts/scripts/label_frames.py --cols 2 --rows 2` 加標籤；金閃版閃點路徑依招牌部位，參考圖直接用外觀定稿、可與分鏡並行送（首跑實證）；追擊提示格的「追擊效果觸發」字樣後製不交給 AI
+  - **道具 ICON 一律後製**（新腳本 `pet-parts/scripts/item_icon.py`，三條線共用：從外觀定稿裁主體、去灰底、疊深色圓角底板，程式出 512 主圖＋256／128／64 預覽；碎片版＝同圖左上疊碎片角標）。**不再用 image-studio 生道具 ICON**（Tim 定案）；**技能 ICON 不在此限**——那是技能圖示，pet-parts 照原生圖流程。三線取圖：武具單張 16:9 灰底定稿直接吃；炮台翅膀 `--grid 3x3 --cell 3,1 --grid-bottom 0.06` 取總覽圖左下格（lv0 組合）；寵物 `--half left`／`--half right` 一階二階各一。**碎片角標素材不進 repo**（線上 UI 素材裁切、kit 是公開 repo）：向主任拿，放本機 `pet-parts/_工作暫存/fragment_badge.png`（gitignored），`--badge` 指路，沒角標就只出主圖。首版曾用生圖出武具 ICON 與碎片 ICON（`scripts/fragment_badge.py`＋`assets/` 角標），同日收斂時已移除
   - **與寵物線的差別**：武具升星不改外觀，**沒有兩階**、一張定稿、不埋伏筆；分鏡不是照企劃動態拆 3–4 格，而是固定 4 步
-  - 兩支都是初版、**尚未實測**，前科表留空待第一次跑完回寫
-- `starter-setup` 依賴表補 weapon 線：共用 `pet-evolution/scripts/fetch_plan.py`、`boss-design/scripts/fit_canvas.py`、`pet-parts/scripts/`
+  - 玄暝雙龍劍首跑已實測：分鏡與金閃版一次全過，前科表已回寫
+- `starter-setup` 依賴表補 weapon 線：共用 `pet-evolution/scripts/fetch_plan.py`、`boss-design/scripts/fit_canvas.py`、`pet-parts/scripts/label_frames.py`；三條生圖線共用 `pet-parts/scripts/item_icon.py`（道具 ICON 後製，只吃 Pillow）
 - ⚙️ **升級動作**：`git pull` 後建立 `~/.claude/skills/weapon-design`、`~/.claude/skills/weapon-parts` 兩條 junction 指向 kit 的 `skills/weapon-design`、`skills/weapon-parts`（新 skill，照既有 skill 的裝法）；無設定變更
 
 ## v3.15.0 (2026-09-30)

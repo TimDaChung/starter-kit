@@ -30,7 +30,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 - `~/.claude/agents/` 現有清單
 - `%USERPROFILE%\starter-kit` 已 clone？（已有就 `git pull`，記 CHANGELOG 新增段落）
 - secretary(skills/secretary)→ 歸「自有」，本精靈完全不碰
-- **image-studio 已裝？**（生圖的唯一引擎，主任另行發放、不在 kit 內）：`~/.claude/skills/image-studio/` 目錄存在？`~/.config/image-studio/credentials.json` 存在？——**只偵測、不能代裝、不給安裝路徑與憑證細節**；未裝或憑證過期＝**沒有替代線**，結算表提醒一行「生圖引擎未裝／憑證過期 → 所有生圖 skill（imagen 系列、generate2dsprite、generate2dmap、cannon-*、boss-design／boss-props／boss-scene、pet-*）完全不能用，必須找主任拿安裝包」（imagen-banner 的驗收模式只吃 Pillow，缺引擎仍可用，提醒時附註一句）
+- **image-studio 已裝？**（生圖的唯一引擎，主任另行發放、不在 kit 內）：`~/.claude/skills/image-studio/` 目錄存在？`~/.config/image-studio/credentials.json` 存在？——**只偵測、不能代裝、不給安裝路徑與憑證細節**；未裝或憑證過期＝**沒有替代線**，結算表提醒一行「生圖引擎未裝／憑證過期 → 所有生圖 skill（imagen 系列、generate2dsprite、generate2dmap、cannon-*、boss-design／boss-props／boss-scene、pet-*）完全不能用，必須找主任拿安裝包」（imagen-banner 的驗收模式、三條線的道具 ICON 後製 `pet-parts/scripts/item_icon.py` 都只吃 Pillow，缺引擎仍可用，提醒時附註一句）
   - **憑證剩餘天數**：讀 `credentials.json` 的 `expiresAt`（ISO 8601、UTC，例 `2026-10-05T16:00:00.000Z`），與今天相減取天數，三段處理——已過期 → 同上，生圖 skill 全停（imagen-banner 的驗收模式除外）；**剩 ≤14 天 → 結算表提醒一行**「憑證 N 天後（YYYY-MM-DD）到期；新一季憑證要等舊的失效才發，不用提前要，到期當天再找主任拿，那天別排生圖」；剩 >14 天 → 不提，保持安靜。措辭一律「找主任拿」，**不寫任何取得憑證的網址或流程**
 - **環境依賴**（企劃／原型／文件類 skill 不需要，只影響生圖、測試、試玩迴圈；data-report-builder 生成的報表 skill 另需 pandas + plotnine，用到再裝）：
   - `python --version` 有 3.10+？
@@ -64,7 +64,8 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 | cannon-parts、cannon-storyboard | cannon-wing | 定稿圖當參考；cannon-parts 另用 `scripts/recolor.py` |
 | boss-design、boss-props、boss-scene、pet-parts、weapon-design、weapon-parts | pet-evolution | `scripts/fetch_plan.py`（讀 Notion 企劃） |
 | boss-scene、pet-parts、weapon-design、weapon-parts | boss-design | `scripts/fit_canvas.py`（`--cover` 背景裁 16:9；weapon 線用 `--height`／`--whole` 補灰底） |
-| weapon-parts | weapon-design、pet-parts | 定稿圖當參考；pet-parts 的 `scripts/icon_check.py`（ICON 切正方形＋64px 預覽）、`scripts/label_frames.py`（分鏡標籤） |
+| weapon-parts | weapon-design、pet-parts | 定稿圖當參考；pet-parts 的 `scripts/label_frames.py`（分鏡標籤） |
+| cannon-wing、weapon-parts（pet-parts 自用） | pet-parts | `scripts/item_icon.py`（道具 ICON 後製：裁定稿、去灰底、疊底板，出 512＋256／128／64 預覽；只吃 Pillow，不用生圖引擎） |
 | boss-demo | generate2dsprite、boss-design | 去背腳本；`boss設計法則.md` 第四節 Spine 限制 |
 
 使用者說「X 不要裝」要進略過清單時，先查這張表：X 若是某一列的「依賴」欄，一句話警告「略過 X 會讓 Y、Z 的某功能壞」（例：略過 generate2dsprite → imagen-ui 的去背不能跑）。使用者仍要略過就照辦，結算表 ⛔ 那行附註連帶影響。
