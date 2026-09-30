@@ -1,6 +1,6 @@
 ---
 name: boss-demo
-description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃（或無企劃從零設計：先產 mini 企劃拍板再做）→ 產出單檔 HTML：依權重 roll 獎級播表演、分段秒數即時調、強制播指定獎級、RNG 批次模擬驗證分布。觸發：「boss 表演 demo」「捕獲表演 demo」「獎級表演驗證」「表演權重 demo」「/boss-demo」。Boss 外觀設計走 boss-design，外觀定案後再來這支做表演驗證。"
+description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃（或無企劃從零設計：先產 mini 企劃拍板再做）→ 產出單檔 HTML：依權重 roll 獎級播表演、分段秒數即時調、強制播指定獎級、RNG 批次模擬驗證分布。觸發：「boss 表演 demo」「捕獲表演 demo」「獎級表演驗證」「表演權重 demo」「/boss-demo」。Boss 外觀設計走 boss-design，外觀定案後再來這支做表演驗證；demo 定稿後從 demo 截分鏡圖、寫回企劃（「截分鏡」「demo 定稿了」）。"
 ---
 
 # Boss-Demo
@@ -95,6 +95,18 @@ description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃
 - **播放控制**：暫停（凍結分鏡進度與 HUD 倒數）／下一分鏡（跳段）
 - **不做耗時 log**：引擎 sleep 即設定值，實測必然貼設定，記錄無資訊量（首發做過後由使用者裁掉）；秒數判讀靠 HUD 倒數＋時長總覽
 - UI 文案繁中；code（變數/註解/log）一律英文
+- **分鏡擷取介面（必做，步驟 6 要用）**：
+  ```js
+  window.DEMO_API = {
+    scenarios: [{ id, name }],   // 每種可強制播的表演：小獎／中獎／大獎／翻盤…
+    play(id),                    // 強制播，回傳 Promise，表演結束時 resolve
+    pause(), resume(),
+  };
+  // 每個分鏡開始時發出：
+  window.dispatchEvent(new CustomEvent('demo:phase', { detail: { name, ms } }));
+  ```
+  舞台元素的 id 一律是 `stage`；舞台裡的 debug HUD、按鈕等非畫面元素加上 `class="demo-ui"`（截圖時會自動隱藏）
+- **表演動作要是 Spine 做得到的**（Boss 是全 2D Spine）：不轉身、不做斜線或弧線的旋轉衝刺、不做流暢跳躍、飾物不繞到身後、會轉的光環是平面正圓。完整對照表見 `boss-design/boss設計法則.md` 第四節。demo 裡做得出不代表美術做得出
 - 表演張力階梯要拉開：低級快進快出、高級要有 anticipation 停頓與全屏效果，讓權重手感差異體感明顯
 
 ### 5. 驗證與交付
@@ -102,6 +114,24 @@ description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃
 - 產出後自己先開瀏覽器過一次：每級強制播一遍確認無 JS error、模擬 ×1000 分布合理
 - 交給使用者試玩 → 後續調參迭代走 `playtest-loop`
 - 輸出位置：使用者指定的專案資料夾；未指定 → `Desktop\<boss名>-reward-demo\`
+
+### 6. 定稿後：擷取分鏡圖、寫回企劃
+
+**表演的分鏡圖從 demo 截，不另外生圖。** 動畫太複雜，先在 demo 裡把節奏和畫面調到定稿，再截圖，分鏡就是實際的樣子。使用者說「demo 定稿了」「要寫企劃了」「截分鏡」時做這步。
+
+1. **截圖**：每種表演強制播一次，在每個分鏡的 60% 處暫停截舞台，拼成一張帶「圖N＋秒數」黃色標籤的分鏡圖（企劃慣用的樣式）
+
+   ```sh
+   python ~/.claude/skills/boss-demo/scripts/capture_storyboard.py <demo資料夾> <輸出資料夾> \
+     [--scenarios <id,...>] [--skip-phases 轉場] [--at 0.6]
+   ```
+
+   - 產出：`分鏡_<表演名>.png`（每種表演一張）、`frames/`（單格原圖）、`分鏡_企劃草稿.md`
+   - 轉場這類全畫面遮罩的分鏡用 `--skip-phases` 排除；某格剛好截在特效空檔就調 `--at`
+   - 舊 demo 沒有 `DEMO_API` 時，寫一支 shim 用 `--shim` 注入（範例：`scripts/shims/seth-reward-demo.js`），並用 `--hide` 隱藏沒加 `demo-ui` 的按鈕
+2. **看圖**：逐張 Read 分鏡圖，確認每格都截到該分鏡的重點畫面
+3. **寫企劃段落**：以 `分鏡_企劃草稿.md` 為骨架，**照企劃原本的格式**補上每格的畫面描述——描述依截圖實際看到的內容寫，秒數用 demo 定稿值。每段標【貼到企劃 X.X.X】，跟「變更區段 Markdown」合在一起交給使用者
+4. **寫回 Notion**：預設由使用者手動貼回（分鏡圖一起上傳）。**不自己改 live 企劃**，除非使用者明確要求
 
 ## 預設四級模板（企劃缺漏時補用）
 
@@ -115,6 +145,7 @@ description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃
 ## 銜接
 
 - Boss 外觀設計（定稿圖）→ `boss-design`；定稿圖直接當步驟 2 的 `--reference`
+- Boss 專屬背景（表演場景）→ `boss-scene`；可直接當 demo 的表演背景
 - 特效素材生圖 → `generate2dsprite`（Q 版用 `art_style=cel_shaded_chibi`）
 - 試玩迭代迴圈 → `playtest-loop`
 - 要進茶會展示 → `demo-intake`（屆時再拉高 polish、debug 面板加收合）
