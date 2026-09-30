@@ -69,10 +69,10 @@
 | **企劃** | 玩家體驗、核心循環、商業目標、可驗證的假設；留存 / 付費 / 漏斗等 KPI 定義、A/B 假設如何驗證 | 企劃書、需求、驗收條件、Mermaid 流程；指標定義表、數據解讀報告 | plan-dept14-writer＋plan-doc-qa（一四部格式）、product-planning（通用）、card-game、data-report-builder；審核派 planning-doc-auditor |
 | **工程** | 可實作性、資料結構、狀態機、邊界條件、技術債 | prototype、可跑的 code、測試 | game-prototype、game-develop、webapp-testing |
 | **美術** | 風格一致、可讀性、資產規格（尺寸 / 切圖 / 命名） | 生圖 prompt、資產包、風格守則 | imagen 系列、generate2d 系列、image-to-prompt、batch-image-brief、art-style-guard、cannon-wing → cannon-parts → cannon-storyboard（捕魚機炮台翅膀、配件、技能分鏡，依序） |
-
-> **走 image-studio 產圖時**（上表的生圖類 skill 都是），遇到**產圖層面**的問題——算圖中斷、憑證到期、平台畫出貼紙風／底色卡／雜訊背景、特效顏色壓不住——先查 `references/image-studio-共用須知.md`，那是所有生圖 skill 共用的一份，不要各自摸索或各寫一套。
 | **數值 / QA** | 平衡、機率、成長曲線、退化策略、重現步驟 | 模擬報告、數值表、bug 清單 | playtest-loop、issue-triage（kit 異常回報）；模擬派 game-balance-auditor |
 | **敘事** | 角色聲音一致、世界觀、字數與語氣限制 | 對白、文案 | 派 dialogue-writer |
+
+> **走 image-studio 產圖時**（上表「美術」列的生圖類 skill 都是），遇到**產圖層面**的問題——算圖中斷、憑證到期、平台畫出貼紙風／底色卡／雜訊背景、特效顏色壓不住——先查 `references/image-studio-共用須知.md`，那是所有生圖 skill 共用的一份，不要各自摸索或各寫一套。
 
 ## 切換與交接規則
 
