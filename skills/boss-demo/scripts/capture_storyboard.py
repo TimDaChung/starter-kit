@@ -1,22 +1,23 @@
-"""Turn a finished boss-demo into plan storyboards: capture every candidate frame, then pick 4 or 6.
+"""Turn a finished boss-demo into plan storyboards: capture every candidate frame, then keep the distinct ones.
 
 Two steps, so frames can be reviewed before the sheet is made:
 
   capture   force-play each scenario, pause every phase at each --at point,
             screenshot the #stage element, save candidates + candidates.json.
-  compose   pick --count frames (4 -> 2x2, 6 -> 2x3) that differ visibly,
-            stitch them with "圖N  X秒" tags (house style of existing boss
-            plans) and write a Markdown skeleton for the plan write-up.
+  compose   keep the frames that differ visibly (any number), stitch them with
+            "圖N  <what happens>" tags and write a Markdown skeleton for the plan.
 
-Auto-pick first keeps one candidate per phase (the one that changed most from
-the previously kept frame), so every story beat is represented, then keeps the
-first and last and repeatedly drops the frame most like its neighbours.
-It is a starting point: compose always writes 候選_<name>.png, a numbered
-contact sheet of every candidate, so a human can override with --pick.
+There is no fixed frame count. Drop candidates that look nearly the same as a
+kept neighbour or show no visible change; keep every distinct beat. compose
+always writes 候選_<name>.png, a numbered contact sheet of every candidate, to
+pick from with --pick. Without --pick an automatic dedupe (drop frames whose
+mean pixel difference from the previous kept frame is below --min-diff) gives a
+starting point only.
 
-A picked frame's seconds = total duration of the phases it stands for, i.e.
-from its phase up to (not including) the next picked frame's phase, so the
-sheet's seconds always add up to the demo's total.
+Tags on the sheet carry what the frame shows (--captions), not seconds: the
+seconds live in the plan text and in the demo. The Markdown skeleton still
+lists each frame's seconds = total duration of the phases it stands for (from
+its phase up to the next kept frame's phase), which adds up to the demo total.
 
 The demo must expose the capture contract (see SKILL.md, 「分鏡擷取介面」):
     window.DEMO_API = { scenarios: [{id, name}], play(id) -> Promise, pause(), resume() }
@@ -27,7 +28,7 @@ class "demo-ui" are hidden while capturing; --hide adds more selectors.
 Usage:
     python capture_storyboard.py capture <demo_dir> <out_dir> [--scenarios 0,1] [--at 0.35,0.75]
                                  [--shim shim.js] [--hide "#btnrow"] [--skip-phases 轉場]
-    python capture_storyboard.py compose <out_dir> --scenario 0 [--count 4|6] [--pick 1,4,7,10]
+    python capture_storyboard.py compose <out_dir> --scenario 0 [--pick 1,3,5,6] [--captions "a|b|c|d"]
 
 The demo directory is served over a local HTTP server (file:// breaks on
 non-ASCII paths and blocks some assets).
@@ -47,7 +48,6 @@ FONT_CANDIDATES = [
     "/System/Library/Fonts/PingFang.ttc",
     "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
 ]
-LAYOUTS = {4: (2, 2), 6: (3, 2)}  # count -> (cols, rows)
 
 # Pauses each phase at every ratio in turn. Page timers keep running while the
 # demo is paused, so the next stop is only scheduled after Python resumes.
@@ -165,27 +165,18 @@ def difference(a: Image.Image, b: Image.Image) -> float:
     return sum(ImageStat.Stat(ImageChops.difference(a, b)).mean) / 3
 
 
-def auto_pick(frames: list[Image.Image], shots: list[dict], count: int) -> list[int]:
+def auto_dedupe(frames: list[Image.Image], min_diff: float) -> list[int]:
     small = [f.convert("RGB").resize((160, 90)) for f in frames]
-    keep: list[int] = []
-    for phase in sorted({s["phase"] for s in shots}):
-        members = [i for i, s in enumerate(shots) if s["phase"] == phase]
-        if keep:
-            members.sort(key=lambda i: difference(small[keep[-1]], small[i]), reverse=True)
-        else:
-            members.sort(reverse=True)  # later pause point usually shows the phase's effect
-        keep.append(members[0])
-    keep.sort()
-    if len(keep) < count:  # fewer phases than cells: fall back to all candidates
-        keep = list(range(len(frames)))
-    while len(keep) > count:
-        # score each interior frame by its similarity to both neighbours; drop the most redundant
-        scores = {}
-        for pos in range(1, len(keep) - 1):
-            prev, cur, nxt = keep[pos - 1], keep[pos], keep[pos + 1]
-            scores[pos] = min(difference(small[prev], small[cur]), difference(small[cur], small[nxt]))
-        keep.pop(min(scores, key=scores.get))
+    keep = [0]
+    for i in range(1, len(frames)):
+        if difference(small[keep[-1]], small[i]) >= min_diff:
+            keep.append(i)
     return keep
+
+
+def grid(n: int) -> tuple[int, int]:
+    cols = n if n <= 3 else 2 if n == 4 else 3 if n <= 9 else 4
+    return cols, -(-n // cols)
 
 
 def contact_sheet(images: list[Image.Image], shots: list[dict], phases: list[dict], out: pathlib.Path) -> None:
@@ -207,42 +198,42 @@ def cmd_compose(args: argparse.Namespace) -> None:
     out_dir = pathlib.Path(args.out_dir).resolve()
     data = json.loads((out_dir / "candidates.json").read_text(encoding="utf-8"))[args.scenario]
     shots, phases = data["shots"], data["phases"]
-    count = args.count
-    if count not in LAYOUTS:
-        raise SystemExit("--count must be 4 or 6")
     images = [Image.open(out_dir / "frames" / s["file"]) for s in shots]
     contact = out_dir / f"候選_{data['name']}.png"
     contact_sheet(images, shots, phases, contact)
-    if args.pick:
-        picked = [int(n) - 1 for n in args.pick.split(",")]
-        if len(picked) != count:
-            raise SystemExit(f"--pick has {len(picked)} frames, --count is {count}")
-    else:
-        if len(shots) < count:
-            raise SystemExit(f"only {len(shots)} candidates, fewer than --count {count}")
-        picked = auto_pick(images, shots, count)
+    picked = [int(n) - 1 for n in args.pick.split(",")] if args.pick else auto_dedupe(images, args.min_diff)
+    captions = [c.strip() for c in args.captions.split("|")] if args.captions else []
+    if captions and len(captions) != len(picked):
+        raise SystemExit(f"--captions has {len(captions)} entries, {len(picked)} frames picked")
 
-    # seconds: each picked frame covers phases from its own up to the next picked frame's phase
+    # seconds: a kept frame covers its own phase (shared evenly with other kept frames in the
+    # same phase) plus every later phase up to the next kept frame's phase; phases before the
+    # first kept frame go to the first one, so the total always equals the demo's
     starts = [shots[i]["phase"] for i in picked]
+    per_phase = {p: starts.count(p) for p in set(starts)}
     spans = []
     for j, start in enumerate(starts):
-        end = starts[j + 1] if j + 1 < len(starts) else len(phases)
-        end = max(end, start + 1)
-        spans.append((start, end, sum(p["ms"] for p in phases[start:end])))
+        is_last_in_phase = j + 1 == len(starts) or starts[j + 1] != start
+        end = (starts[j + 1] if j + 1 < len(starts) else len(phases)) if is_last_in_phase else start + 1
+        ms = phases[start]["ms"] / per_phase[start] + sum(p["ms"] for p in phases[start + 1:end])
+        first = 0 if j == 0 else start
+        if j == 0:
+            ms += sum(p["ms"] for p in phases[:start])
+        spans.append((first, max(end, start + 1), ms))
 
-    cols, rows = LAYOUTS[count]
+    cols, rows = grid(len(picked))
     cell_w = args.cell_width
     cell_h = round(cell_w * images[0].height / images[0].width)
     gap = round(cell_w * 0.02)
     sheet = Image.new("RGB", (cols * cell_w + (cols + 1) * gap, rows * cell_h + (rows + 1) * gap), (24, 24, 24))
     draw = ImageDraw.Draw(sheet)
-    font = load_font(round(cell_h * 0.075))
+    font = load_font(round(cell_h * 0.06))
     pad = round(cell_h * 0.025)
     for j, i in enumerate(picked):
         row, col = divmod(j, cols)
         x, y = gap + col * (cell_w + gap), gap + row * (cell_h + gap)
         sheet.paste(images[i].convert("RGB").resize((cell_w, cell_h), Image.LANCZOS), (x, y))
-        text = f"圖{j + 1}  {seconds_text(spans[j][2])}"
+        text = f"圖{j + 1}  {captions[j]}" if captions else f"圖{j + 1}"
         box = draw.textbbox((x + pad * 2, y + pad * 2), text, font=font)
         draw.rectangle((x + pad, y + pad, box[2] + pad, box[3] + pad), fill=(255, 196, 0))
         draw.text((x + pad * 2, y + pad * 2), text, font=font, fill=(0, 0, 0))
@@ -253,14 +244,16 @@ def cmd_compose(args: argparse.Namespace) -> None:
     md = [f"### {data['name']}（共 {seconds_text(total)}）\n"]
     for j, (start, end, ms) in enumerate(spans, 1):
         names = "＋".join(p["name"] for p in phases[start:end])
-        md.append(f"分鏡{j}（{seconds_text(ms)}）")
-        md.append(f"  涵蓋 demo 分段：{names}")
-        md.append("  （畫面描述：待補）\n")
+        caption = captions[j - 1] if captions else "畫面描述待補"
+        md.append(f"分鏡{j}（{caption}，{seconds_text(ms)}）")
+        md.append(f"  涵蓋 demo 分段：{names}\n")
     md.append(f"[分鏡圖：{sheet_path.name}]\n")
     md_path = out_dir / f"分鏡_{data['name']}_企劃草稿.md"
     md_path.write_text("\n".join(md), encoding="utf-8")
-    print(f"picked candidates {[i + 1 for i in picked]} of {len(shots)} -> {sheet_path.name} ({cols}x{rows}, total {seconds_text(total)})")
-    print(f"wrote {md_path.name}; review {contact.name} and rerun with --pick to override")
+    print(f"kept candidates {[i + 1 for i in picked]} of {len(shots)} -> {sheet_path.name} ({cols}x{rows}, total {seconds_text(total)})")
+    if not args.pick:
+        print(f"auto dedupe only: review {contact.name}, drop near-duplicates, rerun with --pick and --captions")
+    print(f"wrote {md_path.name}")
 
 
 def main() -> None:
@@ -278,8 +271,9 @@ def main() -> None:
     com = sub.add_parser("compose")
     com.add_argument("out_dir")
     com.add_argument("--scenario", required=True)
-    com.add_argument("--count", type=int, default=4)
-    com.add_argument("--pick", default="", help="1-based candidate numbers, overrides auto-pick")
+    com.add_argument("--pick", default="", help="1-based candidate numbers to keep, overrides auto dedupe")
+    com.add_argument("--captions", default="", help="what each kept frame shows, separated by |")
+    com.add_argument("--min-diff", type=float, default=3.0, help="auto dedupe threshold (mean pixel difference)")
     com.add_argument("--cell-width", type=int, default=640)
     args = parser.parse_args()
     cmd_capture(args) if args.cmd == "capture" else cmd_compose(args)
