@@ -2,7 +2,15 @@
 
 ## 結論
 
-{{three_bullets_max_each_ending_with_action}}
+{{three_bullets_max_one_key_number_each}}
+
+## 建議行動
+
+{{who_does_what_next_or_state_no_action_needed}}
+
+## 為什麼這樣說
+
+{{what_was_compared_and_why_2_3_key_numbers_with_meaning_counter_evidence_checked}}
 
 ## 本期總覽
 
