@@ -168,7 +168,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ## Phase 4：迭代修正
 
-user 回饋 → Edit HTML → 再 self-walkthrough → loop。
+**自動流程中**：修 Phase 3 找到的 issue → Edit HTML → 再 self-walkthrough → loop，直到回報「玩法閉環 OK」，接 Phase 5。這段不問 user，符合紀律 1。
+
+**交付後**：user 試玩給回饋時回到這裡迭代（user 回饋 → Edit HTML → self-walkthrough）。這時是 user 主導的新一輪，不受紀律 1「跑完才回報」限制，每輪改完就回報。
 
 **每次 Edit 都針對 single section**——多 section 改動拆多次 Edit 呼叫。
 
