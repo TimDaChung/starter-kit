@@ -257,7 +257,7 @@ python ~/.claude/skills/pet-parts/scripts/item_icon.py <總覽定稿.png> <輸�
   --grid 3x3 --cell 3,1 --grid-bottom 0.06 [--badge <角標.png>]
 ```
 
-產出 `ICON_<套裝名>.png`（512）＋`ICON_<套裝名>_尺寸預覽.png`（256／128／64）；給了 `--badge` 才多出碎片版 `ICON_<套裝名>_fragment.png`（同圖左上疊碎片角標）。**碎片角標素材不進 repo**（線上 UI 素材裁切、kit 是公開 repo）：向主任拿，放本機 `skills/pet-parts/_工作暫存/fragment_badge.png`（已 gitignore），腳本用 `--badge <路徑>` 指路；沒有角標就只出主圖不出碎片版。驗收看 64px 欄：要認得出是哪套（主色＋剪影）。
+產出 `ICON_<套裝名>.png`（512）＋`ICON_<套裝名>_尺寸預覽.png`（256／128／64）；碎片版 `ICON_<套裝名>_fragment.png`（同圖左上疊碎片角標）自動一起出：角標在網芳 `X:\grp.product.pm1\2. 產品改造\一四部企劃範本\kit-assets\fragment_badge.png`（X 讀不到換 Y:），腳本沒給 `--badge` 就自己去讀；讀不到就只出主圖並提示一行。**角標是線上 UI 素材，不進 repo**（kit 是公開 repo）。驗收看 64px 欄：要認得出是哪套（主色＋剪影）。
 
 ### Step 10 — 主動接續下游
 

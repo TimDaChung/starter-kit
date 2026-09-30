@@ -26,6 +26,12 @@ import sys
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
+# Fragment badge lives on the team share, never in this public repo. Used when --badge is omitted.
+SHARED_BADGE_CANDIDATES = (
+    r"X:\grp.product.pm1\2. 產品改造\一四部企劃範本\kit-assets\fragment_badge.png",
+    r"Y:\grp.product.pm1\2. 產品改造\一四部企劃範本\kit-assets\fragment_badge.png",
+)
+
 BG_TOLERANCE = 28          # colour distance treated as "background"
 FEATHER_PX = 2             # soft edge after keying out the background
 PREVIEW_SIZES = (256, 128, 64)
@@ -46,7 +52,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--grid-bottom", type=float, default=0.0,
                         help="fraction of height reserved for captions under the grid (excluded before splitting)")
     parser.add_argument("--board", choices=["dark", "none"], default="dark")
-    parser.add_argument("--badge", help="transparent PNG badge to overlay (fragment icon)")
+    parser.add_argument("--badge", help="transparent PNG badge to overlay (fragment icon); "
+                                        "defaults to the copy on the team share, skipped if unreachable")
+    parser.add_argument("--no-badge", action="store_true", help="never produce the fragment version")
     parser.add_argument("--badge-scale", type=float, default=0.28, help="badge side as a fraction of icon side")
     parser.add_argument("--badge-corner", choices=["top-left", "top-right", "bottom-left", "bottom-right"],
                         default="top-left")
@@ -175,8 +183,11 @@ def main() -> None:
     icon.save(icon_path)
     print(f"{icon_path}: {args.size}x{args.size}, board={args.board}")
 
-    if args.badge:
-        fragment = overlay_badge(icon, args.badge, args.badge_scale, args.badge_corner, args.badge_margin)
+    badge_path = None if args.no_badge else (args.badge or next((p for p in SHARED_BADGE_CANDIDATES if os.path.isfile(p)), None))
+    if badge_path is None and not args.no_badge:
+        print("fragment version skipped: badge not found on the team share (kit-assets) and no --badge given")
+    if badge_path:
+        fragment = overlay_badge(icon, badge_path, args.badge_scale, args.badge_corner, args.badge_margin)
         fragment_path = os.path.join(args.out_dir, f"ICON_{args.name}_fragment.png")
         fragment.save(fragment_path)
         print(f"{fragment_path}: badge {int(args.badge_scale * 100)}% at {args.badge_corner}")
