@@ -90,7 +90,7 @@ allowed-tools:
 **發想前先重撈寵物清單**，對照 `參考素材索引.md` 列出已用題材：
 
 ```sh
-NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") python scripts/fetch_plan.py --list
+NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") python scripts/fetch_plan.py --list pets
 ```
 
 另外避開炮台線已有的動物造型（例：貓 → 避開喵公爵、廚神喵喵）。
@@ -146,7 +146,7 @@ NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") python scripts
 
 ### Step 1 — 取得企劃
 
-問使用者要做哪一隻；沒指定就跑 `fetch_plan.py --list` 列候選讓他挑。
+問使用者要做哪一隻；沒指定就跑 `fetch_plan.py --list pets` 列候選讓他挑。
 
 ```sh
 NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") \
