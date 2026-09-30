@@ -2,6 +2,14 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.14.1 (2026-09-30)
+
+- **全 kit prompt 審查**（對照 Opus 5.5）：修掉引擎換線後的過時說明（imagen-ui「一律 magenta」改成單件 `--remove-background`、生圖 skill 數量、已刪的 prompt-builder）、錯誤指令（imagen-ui 多件切圖 `--rows 1 --cols 1`、cannon-storyboard 不存在的 `--equal`）、同檔矛盾（cannon-parts 雷射批次改回直式單張、cannon-storyboard 5 格殘留與攻擊格數、cannon-wing 驗收「鎏金」vs「不限金色」、pet-evolution 參考圖規則）、失效引用與相對路徑（pet-* 腳本改絕對路徑）
+- **移除 cannon-art 的所有引用**：該 skill 已刪除，cannon-wing 改成自己說明流程設計理由
+- `starter-setup` 依賴表補上 cannon／boss／pet 系列的上下游關係，生圖 skill 清單更新
+- `plan-doc-qa` 讀 Notion 統一走部門金鑰 REST
+- ⚙️ **升級動作**：`git pull` 即生效，無設定變更
+
 ## v3.14.0 (2026-09-30)
 
 - **新增 `pet-parts`**（寵物配件，`pet-evolution` 的下游）：以兩階定稿為參考延伸
