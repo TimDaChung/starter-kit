@@ -26,7 +26,7 @@ f. 不轉身背對畫面，每一格都是正面或斜側面。
 - 第 3 格：【…】
 ```
 
-交付前：`python scripts/label_frames.py <圖> <輸出> --cols 3 --rows 1 --captions "…|…|…" --title 一般動態`
+交付前：`python ~/.claude/skills/pet-parts/scripts/label_frames.py <圖> <輸出> --cols 3 --rows 1 --captions "…|…|…" --title 一般動態`
 
 ## 二、技能 ICON
 

@@ -30,8 +30,8 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 - `~/.claude/agents/` 現有清單
 - `%USERPROFILE%\starter-kit` 已 clone？（已有就 `git pull`，記 CHANGELOG 新增段落）
 - secretary(skills/secretary)→ 歸「自有」，本精靈完全不碰
-- **image-studio 已裝？**（生圖的唯一引擎，主任另行發放、不在 kit 內）：`~/.claude/skills/image-studio/` 目錄存在？`~/.config/image-studio/credentials.json` 存在？——**只偵測、不能代裝、不給安裝路徑與憑證細節**；未裝或憑證過期＝**沒有替代線**，結算表提醒一行「生圖引擎未裝／憑證過期 → 六支生圖 skill（imagen、imagen-portrait、imagen-ui、imagen-banner、generate2dsprite、generate2dmap）完全不能用，必須找主任拿安裝包」（imagen-banner 的驗收模式只吃 Pillow，缺引擎仍可用，提醒時附註一句）
-  - **憑證剩餘天數**：讀 `credentials.json` 的 `expiresAt`（ISO 8601、UTC，例 `2026-10-05T16:00:00.000Z`），與今天相減取天數，三段處理——已過期 → 同上，六支生圖全停（imagen-banner 的驗收模式除外）；**剩 ≤14 天 → 結算表提醒一行**「憑證剩 N 天到期，現在還能用，但換憑證要等主任發，先去要新的，別等到期當天卡住生圖工作」；剩 >14 天 → 不提，保持安靜。措辭一律「找主任拿」，**不寫任何取得憑證的網址或流程**
+- **image-studio 已裝？**（生圖的唯一引擎，主任另行發放、不在 kit 內）：`~/.claude/skills/image-studio/` 目錄存在？`~/.config/image-studio/credentials.json` 存在？——**只偵測、不能代裝、不給安裝路徑與憑證細節**；未裝或憑證過期＝**沒有替代線**，結算表提醒一行「生圖引擎未裝／憑證過期 → 所有生圖 skill（imagen 系列、generate2dsprite、generate2dmap、cannon-*、boss-design／boss-props／boss-scene、pet-*）完全不能用，必須找主任拿安裝包」（imagen-banner 的驗收模式只吃 Pillow，缺引擎仍可用，提醒時附註一句）
+  - **憑證剩餘天數**：讀 `credentials.json` 的 `expiresAt`（ISO 8601、UTC，例 `2026-10-05T16:00:00.000Z`），與今天相減取天數，三段處理——已過期 → 同上，生圖 skill 全停（imagen-banner 的驗收模式除外）；**剩 ≤14 天 → 結算表提醒一行**「憑證剩 N 天到期，現在還能用，但換憑證要等主任發，先去要新的，別等到期當天卡住生圖工作」；剩 >14 天 → 不提，保持安靜。措辭一律「找主任拿」，**不寫任何取得憑證的網址或流程**
 - **環境依賴**（企劃 / 原型類 6 支不需要，只影響生圖、測試、試玩迴圈；data-report-builder 生成的報表 skill 另需 pandas + plotnine，用到再裝）：
   - `python --version` 有 3.10+？
   - `python -c "import PIL"`、`python -c "import playwright"` 各自過不過？
@@ -61,6 +61,10 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 | playtest-loop | agents dialogue-writer、game-balance-auditor | 收割後的文筆 / 數值修正轉派 |
 | plan-dept14-writer | plan-doc-qa | 產出後的一致性複查 |
 | plan-doc-qa | plan-dept14-writer | `references/notion-access.md`（Notion 金鑰位置與紀律，兩支共用） |
+| cannon-parts、cannon-storyboard | cannon-wing | 定稿圖當參考；cannon-parts 另用 `scripts/recolor.py` |
+| boss-design、boss-props、boss-scene、pet-parts | pet-evolution | `scripts/fetch_plan.py`（讀 Notion 企劃） |
+| boss-scene、pet-parts | boss-design | `scripts/fit_canvas.py --cover`（背景裁 16:9） |
+| boss-demo | generate2dsprite、boss-design | 去背腳本；`boss設計法則.md` 第四節 Spine 限制 |
 
 使用者說「X 不要裝」要進略過清單時，先查這張表：X 若是某一列的「依賴」欄，一句話警告「略過 X 會讓 Y、Z 的某功能壞」（例：略過 generate2dsprite → imagen-ui 的去背不能跑）。使用者仍要略過就照辦，結算表 ⛔ 那行附註連帶影響。
 
@@ -122,7 +126,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 ### 環境
 
 - **仍缺的依賴**：第 3 節第 5 步沒裝或裝失敗的 → 逐項列「缺 X → Y skill 不能跑 / 退到 Z fallback」（例：缺 chrome-devtools MCP → playtest-loop 退到手貼 `exportDevNotes()`；缺 playwright → webapp-testing 不能跑，game-develop 的玩法 QA 走 chrome-devtools fallback）
-- **生圖引擎缺席**：image-studio 未裝或 `credentials.json` 過期 → 列一行「六支生圖 skill 全部停用（沒有替代線；imagen-banner 的驗收模式仍可用）→ 找主任拿安裝包」；kit 不代裝、不寫安裝路徑與憑證細節
+- **生圖引擎缺席**：image-studio 未裝或 `credentials.json` 過期 → 列一行「生圖 skill 全部停用（沒有替代線；imagen-banner 的驗收模式仍可用）→ 找主任拿安裝包」；kit 不代裝、不寫安裝路徑與憑證細節
 - **憑證即將到期**（第 1 節讀到的 `expiresAt` 剩 ≤14 天）：列一行「憑證剩 N 天，現在還能用；換憑證要等主任發，先去要新的」——健檢模式只跑第 1、5 節，這行是定期健檢的人唯一會看到預警的地方，不可略過；剩 >14 天不列
 - **僅健檢模式**（第 1 節 + 第 5 節）：一樣列出來，附指令，不裝
 
@@ -169,7 +173,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 ```
 🩺 開場健檢:CLAUDE.md 96 行 / skills 0 / agents 0 / secretary 無
 🧰 環境:Python 3.13 ✔ / Pillow ✔ / Playwright ✔(本次裝) / chrome-devtools MCP ✘(你說先不裝→playtest-loop 退手貼模式)
-🎨 生圖引擎 image-studio:✘ 未裝 → 六支生圖 skill(imagen / imagen-portrait / imagen-ui / imagen-banner / generate2dsprite / generate2dmap)完全不能用,沒有替代線,找主任拿安裝包(imagen-banner 的驗收模式只吃 Pillow,仍可用)
+🎨 生圖引擎 image-studio:✘ 未裝 → 所有生圖 skill(imagen 系列 / generate2dsprite / generate2dmap / cannon-* / boss-design、props、scene / pet-*)完全不能用,沒有替代線,找主任拿安裝包(imagen-banner 的驗收模式只吃 Pillow,仍可用)
    (已裝但憑證快到期時改成這行)⏳ 生圖引擎憑證:剩 17 天到期(2026-10-05),現在還能用;換憑證要等主任發,先去要新的
 🧩 Claude in Chrome:未裝 → 自己點一下 https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn,裝完在 Claude Code 打 /chrome 選 Enabled by default
 ✅ 新裝 skills(N,junction):starter-setup、product-planning、imagen …

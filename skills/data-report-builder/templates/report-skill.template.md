@@ -36,7 +36,9 @@ description: 定期分析「{{report_name}}」（{{product}}）。資料來源�
 ### 統計規範
 
 - 視覺化優先 plotnine（ggplot 風格）
-- 圖表含中文時先設 `plt.rcParams["font.family"] = "Microsoft JhengHei"`
+- 圖表含中文時從候選清單挑**第一個系統有的**再設（單指定的字體不存在時 matplotlib 只出 warning，中文靜默變豆腐；整串塞進 `font.family` 則會刷 findfont warning）：
+  `avail = {f.name for f in matplotlib.font_manager.fontManager.ttflist}`
+  `plt.rcParams["font.family"] = next(c for c in ["Microsoft JhengHei", "Noto Serif TC", "Noto Sans TC", "Noto Serif CJK TC"] if c in avail)`
 - 統計檢定（分群比較、A/B）前先查常態性 / 同質變異 / 獨立性，不直接套公式
 - 結果同時給 effect size + p-value，不只看顯著性
 - Python 依專案規範：4 空格、type hints、f-string、pytest

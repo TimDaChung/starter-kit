@@ -63,9 +63,9 @@ allowed-tools:
 
 | 元件代號 | 用途 | 預設規格 |
 |---------|------|---------|
-| `button` | 按鈕（confirm / cancel / 主行動）| 以 21:9 生成 → 後製裁到 4:1 / 3:1，magenta 底去背 |
-| `icon_skill` | 技能 / 法術 icon | 1:1，magenta 底去背，預留發光區 |
-| `icon_item` | 道具 / 物品 icon | 1:1，magenta 底去背 |
+| `button` | 按鈕（confirm / cancel / 主行動）| 以 21:9 生成 → 後製裁到 4:1 / 3:1，去背 |
+| `icon_skill` | 技能 / 法術 icon | 1:1，去背，預留發光區 |
+| `icon_item` | 道具 / 物品 icon | 1:1，去背 |
 | `icon_currency` | 貨幣 / 資源 icon | 1:1，金屬光澤強 |
 | `frame_card` | 卡牌 / 角色卡框 | 3:4，中央透空 |
 | `frame_avatar` | 頭像框（圓 / 方）| 1:1，中央透空 |
@@ -102,11 +102,11 @@ allowed-tools:
 |------|------|------|
 | **長寬比** | 1:1 / 3:4 / 4:3 / 16:9 / 21:9（寬元件以 21:9 生成後裁切）| 依元件類型自動建議 |
 | **解析度** | 1K / 2K | **1K**（UI 通常不需 2K）|
-| **背景處理** | magenta 底去背 / 純色 / 漸層 | **magenta 底去背** |
+| **背景處理** | 去背（單件 `--remove-background`／多件同版 magenta 底切圖）/ 純色 / 漸層 | **去背** |
 | **變體數量** | 1 / normal+pressed / 多稀有度版本（白藍紫金紅）| 1 |
 | **參考圖** | 是否上傳（既有 UI / 風格 / motif）| 無 |
 
-**如果做多稀有度版本**：產一張通用構造，再用「relight + recolor」走色階變體（白 / 綠 / 藍 / 紫 / 金 / 紅），見 Phase 5。
+**如果做多稀有度版本**：同一個 base prompt 只換色相詞與光效強度，逐階各生一張（白 / 藍 / 紫 / 金 / 紅），見 Phase 5。
 
 **如果使用者之前用過**：先讀 `<project-dir>/docs/imagen_history.md` 提示沿用（common.md §8）。
 
@@ -132,7 +132,7 @@ allowed-tools:
 ### 技術規格
 - 長寬比：[ratio]，因為 [元件用途]
 - 解析度：[size]，UI 用途通常 1K 夠
-- 背景：[magenta 底去背/漸層]
+- 背景：[去背（單件 / 多件切圖）/漸層]
 
 ### 視覺重點
 - [must-have 設計元素]
@@ -221,7 +221,7 @@ soft painted gradient, ornate but readable, solid #FF00FF magenta background, ed
 - **一張圖含多件要切開**：prompt 鎖 magenta 底，再借用 generate2dsprite 的後製切圖：
 
 ```bash
-python ~/.claude/skills/generate2dsprite/scripts/generate2dsprite.py process --target asset --mode single --rows 1 --cols 1 --input <png> --output-dir <dir>
+python ~/.claude/skills/generate2dsprite/scripts/generate2dsprite.py process --target asset --mode single --rows <列數> --cols <欄數> --input <png> --output-dir <dir>
 ```
 
 ### 多稀有度變體（常見需求）
@@ -256,7 +256,7 @@ mythic (red): crimson palette, fiery red aura with flame motif
 1. **形狀必須具體**：rounded square / hexagonal / circular / shield-shaped — 不要含糊
 2. **材質明確**：metallic gold / frosted glass / brushed steel / parchment / hologram
 3. **預留 content space**：如果元件背後要放文字 / 數字，加 `clear central area for text/number`
-4. **強調 magenta 底**：除非有特殊需求，背景一律 `solid #FF00FF magenta background, edge-to-edge`，後製 chroma-key 去背
+4. **背景配合去背方式**：一張圖要切多件時寫 `solid #FF00FF magenta background, edge-to-edge`，後製 chroma-key 切圖；單件元件走 `--remove-background`（見 Phase 5「去背」）
 5. **避免實際內容**：icon 描繪「火球能量球」不要寫具體文字 / logo / 角色名
 6. **強調 readable / clean**：UI 必須清楚，加 `clean readable silhouette`、`high contrast against any background`
 7. **避免 photo / 3D render 詞彙**：手遊 UI 通常是 2D 風格化，避免觸發寫實 photo 風

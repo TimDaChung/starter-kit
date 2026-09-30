@@ -1,6 +1,6 @@
 # Draw Engine
 
-Shared engine rules for the five image-generation skills in this kit: `imagen`, `imagen-portrait`, `imagen-ui`, `generate2dsprite`, `generate2dmap`. Cite as「draw-engines.md §N」.
+Shared engine rules for the six image-generation skills in this kit: `imagen`, `imagen-portrait`, `imagen-ui`, `imagen-banner`, `generate2dsprite`, `generate2dmap`. Cite as「draw-engines.md §N」.
 
 | § | Section | Read when |
 |---|---------|-----------|
@@ -18,7 +18,7 @@ Shared engine rules for the five image-generation skills in this kit: `imagen`, 
 
 Usable only when that skill directory exists AND `~/.config/image-studio/credentials.json` is present with `expiresAt` in the future.
 
-**There is no fallback line.** If the GPT line is missing or its credentials expired, image generation **stops**: tell the user that the five image skills cannot run until the installer and credentials are obtained from the team lead, and do not attempt any other generation route. Everything else in the host skill (prompt writing, postprocess scripts, QC, style bible) still works on images the user already has.
+**There is no fallback line.** If the GPT line is missing or its credentials expired, image generation **stops**: tell the user that the six image skills cannot run until the installer and credentials are obtained from the team lead, and do not attempt any other generation route. Everything else in the host skill (prompt writing, postprocess scripts, QC, style bible) still works on images the user already has.
 
 ## 2. Generation rules
 

@@ -2,8 +2,6 @@
 
 Use this file when writing sprite prompts by hand.
 
-Do not delegate prompt writing to a script unless you specifically need parity with an older generated prompt.
-
 ## Global Rules
 
 Always keep these constraints:

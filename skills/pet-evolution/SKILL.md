@@ -55,7 +55,7 @@ allowed-tools:
 
 - **法則優先**：產圖前後都對照 `寵物進化設計法則.md`，交付前逐條跑第七節驗收清單
 - **每輪至少算 2 張**：平台會偶發異常（底座、底色卡、貼紙風），對策是重抽不是改提示詞
-- **一階不給舊參考圖、二階永遠不給舊參考圖**：參考圖會把造型拉回舊設定（規則見 `prompt模板.md`）
+- **二階永遠不給舊參考圖；一階要大改時也不給**：參考圖會把造型拉回舊設定。只有一階沿用舊設定時才給一階舊圖（規則見 `prompt模板.md`）
 - **裝飾量照企劃走，不刻意減**：判準是「每件都連得回概念」，不是數量
 - **中間產物進 `_工作暫存/`**（已 gitignore）；定稿才輸出到使用者指定位置。**未上線的設計圖不進 repo**（kit 是公開 repo）
 - **主動點出企劃問題**：用詞不一致、文字與圖不符、兩階差異不足時直接講，不要自行補完後默默帶過
@@ -90,7 +90,7 @@ allowed-tools:
 **發想前先重撈寵物清單**，對照 `參考素材索引.md` 列出已用題材：
 
 ```sh
-NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") python scripts/fetch_plan.py --list pets
+NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py --list pets
 ```
 
 另外避開炮台線已有的動物造型（例：貓 → 避開喵公爵、廚神喵喵）。
@@ -150,7 +150,7 @@ NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") python scripts
 
 ```sh
 NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") \
-  python scripts/fetch_plan.py <page_id> _工作暫存/<寵物名>
+  python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <page_id> _工作暫存/<寵物名>
 ```
 
 產出 `plan.md`（企劃全文）與 `img_NN.png`（企劃圖，簽名 URL 約 5 分鐘失效，腳本當下就下載）。**企劃圖要實際 Read 來看**——文字與圖常常不一致（例：摩卡企劃寫「叉子」、圖畫的是打蛋器）。

@@ -23,7 +23,7 @@ description: 企劃書一致性審查（一＋四部 house style，部門專屬�
 
 ## 執行步驟
 
-1. **完整讀取**：用 Notion MCP 或 Notion API 讀取所有 block，含子頁面、表格、流程圖（mermaid）、圖片替代文字。不可只讀前幾段。
+1. **完整讀取**：用部門金鑰走 Notion REST API 讀取所有 block（不走個人 Notion MCP，理由見 `notion-access.md`），含子頁面、表格、流程圖（mermaid）、圖片替代文字。不可只讀前幾段。
     - **金鑰**：讀取用部門的**唯讀**金鑰，位置與取用流程見 `../plan-dept14-writer/references/notion-access.md`——**自己照該檔去拿，不要問使用者**；token 走環境變數（如 `NOTION_KEY`）傳入，不寫進腳本或設定檔
     - 讀不到頁面（404／無權限）→ **停下回報**：常見是該頁沒分享給 integration，或不在認證的同一個 workspace。請 PM 分享頁面或貼出內容，**不要從標題或殘缺片段推測內容就開始審**
 2. **建立詞彙庫**：列出全部關鍵名詞（幣別、排行榜名稱、按鈕文字、時間名詞如「結束時間 vs 關閉時間」、模式名稱），記錄每個名詞在各章節的寫法。

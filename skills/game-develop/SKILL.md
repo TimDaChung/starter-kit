@@ -102,7 +102,7 @@ allowed-tools:
 | **角色 / 物件，遊戲中會動或需要狀態切換**（揮棒、投球、走路、待機、被擊中、攻擊…）| **`generate2dsprite`**（Q 版 / chibi 風用 `art_style=cel_shaded_chibi`）| 3 | 內建 magenta chroma key + processor，產出真透明 PNG + 多 frame sheet | — |
 | **小物件 sprite**（球、子彈、道具、特效粒子）| **`generate2dsprite`** | 3 | 同上，要透明背景才能疊在背景上 | — |
 | **背景 / 地圖 / 場景**（球場、戰鬥背景、村莊、戰場）| **`generate2dmap`** | 3 | 場景專用 pipeline，比例 / 透視 / 圖層處理對 | — |
-| **UI 元件**（button / icon / frame / banner / popup / coin / chip）| **`imagen-ui`** | 3 | imagen-ui 產出 magenta 背景，用 generate2dsprite 的 processor 去背，得到真透明 PNG | — |
+| **UI 元件**（button / icon / frame / banner / popup / coin / chip）| **`imagen-ui`** | 3 | 單件元件以 `--remove-background` 直出透明 PNG；多件同版才走 magenta 底＋generate2dsprite processor 切圖 | — |
 | **靜態角色立繪**（封面圖、選角畫面，純單張無動畫）| `imagen-portrait` | 3 | 半身 / 全身大圖，內建後製 | — |
 | **通用單張插圖**（splash art、敘事插畫、無 alpha 需求）| `imagen` | 3 | **僅限**真的不需要透明背景的場合 | — |
 | **有參考圖要還原風格**（user 給圖說「照這種感覺」）| `image-to-prompt` | 2–3 | 逆向出中性、可換角色的 prompt，再交給上列生圖 skill | skill 自己 Read 看圖描述風格 |
@@ -114,7 +114,7 @@ allowed-tools:
 | **動效 / 音效 / 特效 / 粒子** | **無外包** | 任何 | 沒有對應 skill | **skill 自己做（CSS animation / Web Audio API / Canvas）** |
 
 **反模式**：
-- ❌ 用 `imagen` 生「透明背景 PNG」——`imagen` 不跑後製，prompt 寫 transparent 也沒用，會出 RGB 圖
+- ❌ 靠 prompt 寫 transparent 要透明背景——沒用，會出 RGB 圖；單張透明要加 `--remove-background`（`../imagen/references/common.md` §9），會動的一律走 `generate2dsprite`
 - ❌ 用 `imagen` 生會動的角色——沒有 frame sheet 邏輯，只能拿到單張靜態
 - ❌ 信任 sub-agent 回報「透明背景 PNG」就算數——必須跑 alpha 驗證（見 Phase 3 驗證步驟）
 

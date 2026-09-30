@@ -39,7 +39,7 @@ Read [references/modes.md](references/modes.md) when the request is ambiguous.
 
 ## Consistency rules (read before the first generation)
 
-The lock rules shared by all five image skills live in [`../imagen/references/consistency-rules.md`](../imagen/references/consistency-rules.md) — §1 default visual rules, §2 project asset inheritance, §3 batch consistency mode, §4 hand-off to `art-style-guard`. Summary plus the sprite-only deltas:
+The lock rules shared by all six image skills live in [`../imagen/references/consistency-rules.md`](../imagen/references/consistency-rules.md) — §1 default visual rules, §2 project asset inheritance, §3 batch consistency mode, §4 hand-off to `art-style-guard`. Summary plus the sprite-only deltas:
 
 - **Default visual rules (§1)**: female → fair luminous skin; all characters → refined attractive features (mobile gacha aesthetic), no western cartoon / Disney / Pixar / caricature drift; canvas full-bleed to all four edges via a positive composition instruction. Explicit user requests override. **[HD / chibi]** "refined" also means big expressive eyes and a well-proportioned chibi body.
 - **Project asset inheritance (§2, REQUIRED pre-flight)**: scan `assets/sprites/`, `sprites/`, `assets/sprites/monsters/`, `assets/maps/`, `assets/tiles/`. If same-category sprites exist: LOCK art style, head-body proportions, view angle, anchor (bottom / center), pixel / HD scale, line weight, shading style, facing direction, lighting direction; pass at least one existing sprite as `--reference` next to the subject reference; embed the "visually rhyme" Strict Rule; confirm the lock with the user.
@@ -52,7 +52,7 @@ The lock rules shared by all five image skills live in [`../imagen/references/co
 ## Agent Rules
 
 - Decide the asset plan yourself. Do not force the user to spell out sheet size, frame count, or bundle structure when the request already implies them.
-- Write the art prompt yourself. Do not default to the prompt-builder script; if a legacy prompt-builder command exists, treat it as historical compatibility only, not the normal skill workflow.
+- Write the art prompt yourself (see `references/prompt-rules.md`); the script only postprocesses.
 - Engine routing: every raw image comes from the personal `image-studio` skill (the GPT line) — the only engine, see `../imagen/references/draw-engines.md` (§1 availability, §3 call contract: aspect ratio and resolution go into the prompt text, `--remove-background` can replace magenta chroma-key for transparency while frame splitting / scaling / QC scripts still apply; §4 failure handling: a batch fails only when 0 images saved — report the cause and let the user decide). If `image-studio` is not installed or its credentials expired, image generation stops: tell the user to get the installer from the team lead. There is no other generation route, and no fallback to look for.
 - When the user provides or implies a visual reference, first Read the reference image with the Read tool so you can see it, then pass the same path to the client via one or more `--reference <path>` flags. The client embeds the reference as the visual anchor — do not rely on a filesystem path string inside the text prompt.
 - Do not force pixel art when the asset is a map prop for `generate2dmap` or when the user/project requests a different style. Match the map or reference style first.
