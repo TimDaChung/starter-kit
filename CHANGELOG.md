@@ -12,6 +12,7 @@
 - **`playtest-loop` 死分支**：頻道偵測與 curate 流程引用 `exportLearned`／`learned_script`，但 kit 標準頻道 `dev-notes-channel.js` 沒有這兩個；改為只認 `exportDevNotes`，`learned_script` 只在專案自己另建時才走
 - **`plan-doc-qa` 讀企劃要下載圖來看**：原本只讀「圖片替代文字」，但文案與版面常整段放在圖裡（`notion-access.md` §1 已寫）
 - `starter-setup` 環境依賴說明「企劃／原型類 6 支」數字已失真，改為類別描述
+- **`data-report-builder` 生成的報告改「結論先行」**：前三節固定「結論 → 建議行動 → 為什麼這樣說」，之後才是總覽與明細表；正文只留支撐結論的 2–3 個關鍵數字，不把所有比較過程全部列出。**建議行動不可為空**——沒異常也要寫下一個該確認的數字，或「觀察什麼、N 期後回看」；寫不出行動就是還沒分析完，不交。既有用此 skill 生成的報表 skill 不會自動更新，重跑一次 builder 或手動照 `templates/report.template.md` 改
 - ⚙️ **升級動作**：`git pull` 即生效，無設定變更。組員若習慣「畫一張」，現在會拿到兩張供挑；要固定一張就講「畫 1 張」
 
 ## v3.14.1 (2026-09-30)
