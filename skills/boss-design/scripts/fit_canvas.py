@@ -24,6 +24,8 @@ Steps:
 --whole: skip steps 2-3 and fit the entire source image into the canvas
 (for capture-performance frames, where effects fill the frame and a subject
 box is meaningless).
+--cover: center-crop the source to 16:9 and scale to fill (for full-bleed
+scenes such as boss-scene backgrounds; no gray bars).
 
 Prints the source and final screen ratios so the caller can verify, and warns
 when the subject had to be upscaled (loses detail; regenerate larger instead).
@@ -65,9 +67,27 @@ def fit_whole(rgb: Image.Image, gray: tuple[int, int, int], canvas_w: int) -> tu
     return canvas, [f"whole image fitted, padded {canvas_w - resized.width}px x {canvas_h - resized.height}px"]
 
 
+def fit_cover(rgb: Image.Image, canvas_w: int) -> tuple[Image.Image, list[str]]:
+    canvas_h = round(canvas_w * 9 / 16)
+    ratio = canvas_w / canvas_h
+    if rgb.width / rgb.height > ratio:
+        crop_w = round(rgb.height * ratio)
+        left = (rgb.width - crop_w) // 2
+        box = (left, 0, left + crop_w, rgb.height)
+    else:
+        crop_h = round(rgb.width / ratio)
+        top = (rgb.height - crop_h) // 2
+        box = (0, top, rgb.width, top + crop_h)
+    cropped = rgb.crop(box)
+    note = f"cover: cropped {rgb.width - cropped.width}px x {rgb.height - cropped.height}px from the source"
+    return cropped.resize((canvas_w, canvas_h), Image.LANCZOS), [note]
+
+
 def place(src: Image.Image, args: argparse.Namespace) -> tuple[Image.Image, list[str]]:
     rgb = src.convert("RGB")
     gray = corner_gray(rgb) if args.gray == "auto" else tuple(int(v) for v in args.gray.split(","))
+    if args.cover:
+        return fit_cover(rgb, args.width)
     if args.whole:
         return fit_whole(rgb, gray, args.width)
     left, top, right, bottom = subject_box(rgb, gray, args.threshold)
@@ -102,6 +122,7 @@ def main() -> None:
     parser.add_argument("--gray", default="auto")
     parser.add_argument("--threshold", type=int, default=28)
     parser.add_argument("--whole", action="store_true", help="fit the whole image, no subject scaling")
+    parser.add_argument("--cover", action="store_true", help="crop to fill 16:9, for full-bleed scenes")
     args = parser.parse_args()
     out, notes = place(Image.open(args.src), args)
     out.save(args.dst)

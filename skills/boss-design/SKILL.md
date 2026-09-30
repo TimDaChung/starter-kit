@@ -26,7 +26,7 @@ allowed-tools:
 - `boss設計法則.md` — 畫面規格、外觀原則、表演示意的 Spine 限制、驗收清單（硬規範）
 - `prompt模板.md` — 外觀與表演示意的提示詞模板、畫風錨點（改提示詞只改這份）
 - `參考素材索引.md` — 既有 Boss 清單（撞題檢查）、畫風、已知企劃問題
-- `scripts/fit_canvas.py` — 把算出的圖補成精準 16:9 灰底
+- `scripts/fit_canvas.py` — 把算出的圖補成精準 16:9 灰底（`--cover` 裁切填滿模式給 `boss-scene` 用）
 
 共用的：
 
@@ -41,7 +41,7 @@ allowed-tools:
 
 | 歸這支 | 不歸這支 |
 |---|---|
-| Boss 外觀定稿圖（每階段一張） | Boss 專屬背景、表演場景 → 配套 skill（規劃中） |
+| Boss 外觀定稿圖（每階段一張） | Boss 專屬背景、表演場景 → `boss-scene` |
 | 捕獲表演示意圖（使用者要才做） | 登場橫幅、彩金欄、結算欄、ICON → UI |
 | | 互動的表演節奏與權重驗證 → `boss-demo` |
 | | Spine 分件、骨架、動畫規格 → 不寫 |
@@ -231,7 +231,9 @@ python ~/.claude/skills/boss-design/scripts/fit_canvas.py <算出的圖> <輸出
 
 - 定稿圖輸出到使用者指定位置，附最終提示詞
 - 這次暴露了新規則或前科 → 回寫 `boss設計法則.md` 第七節或 `prompt模板.md`
-- 主動提下游：要驗證表演節奏與權重 → `boss-demo`（直接拿這裡的定稿圖當素材參考）
+- 主動提下游：
+  - Boss 的漁場邊框、表演背景 → `boss-scene`（拿這裡的定稿圖當配色參考）
+  - 要驗證表演節奏與權重 → `boss-demo`（直接拿這裡的定稿圖當素材參考）
 
 ---
 
