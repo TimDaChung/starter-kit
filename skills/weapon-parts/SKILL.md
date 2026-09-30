@@ -81,7 +81,7 @@ python3 ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 ### Step 3 — 後製
 
 - **ICON**：`python ~/.claude/skills/pet-parts/scripts/icon_check.py <圖> <輸出資料夾> --names <武具名>`，產出 `ICON_<武具名>.png` 與 `ICON_尺寸預覽.png`；**64px 欄看不懂就重抽**
-- **碎片 ICON**：`python ~/.claude/skills/weapon-parts/scripts/fragment_badge.py <ICON_武具名.png> <角標.png>`，輸出同資料夾 `ICON_<武具名>_fragment.png`（角標縮到邊長 35% 疊左上；可調 `--scale`、`--corner`、`--margin`）。角標第一次沒有時先照 `配件規格.md` 第三節備一顆
+- **碎片 ICON**：`python ~/.claude/skills/weapon-parts/scripts/fragment_badge.py <ICON_武具名.png> <角標.png>`，`--scale 0.28`，輸出同資料夾 `ICON_<武具名>_fragment.png`（角標疊左上；可調 `--scale`、`--corner`、`--margin`）。角標固定用 `assets/fragment_badge.png`（線上碎片圖示的裁切，見 `配件規格.md` 第三節）
 - **登場分鏡**：`python ~/.claude/skills/pet-parts/scripts/label_frames.py <圖> <輸出> --cols 2 --rows 2 --captions "中間出現|<動作A>|<動作B>|統一發光" --title 登場動畫`（格數不符會擋下，重抽）
 - **金閃版**：同上，`--title "登場動畫（3星金閃）"`
 - **追擊提示格**：`fit_canvas.py --whole` 補成 1920×1080 後，用 PIL 在右側加「追擊效果觸發」（片段見 `配件規格.md` 第六節）
