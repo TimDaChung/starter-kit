@@ -6,7 +6,7 @@
 
 ## 建議行動
 
-{{who_does_what_next_never_empty_if_no_anomaly_name_the_number_to_verify_next}}
+{{who_does_what_next_never_empty_if_no_anomaly_name_the_number_to_verify_or_what_to_watch_and_when_to_recheck}}
 
 ## 為什麼這樣說
 
