@@ -6,7 +6,7 @@
 
 ## 建議行動
 
-{{who_does_what_next_or_state_no_action_needed}}
+{{who_does_what_next_never_empty_if_no_anomaly_name_the_number_to_verify_next}}
 
 ## 為什麼這樣說
 
