@@ -62,8 +62,9 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 | plan-dept14-writer | plan-doc-qa | 產出後的一致性複查 |
 | plan-doc-qa | plan-dept14-writer | `references/notion-access.md`（Notion 金鑰位置與紀律，兩支共用） |
 | cannon-parts、cannon-storyboard | cannon-wing | 定稿圖當參考；cannon-parts 另用 `scripts/recolor.py` |
-| boss-design、boss-props、boss-scene、pet-parts | pet-evolution | `scripts/fetch_plan.py`（讀 Notion 企劃） |
-| boss-scene、pet-parts | boss-design | `scripts/fit_canvas.py --cover`（背景裁 16:9） |
+| boss-design、boss-props、boss-scene、pet-parts、weapon-design、weapon-parts | pet-evolution | `scripts/fetch_plan.py`（讀 Notion 企劃） |
+| boss-scene、pet-parts、weapon-design、weapon-parts | boss-design | `scripts/fit_canvas.py`（`--cover` 背景裁 16:9；weapon 線用 `--height`／`--whole` 補灰底） |
+| weapon-parts | weapon-design、pet-parts | 定稿圖當參考；pet-parts 的 `scripts/icon_check.py`（ICON 切正方形＋64px 預覽）、`scripts/label_frames.py`（分鏡標籤） |
 | boss-demo | generate2dsprite、boss-design | 去背腳本；`boss設計法則.md` 第四節 Spine 限制 |
 
 使用者說「X 不要裝」要進略過清單時，先查這張表：X 若是某一列的「依賴」欄，一句話警告「略過 X 會讓 Y、Z 的某功能壞」（例：略過 generate2dsprite → imagen-ui 的去背不能跑）。使用者仍要略過就照辦，結算表 ⛔ 那行附註連帶影響。

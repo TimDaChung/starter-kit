@@ -2,6 +2,16 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.16.0 (2026-09-30)
+
+- **新增武具線兩支**（魚樂園陣營戰武具，結構比照 pet-evolution → pet-parts）：
+  - **`weapon-design`**：讀功能之書〈武具系統〉§2.7／§2.9 的既有武具、或從零發想並先提案＋產 mini 道具企劃拍板 → 算一張 3D 成品感示意圖（3/4 視角、無角色、無 UI、無文字）→ `boss-design/scripts/fit_canvas.py --height 0.6 --max-width 0.7` 補成 16:9 灰底 → 驗收。**招牌部位要能成為登場動畫的動作來源**（企劃四把的動畫都圍繞一個部位：扇面旋轉、麒麟眼電光、盾面展開、雙劍交叉）。`參考素材索引.md` 記既有 4 把（只有玄暝雙龍劍有 wid 3300001，其餘三把企劃標「暫放」）與已知企劃問題（3 把無 wid 與屬性、2D／3D 未寫明）
+  - **`weapon-parts`**（下游，全部以定稿為參考圖）：① 武具 ICON（`pet-parts/scripts/icon_check.py` 切正方形＋64px 檢查）；② 碎片 ICON **不生圖**——新增 `scripts/fragment_badge.py`，把通用碎片角標縮到 ICON 邊長 35% 疊左上（`--scale`／`--corner`／`--margin` 可調），角標放 `assets/`；③ 登場動畫分鏡一張 2×2，**格序固定：中間出現 → 招牌動作 A → 招牌動作 B → 統一發光**（企劃 §2.9 PM 註記），`pet-parts/scripts/label_frames.py --cols 2 --rows 2` 加標籤；④ 3 星以上金色閃點版，閃點路徑依招牌部位；⑤ 追擊提示格選做，「追擊效果觸發」字樣後製不交給 AI
+  - **與寵物線的差別**：武具升星不改外觀，**沒有兩階**、一張定稿、不埋伏筆；分鏡不是照企劃動態拆 3–4 格，而是固定 4 步
+  - 兩支都是初版、**尚未實測**，前科表留空待第一次跑完回寫
+- `starter-setup` 依賴表補 weapon 線：共用 `pet-evolution/scripts/fetch_plan.py`、`boss-design/scripts/fit_canvas.py`、`pet-parts/scripts/`
+- ⚙️ **升級動作**：`git pull` 後建立 `~/.claude/skills/weapon-design`、`~/.claude/skills/weapon-parts` 兩條 junction 指向 kit 的 `skills/weapon-design`、`skills/weapon-parts`（新 skill，照既有 skill 的裝法）；無設定變更
+
 ## v3.15.0 (2026-09-30)
 
 第二輪 prompt 審查（對照 Opus 5.5），修「兩份檔案對同一件事說法不同」與過度規定：
