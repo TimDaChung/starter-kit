@@ -177,3 +177,9 @@ python3 ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 
 - 改版面／版位比例／分鏡結構／驗收 → `分鏡規格.md`
 - 改提示詞 → `prompt模板.md`
+
+## 貼回企劃（2026-10-02 起）
+
+定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+
+- 技能分鏡 → 翅膀頁 `2.3 翅膀技能`：**分鏡文字寫在同一個小標題的左欄，整張分鏡圖一張貼右欄，不切圖**（Tim 2026-10-02），caption《<技能名>分鏡示意圖》。舊頁面 `2.3.B–F` 一分鏡一圖是過去寫法，新寫的照這條

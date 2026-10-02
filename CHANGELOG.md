@@ -2,6 +2,19 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.18.3 (2026-10-02)
+
+- **`plan-dept14-writer` 新增「貼圖模式」（第十一節）**：負責把示意圖、美術稿貼進 Notion 企劃對應章節。PM 給目標頁網址 → `scripts/paste_images.py list` 列出章節、右欄 column、卡位、synced_block 原件 → 報清單取得同意 → `insert`／`replace`（`split` 把整張分鏡切成一格一張）→ 回讀。寫入要該線讀寫 token（`--line`，Tim 持有）
+- **新增 `references/image-slots.md`**：2026-10-02 實讀一部 24 頁、四部 39 頁＋兩份編寫手冊整理的放圖規則——兩部都是左文右圖；圖名一部寫在圖上方《n.圖名》（caption 空）、四部寫在 caption《圖名》；各範本卡位（「窩是示意圖」佔位圖、「圖片放置區」、《圖片待補》、【待補】）怎麼處理；魚樂園要貼進物件頁的 synced_block 原件；**每支生圖 skill 的產出對到哪個 DB、哪一節**；不准動的圖與企劃裡還沒有圖位的產出
+- 第五節第 4 條修正：原本寫「不做序號命名、未提供寫圖後補」，與手冊和範本實況不符 → 改成照部別的圖名寫法、卡位用語跟隨範本
+- **14 支生圖 skill 結尾補「貼回企劃」段**（boss-design／props／scene／demo、cannon-wing／parts／storyboard、pet-evolution／parts、weapon-design／parts、imagen、imagen-banner、avatar-proposal），寫明自己的產出落點並指向貼圖模式。Tim 同日定案的四條一起落地：
+  - **分鏡整張一張圖**：boss-demo、cannon-storyboard 的分鏡文字寫在同一個小標題左欄、整張圖貼右欄，不切圖（舊頁一分鏡一圖是過去寫法）
+  - **weapon-design 讀取來源更正**：外觀企劃以**道具之書武具頁**（道具大類 33；雙龍劍 279e…、神機弩 2d1e…、伏煞盾 374e…）為準，登場動畫與效果池仍在功能之書〈武具系統〉§2.9／§3.5，兩頁都抓；`參考素材索引.md` 同步更正
+  - **ICON 企劃沒圖位就不出圖**：cannon-wing 套裝 ICON（Step 9.5）、pet-parts／weapon-parts 道具 ICON 改成「企劃有 ICON 圖位才做」，目前三類頁面都沒有，預設跳過
+  - **imagen-banner 新增「機台廣宣在地化」**：娛樂城網頁之書機台廣宣 `2.2 畫面呈現` 右欄《wow現有廣宣》是英文原圖（輸入、不准動），《內文排版示意》是成品——以原圖為 reference 只換字（中文標題字、角標、標語、按鈕、注意文字照企劃文案，一字不改），多版本各一張，`replace` 換回《內文排版示意》
+- Notion REST 共用模組移到 `plan-dept14-writer/scripts/notion_rest.py`（加上部門指紋判斷、網址取 id、各線讀寫 token），`avatar-proposal/scripts/notion_api.py` 改為轉接
+- ⚙️ **升級動作**：`git pull` 即生效，無設定變更
+
 ## v3.18.2 (2026-10-02)
 
 - **`avatar-proposal` 新增 `fill` 模式，並定為正式流程預設**（Tim 定）：使用者先用 Notion 範本建好頁、把網址貼來，`build_notion.py fill` 把內容插在範本「調整紀錄」標題之前——範本的目錄與「新增調整紀錄」按鈕（API 建不出來）原樣保留，也不用再問 workspace 與父頁。範本已放卡位圖（圖說「示意圖｜<組別>」）就用 `swap` 原地換。**`new` 只在使用者口頭明說「你幫我建」時用**。找不到調整紀錄標題會改附加到頁尾並警告；調整紀錄是頁面第一個 block 時直接停（API 無法插在第一個 block 之前）

@@ -250,6 +250,8 @@ python3 ~/.claude/skills/cannon-wing/scripts/compose.py <tiles> <輸出目錄> "
 
 ### Step 9.5 — 套裝 ICON（後製，不生圖）
 
+**企劃有 ICON 圖位才做，沒有就跳過本步、不出圖**（Tim 2026-10-02）。目前套裝頁 `2.2 套裝組合` 只有文字、沒有 ICON 圖位。
+
 總覽圖定稿後，道具 ICON 直接從定稿裁（Tim 定案 2026-09-30，寵物、武具線同規），不用 image-studio 另生。套裝 ICON 取**左下格（列 3 lv0 的組合）**；總覽圖底部有一列標籤，用 `--grid-bottom 0.06` 先排除：
 
 ```sh
@@ -283,3 +285,12 @@ python ~/.claude/skills/pet-parts/scripts/item_icon.py <總覽定稿.png> <輸�
 - 改切格／合成／調色邏輯 → `scripts/`（`slice.py`、`compose.py`、`recolor.py`）
 - 改套裝 ICON 後製 → `pet-parts/scripts/item_icon.py`（三線共用，改那邊）
 - 新增參考套裝 → `參考素材索引.md`
+
+## 貼回企劃（2026-10-02 起）
+
+定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+
+- 3×3 總覽 → 道具之書 炮台頁**與**翅膀頁 `2.2.C 四星造型變化` 右欄，接在四星單圖後，caption《三階示意圖》
+- 單格（lv0/2/4）→ 炮台頁、翅膀頁 `2.2.A/B/C` 右欄各一張《零星炮台示意圖》《二星特效示意圖》《四星炮台示意圖》
+- 套裝 ICON → 企劃有圖位才做；目前套裝頁沒有，就不出圖
+- 不要動 2.1.B 底下的「0/2/4 星遊戲內對位條」（美術產物）

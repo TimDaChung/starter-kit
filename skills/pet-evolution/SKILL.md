@@ -233,3 +233,10 @@ python3 ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 - 改提示詞 → `prompt模板.md`（流程不用動）
 - 新增寵物後更新撞題清單 → `參考素材索引.md`
 - 傳說級（三階）納入時：法則第一節的稀有度表、第六節、提示詞模板都要擴成三階，並先跟使用者確認第三階走類人還是神話化
+
+## 貼回企劃（2026-10-02 起）
+
+定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+
+- 兩階並排定稿 → 道具之書 寵物頁 `2.2 寵物本體` 標題**正下方，頂層滿寬、不在分欄裡**（三頁一致），現行無圖說，建議《兩階外觀示意》
+- 單階裁圖（選）→ `2.2.A 零星造型`／`2.2.C 三星造型` 右欄

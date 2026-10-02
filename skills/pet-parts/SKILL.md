@@ -78,7 +78,7 @@ python3 ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 
 - **動畫分鏡**：`python ~/.claude/skills/pet-parts/scripts/label_frames.py <圖> <輸出> --cols 3 --rows 1 --captions "…|…|…" --title 一般動態`（格數不符會擋下，重抽）
 - **技能 ICON**：`python ~/.claude/skills/pet-parts/scripts/icon_check.py <圖> <輸出資料夾> --names 技能1,技能2`，產出正方形 ICON 與 `ICON_尺寸預覽.png`
-- **道具 ICON（後製，不生圖）**：一階／二階各一張，從並排定稿各取一半：
+- **道具 ICON（後製，不生圖）**：**企劃有 ICON 圖位才做，沒有就跳過不出圖**（Tim 2026-10-02；目前寵物頁 2.1.B 寫「按公版設計」、2.5 只有文字，沒有圖位）。要做時一階／二階各一張，從並排定稿各取一半：
   ```sh
   python ~/.claude/skills/pet-parts/scripts/item_icon.py <兩階定稿.png> <輸出資料夾> --name <寵物名>_一階 --half left [--badge <角標.png>]
   python ~/.claude/skills/pet-parts/scripts/item_icon.py <兩階定稿.png> <輸出資料夾> --name <寵物名>_二階 --half right [--badge <角標.png>]
@@ -102,3 +102,12 @@ python3 ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 - 改提示詞 → `prompt模板.md`
 - 改技能 ICON 切割與預覽 → `scripts/icon_check.py`
 - 改道具 ICON 後製（裁切、底板、角標）→ `scripts/item_icon.py`（三條線共用，改動要顧炮台翅膀與武具線）
+
+## 貼回企劃（2026-10-02 起）
+
+定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+
+- 動畫分鏡 → `2.2.B 零星動態`／`2.2.D 三星動態` 右欄，順序一般→上陣→虛弱
+- 技能 ICON → `2.3 技能`「技能描述」清單底下、技能表上方，**多顆拼成一張橫排長條**巢在清單裡
+- 專屬背景 → `2.4 UI設計` 右欄第一張《專屬背景示意圖》；滿星貼圖 → `2.5 新增道具` 右欄《滿星貼圖》
+- 道具 ICON＋碎片 → 企劃沒有圖位就不做（不出圖、不問開節）

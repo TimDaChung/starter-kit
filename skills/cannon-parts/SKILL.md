@@ -138,3 +138,11 @@ python3 ~/.claude/skills/cannon-parts/scripts/rotate.py <素材.png> <轉向後.
 - 改版型／規格 → `配件規格.md`
 - 改提示詞 → `prompt模板.md`
 - 調色腳本共用 `cannon-wing/scripts/recolor.py`，不在本 skill 重複實作
+
+## 貼回企劃（2026-10-02 起）
+
+定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+
+- 子彈、基礎彈紋 → 炮台頁 `2.3.A`、`2.4.A` 右欄《子彈示意圖》《基礎彈紋示意圖》
+- 專屬彈紋／獎圈 → 炮台頁 `2.4.B`／`2.4.C`（**不是**附屬物頁）《專屬彈紋示意圖》《專屬獎圈示意圖》
+- 雷射子彈＋彈紋 → 套裝頁 `2.3 雷射特效` 右欄《雷射子彈示意圖》《雷射彈紋示意圖》

@@ -161,3 +161,9 @@ allowed-tools:
 - 2D 地圖／場景 → `generate2dmap`
 - 角色 sprite／動畫 → `generate2dsprite`；chibi／Q 版風用 `generate2dsprite`（`art_style=cel_shaded_chibi`）
 - 第二批以後的同專案生圖 / 風格疑慮 → 先過 `art-style-guard`
+
+## 貼回企劃（2026-10-02 起）
+
+定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+
+- 介面示意／wireframe → 功能頁「呈現 > 介面 > <畫面>」右欄，換掉卡位（一部「圖片放置區」→ 圖上方《n.xxx示意》；四部「窩是示意圖」佔位圖 → caption《<畫面名>》）；版本頁不直接貼

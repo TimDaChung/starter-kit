@@ -289,3 +289,10 @@ python ~/.claude/skills/boss-design/scripts/fit_canvas.py <算出的圖> <輸出
 - 改提示詞 → `prompt模板.md`（流程不用動）
 - 新 Boss 上線後更新清單 → `參考素材索引.md`
 - 改補邊邏輯 → `scripts/fit_canvas.py`
+
+## 貼回企劃（2026-10-02 起）
+
+定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+
+- 外觀定稿 → 魚類之書 Boss 頁 `3.2 靜態 > 3.2.A Boss造型` 右欄，一階一張由上往下，caption《一階造型》《二階造型》（單階《boss外觀示意》）；16:9 對位圖接在後面《對位示意》
+- 魚樂園物件頁內容包在 synced_block 原件裡，貼進原件那一欄，不貼版本頁

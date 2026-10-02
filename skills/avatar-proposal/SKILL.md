@@ -152,3 +152,9 @@ python <skill-dir>/scripts/build_notion.py new  proposal.json --parent <父頁 i
 | 2026-10-02 | 一般裝背景自己長出鳥居與石燈籠 | 排除項明列宗教建築，背景描述寫「不要畫鳥居」 |
 | 2026-10-02 | 一般裝畫得比九月一般裝精緻 | 模板加「中強度、花紋大而少」 |
 | 2026-10-01 | 讀 SOP 先打 Notion MCP 404、再繞瀏覽器丟了表格標記 | Notion 讀寫一律 token＋REST |
+
+## 貼回企劃（2026-10-02 起）
+
+定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+
+- 示意圖只進**人物設定頁**（本 skill 的頁，範本待 Tim 建）；**不進**神娃大活動「圖示(男女共用)」或人物大活動「圖示」——那兩格放美術稿，美術完成後由 PM 用 plan-dept14-writer 貼圖模式補

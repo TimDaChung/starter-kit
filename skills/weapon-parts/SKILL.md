@@ -5,7 +5,7 @@ description: |
   魚樂園陣營戰「武具」登場動畫分鏡產出流程，weapon-design 的下游：
   登場動畫分鏡（一張 16:9 灰底 2×2 四格，格序固定：中間出現 → 招牌動作 A → 招牌動作 B → 統一發光）、3 星以上金色閃點版分鏡、追擊提示格（選做）。
   道具 ICON＋碎片版**不生圖、走後製**（`pet-parts/scripts/item_icon.py` 從定稿裁，與炮台翅膀、寵物線一致）。
-  讀功能之書〈武具系統〉 → 以外觀定稿為參考圖分批算圖 → 加標籤 → 交付。必須等武具外觀定稿後才做。
+  讀功能之書〈武具系統〉§2.9（外觀以道具之書武具頁為準） → 以外觀定稿為參考圖分批算圖 → 加標籤 → 交付。必須等武具外觀定稿後才做。
   適用於：「武具配件」「登場動畫分鏡」「武具分鏡」「追擊提示」。
 allowed-tools:
   - Read
@@ -82,7 +82,7 @@ python3 ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 - **登場分鏡**：`python ~/.claude/skills/pet-parts/scripts/label_frames.py <圖> <輸出> --cols 2 --rows 2 --captions "中間出現|<動作A>|<動作B>|統一發光" --title 登場動畫`（格數不符會擋下，重抽）
 - **金閃版**：同上，`--title "登場動畫（3星金閃）"`
 - **追擊提示格**：`fit_canvas.py --whole` 補成 1920×1080 後，用 PIL 在右側加「追擊效果觸發」（片段見 `配件規格.md` 第四節）
-- **道具 ICON＋碎片版（後製，不生圖）**：定稿是單張 16:9 灰底，直接吃、不用 `--half`／`--grid`：
+- **道具 ICON＋碎片版（後製，不生圖）**：**企劃有 ICON 圖位才做，沒有就跳過不出圖**（Tim 2026-10-02；目前武具道具頁沒有 ICON 圖位）。要做時，定稿是單張 16:9 灰底，直接吃、不用 `--half`／`--grid`：
   ```sh
   python ~/.claude/skills/pet-parts/scripts/item_icon.py <外觀定稿.png> <輸出資料夾> --name <武具名> [--badge <角標.png>]
   ```
@@ -103,3 +103,11 @@ python3 ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 - 改提示詞 → `prompt模板.md`
 - 分鏡標籤的邏輯在 `pet-parts/scripts/label_frames.py`，兩線共用，改那邊
 - 改道具 ICON 後製 → `pet-parts/scripts/item_icon.py`（三線共用，改那邊）。首版自製的 ICON 生圖模板與 `fragment_badge.py` 已於 v3.16.0 同日移除，不要撿回來——道具 ICON 不生圖
+
+## 貼回企劃（2026-10-02 起）
+
+定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+
+- 登場動畫（含 3 星金閃版）→ 現況暫放在功能之書〈武具系統〉`2.9` 底下該武具的 H4 toggle，toggle 內清單後直接接 image、不分欄《登場動畫分鏡》《登場動畫分鏡（3星金閃）》；武具道具頁目前沒有這節
+- 追擊提示格 → 武具系統 `2.7 動畫︰武具追擊動畫` 右欄《追擊動畫分鏡圖》
+- 道具 ICON＋碎片 → 企劃沒有圖位就不做（不出圖、不問開節）

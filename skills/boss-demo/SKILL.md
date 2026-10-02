@@ -192,3 +192,9 @@ description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃
 - 試玩迭代迴圈 → `playtest-loop`
 - 要進茶會展示 → `demo-intake`（屆時再拉高 polish、debug 面板加收合）
 - 權重/倍率的期望值驗算 → 派 `game-balance-auditor`
+
+## 貼回企劃（2026-10-02 起）
+
+定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+
+- 分鏡 → Boss 頁 `3.3 Boss動態 > 3.3.x <表演名>`：**分鏡細拆文字寫在同一個小標題的左欄，分鏡圖整張一張貼右欄，不切圖**（Tim 2026-10-02），caption《<表演名>分鏡示意圖》。舊頁面是一分鏡一張圖，新寫的照這條

@@ -163,3 +163,11 @@ python ~/.claude/skills/boss-design/scripts/fit_canvas.py <背景.png> <輸出.p
 - 改提示詞 → `prompt模板.md`（流程不用動）
 - 改透明化或覆蓋率判定 → `scripts/frame_alpha.py`
 - 16:9 裁切邏輯在 `boss-design/scripts/fit_canvas.py`（兩支共用）
+
+## 貼回企劃（2026-10-02 起）
+
+定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+
+- A 漁場邊框 → Boss 頁 `3.2.B 漁場背景`（多階段 `3.2.x X階段漁場背景`）右欄，**貼預覽合成圖**（透明 PNG 在 Notion 白底看不出），caption《漁場背景示意》
+- B 表演背景 → `3.2.C 彩金表演背景`／捕獲表演背景右欄，caption《彩金表演背景示意》
+- 注意：Step 1 舉例的節號 3.2.D 與現行實頁不符，以 `list` 實際看到的節名為準

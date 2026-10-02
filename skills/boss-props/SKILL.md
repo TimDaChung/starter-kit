@@ -108,3 +108,10 @@ python ~/.claude/skills/boss-props/scripts/lineup.py <原圖.png> <輸出.png> \
 - 改等級法則或驗收 → `道具規格.md`
 - 改提示詞 → `prompt模板.md`
 - 改切件、統一大小、標籤 → `scripts/lineup.py`
+
+## 貼回企劃（2026-10-02 起）
+
+定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+
+- 道具等級系列 → Boss 頁 `3.2` 底下對應玩法那節右欄（例：賽特 3.2.C、劍魔 3.2.E），caption《<道具>等級&特效示意》
+- 範本沒有這節；實頁沒有對應節時先問 PM 開哪節
