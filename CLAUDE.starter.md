@@ -28,7 +28,7 @@
   - 最容易中的坑：沒開任何專案資料夾就啟動 session，落點會是一次性的臨時工作目錄，事後該目錄被清掉 → memory 檔還在但**永遠不會再被讀到**。習慣固定在同一個資料夾開 session 可以避開
 - **工具地圖**：`~/.claude/starter-skill-map.md` 是「工作情境 → 該用哪支 skill／agent」的對照表（由 starter 精靈產生與更新）。**派工或挑工具前先查這張**，不要憑印象猜
 - **月度健檢**：`~/.claude/starter-skill-map.md` 頂部記「上次 starter 健檢：<日期>」，超過 30 天 Claude 要主動提議跑「starter 健檢」，跑完更新日期
-- **異常走 SOP**：kit 的 skill／腳本出異常 → 走 `issue-triage` 回報模式產出標準回報轉給維護者，不自行修改 junction 內的 kit 檔案
+- **異常與建議都走 SOP**：kit 的 skill／腳本出異常 → 走 `issue-triage` 回報模式產出標準回報轉給維護者；**沒壞但覺得某支 skill 不順手、想改流程／觸發詞／輸出格式／加功能** → 走 `issue-triage` 建議模式（四欄輕量建議單，不用重現步驟）轉給維護者。兩者都不自行修改 junction 內的 kit 檔案——改了會跟下次升級打架，而且意見悶在自己機器上維護者收不到
 
 ---
 
@@ -69,7 +69,7 @@
 | **企劃** | 玩家體驗、核心循環、商業目標、可驗證的假設；留存 / 付費 / 漏斗等 KPI 定義、A/B 假設如何驗證 | 企劃書、需求、驗收條件、Mermaid 流程；指標定義表、數據解讀報告 | plan-dept14-writer＋plan-doc-qa（一四部格式）、product-planning（通用）、card-game、data-report-builder；審核派 planning-doc-auditor |
 | **工程** | 可實作性、資料結構、狀態機、邊界條件、技術債 | prototype、可跑的 code、測試 | game-prototype、game-develop、webapp-testing |
 | **美術** | 風格一致、可讀性、資產規格（尺寸 / 切圖 / 命名） | 生圖 prompt、資產包、風格守則 | imagen 系列、generate2d 系列、image-to-prompt、batch-image-brief、art-style-guard、cannon-wing → cannon-parts → cannon-storyboard（捕魚機炮台翅膀＋套裝 ICON（後製）、配件、技能分鏡，依序）、pet-evolution → pet-parts（魚樂園寵物兩階進化圖 → 動畫分鏡／技能 ICON／專屬背景／道具 ICON（後製））、boss-design → boss-scene／boss-props（捕魚機 Boss 外觀 → 專屬背景／表演道具等級系列）、weapon-design → weapon-parts（魚樂園武具外觀 → 登場動畫分鏡／道具 ICON（後製）） |
-| **數值 / QA** | 平衡、機率、成長曲線、退化策略、重現步驟 | 模擬報告、數值表、bug 清單 | playtest-loop、issue-triage（kit 異常回報）、boss-demo（Boss 捕獲表演 demo，定稿後截分鏡寫回企劃）；模擬派 game-balance-auditor |
+| **數值 / QA** | 平衡、機率、成長曲線、退化策略、重現步驟 | 模擬報告、數值表、bug 清單 | playtest-loop、issue-triage（kit 異常回報／優化建議）、boss-demo（Boss 捕獲表演 demo，定稿後截分鏡寫回企劃）；模擬派 game-balance-auditor |
 | **敘事** | 角色聲音一致、世界觀、字數與語氣限制 | 對白、文案 | 派 dialogue-writer |
 
 > **走 image-studio 產圖時**（上表「美術」列的生圖類 skill 都是），遇到**產圖層面**的問題——算圖中斷、憑證到期、平台畫出貼紙風／底色卡／雜訊背景、特效顏色壓不住——先查 `references/image-studio-共用須知.md`，那是所有生圖 skill 共用的一份，不要各自摸索或各寫一套。

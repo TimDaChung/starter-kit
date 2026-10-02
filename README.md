@@ -28,7 +28,7 @@
 | 遊戲開發 | game-prototype、game-develop、playtest-loop、card-game、boss-demo(捕魚機 Boss 捕獲表演 demo;定稿後截分鏡圖寫回企劃) |
 | 美術生圖 | imagen、imagen-portrait、imagen-ui、imagen-banner(廣宣 / banner 生圖與驗收,20 條鐵則;**鐵則只約束廣宣圖,不外溢立繪 / UI / 插畫**)、generate2dsprite(像素 / HD / cel-shaded chibi 用 art_style 切)、generate2dmap、image-to-prompt、batch-image-brief、art-style-guard、cannon-wing → cannon-parts → cannon-storyboard(捕魚機炮台翅膀＋套裝 ICON(後製)、配件、技能分鏡)、pet-evolution → pet-parts(魚樂園寵物兩階進化圖 → 動畫分鏡／技能 ICON／專屬背景／道具 ICON(後製))、boss-design → boss-scene／boss-props(Boss 外觀 → 漁場邊框與表演背景／表演道具等級系列)、weapon-design → weapon-parts(魚樂園武具外觀 → 登場動畫分鏡／道具 ICON(後製))(生圖引擎 image-studio 由主任另行發放,缺它這幾支不能生圖) |
 | 測試 | webapp-testing(需 Python + Playwright) |
-| 異常處理 | issue-triage(回報模式:標準異常回報;收單模式:維護端驗證修復 SOP) |
+| 異常處理 | issue-triage(回報模式:標準異常回報;建議模式:skill 沒壞但不順手想改的四欄建議單;收單模式:維護端驗證修復 SOP) |
 | Agents | dialogue-writer(對白)、game-balance-auditor(數值模擬)、planning-doc-auditor(企劃vs實作對照)、my-voice 範本(自己的分身自己建) |
 
 企劃與遊戲原型類裝完即用;生圖要先裝 image-studio(向主任索取),測試與 playtest-loop 另需 Python 套件或 chrome-devtools MCP,安裝精靈會偵測缺什麼並問你要不要順手裝(細節見 `安裝說明.md` 前置表)。

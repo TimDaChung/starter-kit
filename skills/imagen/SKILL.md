@@ -115,7 +115,7 @@ allowed-tools:
 ## Phase 5｜圖片生成
 
 1. **存放位置與檔名**：依 common.md §7 決定（fallback `<cwd>/imagen/`；檔名 `{簡短描述}_{日期}_{序號}.png`，例 `fire_monster_20260331_01.png`）。
-2. **執行**：英文 prompt Write 到 `prompt-final.txt`，再呼叫 image-studio client（標準指令見 common.md §9 / draw-engines.md §3）；預設一次 1 張，每批只發一次請求、不自動重試。
+2. **執行**：英文 prompt Write 到 `prompt-final.txt`，再呼叫 image-studio client（標準指令見 common.md §9 / draw-engines.md §3）；預設一次 2 張（驗收挑一張；使用者指定張數照指定，不自行加抽），每批只發一次請求、不自動重試。
 3. **生成後**：Read 看圖 → 回報路徑 → 問是否滿意；要調整只改使用者提到的部分（common.md §6）。整批失敗的診斷與回報見 draw-engines.md §4。
 
 ---
