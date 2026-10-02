@@ -49,7 +49,7 @@ allowed-tools:
 | 主題提案（3 案）與查重 | 活動企劃書（走期、名稱、VIP、ID）→ `plan-dept14-writer` |
 | 六組×男女的小主題、主色、部件勾選、重點需求 | 對稿、神娃會議、發單 → SOP 步驟一 貳～伍，人工 |
 | 示意圖（每組一張，前景背景畫在圖裡） | 正式美術稿 → 美術 |
-| 把內容填進使用者用範本建好的 Notion 頁（預設）；口頭要求才代建 | 主題庫回寫 → 目前人工（readwrite 限 Tim） |
+| Notion 企劃頁（新建或在範本卡位換圖） | 主題庫回寫 → 目前人工（readwrite 限 Tim） |
 
 一期的量：**六組**（新手／一般1／一般2／儲值／BOSS1／BOSS2）× 男女 ＝ 12 個角色、6 張示意圖、前景 7 個、背景 4 個、更衣室背景 1 個。**儲值裝神娃版已於 2026-05 移除，但人物系統仍做，示意圖照算**（測試時可略，正式不可）。
 
@@ -107,22 +107,18 @@ python <skill-dir>/scripts/gen_sheets.py proposal.json --out _工作暫存/<期�
 - 跑完逐張看，對 `設計法則.md` 第四節的驗收清單；不過的那組單獨重跑（`--only 03_normal2`），不要整批重算
 - 這一步會吃 image-studio 配額（每小時 30 張全站共用），六組六張
 
-### 5. 填 Notion 頁
+### 5. 建 Notion 頁
 
-**預設：請使用者用 Notion 範本建好頁、把網址貼來，skill 只填內容。** 理由：範本自帶的目錄與「新增調整紀錄」按鈕 API 建不出來，而且拿到網址就不用問 workspace 與父頁。**只有使用者口頭明說「你幫我建」才用 `new`。**
+兩種情況：
 
 ```bash
-# 預設：內容插在範本「調整紀錄」標題之前，示意圖直接上傳插入（需 readwrite）
-python <skill-dir>/scripts/build_notion.py fill proposal.json --page <頁 id> --sheets _工作暫存/<期別>/sheets
-# 範本已放卡位圖（圖說「示意圖｜<組別>」）：原地換圖，不動其他內容
+# a) 沒有範本頁：在指定父頁下新建（需 readwrite）
+python <skill-dir>/scripts/build_notion.py new proposal.json --parent <父頁 id> --sheets _工作暫存/<期別>/sheets
+# b) 使用者已用 Notion 範本建好頁、放了卡位圖：原地換圖，不重建
 python <skill-dir>/scripts/build_notion.py swap proposal.json --page <頁 id> --sheets _工作暫存/<期別>/sheets
-# 使用者明說要你建：在指定父頁下新建
-python <skill-dir>/scripts/build_notion.py new  proposal.json --parent <父頁 id> --sheets _工作暫存/<期別>/sheets
 ```
 
-- 頁 id 從網址取（32 碼），一部／四部用連結指紋判斷（`notion-access.md`）
-- `fill` 找不到「調整紀錄」標題會改附加到頁尾並警告，這時要回報使用者確認位置
-- 跑完回讀 top-level block 數，開頁面給使用者看
+`swap` 認的是圖說開頭「示意圖｜<組別>」，範本卡位圖的圖說要照這個寫。建完回讀 block 數並開給使用者看。父頁沒指定時問使用者，不要自己挑。
 
 ### 6. 交付
 
