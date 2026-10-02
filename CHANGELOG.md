@@ -2,6 +2,11 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.18.4 (2026-10-02)
+
+- **`imagen-banner` 機台廣宣在地化補第 0 步**：開工先問一句「直接用企劃 2.2《wow現有廣宣》那張翻，還是你會另外給我圖？」——使用者可能手上有更新或不同版位的原圖。給圖就以他的圖當 reference，企劃那張只當對照（Tim 定）。`plan-dept14-writer/references/image-slots.md` 對照表同步
+- ⚙️ **升級動作**：`git pull` 即生效，無設定變更
+
 ## v3.18.3 (2026-10-02)
 
 - **`plan-dept14-writer` 新增「貼圖模式」（第十一節）**：負責把示意圖、美術稿貼進 Notion 企劃對應章節。PM 給目標頁網址 → `scripts/paste_images.py list` 列出章節、右欄 column、卡位、synced_block 原件 → 報清單取得同意 → `insert`／`replace`（`split` 把整張分鏡切成一格一張）→ 回讀。寫入要該線讀寫 token（`--line`，Tim 持有）
