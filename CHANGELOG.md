@@ -2,6 +2,17 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.18.0 (2026-10-02)
+
+- **新增 `avatar-proposal`**：神幣「神娃＋人物」每月大活動的人物設定提案（SOP 步驟一）。流程：`scripts/fetch_themes.py` 讀 Notion「大活動歷屆主題」庫查重（主要類別＋要素近 12 個月組合，不比字串）→ 出 3 個主題提案（每案六組×男女小主題、主色、前景背景）→ 拍板 → 寫 `proposal.json` → `scripts/gen_sheets.py` 用 image-studio 算示意圖（**每組男女一張、前景畫在人物框四角、背景畫在另一側滿版；一次一個 job、每組一張**）→ `scripts/build_notion.py` 建 Notion 分欄頁（左文右圖；部件勾選表依 SOP 規則自動產，✅／—／橘字覆寫）或在範本頁原地換掉卡位圖（`swap`，認圖說「示意圖｜<組別>」）
+  - 版面與畫風錨＝九月成品五張（美術網芳 Avatar魔鬼營 202609 靜態平面），腳本自動抓、不進 kit；固定用這五張不每月換
+  - 規則來源：SOP 步驟一部件需求表（五級標記）、Avatar Q&A 禁忌（書／鐘／蛇／宗教／殘破／綠帽／女性重甲與裸露），完成品踩線處預設擋並提替代
+  - Notion 側實測：File Upload API 可直接上傳圖片；**原地換圖 `PATCH /blocks/{id}` body 不帶 `image.type`**；分欄裡放表格是三層巢狀，建頁只能帶兩層，所以建頁只帶第一個 block、其餘 append
+  - 建頁與換圖要一部 readwrite token（Tim 持有），`notion_api.find_token("readwrite")` 拿不到會停下提示找 Tim；讀取走 readonly 自動到網芳拿
+  - `scripts/ppt2notion.py`：舊的 20 頁人物設定 pptx 整份轉 Notion（文字、勾選表、60 張圖），遷移歷史企劃用
+  - 首跑：2612 候選案「百鬼夜宴」五組示意圖一次過（儲值組測試略過），Tim 定稿分欄版格式
+- ⚙️ **升級動作**：`git pull` 後建立 `~/.claude/skills/avatar-proposal` junction 指向 kit 的 `skills/avatar-proposal`（照既有 skill 裝法）；無設定變更
+
 ## v3.17.0 (2026-10-02)
 
 - **`issue-triage` 新增 C 建議模式**：kit 原本只有「異常走 SOP」一條回報線，要求最小重現與根因行號，組員若只是覺得某支 skill 不順手（流程多一步、觸發詞叫不到、輸出格式不合用、想加功能）沒有管道，又被禁止改 junction 內的檔，意見會悶在自己機器上。現在「這支 skill 想改」「對 skill 有意見」→ 四欄輕量建議單（哪支哪步／現況 vs 希望／理由／影響範圍，加一欄「我試過的改法」），不用重現步驟，一樣轉給主任

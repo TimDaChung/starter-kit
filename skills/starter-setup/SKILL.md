@@ -65,6 +65,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 | boss-design、boss-props、boss-scene、pet-parts、weapon-design、weapon-parts | pet-evolution | `scripts/fetch_plan.py`（讀 Notion 企劃） |
 | boss-scene、pet-parts、weapon-design、weapon-parts | boss-design | `scripts/fit_canvas.py`（`--cover` 背景裁 16:9；weapon 線用 `--height`／`--whole` 補灰底） |
 | weapon-parts | weapon-design、pet-parts | 定稿圖當參考；pet-parts 的 `scripts/label_frames.py`（分鏡標籤） |
+| avatar-proposal | image-studio、plan-dept14-writer | `image-studio-client.py`（示意圖）；`references/notion-access.md`（金鑰位置與部門判斷）；建頁／換圖需一部 readwrite（Tim） |
 | cannon-wing、weapon-parts（pet-parts 自用） | pet-parts | `scripts/item_icon.py`（道具 ICON 後製：裁定稿、去灰底、疊底板，出 512＋256／128／64 預覽；只吃 Pillow，不用生圖引擎） |
 | boss-demo | generate2dsprite、boss-design | 去背腳本；`boss設計法則.md` 第四節 Spine 限制 |
 
