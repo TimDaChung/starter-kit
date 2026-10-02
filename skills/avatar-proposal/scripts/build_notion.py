@@ -1,9 +1,13 @@
 """Build the 神娃＋人物設定 Notion page (two-column layout) from proposal.json.
 
   python build_notion.py preview proposal.json                       # no API: print what would be built
-  python build_notion.py new     proposal.json --parent <page_id> [--sheets DIR] [--title T]
+  python build_notion.py fill    proposal.json --page <page_id>   [--sheets DIR]   # DEFAULT in the SOP
+        # user made the page from the Notion template and gave us the URL; content is inserted right before
+        # the template's 調整紀錄 heading (table of contents / adjustment-log skeleton untouched), sheets uploaded inline
   python build_notion.py swap    proposal.json --page <page_id>   [--sheets DIR]
-        # in-place: find image blocks whose caption starts with "示意圖｜<tier>" and replace the file
+        # template already has placeholder images captioned "示意圖｜<tier>": replace the files in place
+  python build_notion.py new     proposal.json --parent <page_id> [--sheets DIR] [--title T]
+        # only when the user explicitly asks us to create the page ourselves
 
 Sheets: one PNG per group, matched by group "key" prefix (e.g. 01_newbie*.png) inside --sheets.
 Token: NOTION_KEY env or the readwrite token on the share (Tim only). See notion_api.find_token.
@@ -181,9 +185,37 @@ def swap(api, page_id, proposal, sheets_dir, log=print):
     return done
 
 
+ADJUST_WORDS = ("調整紀錄", "調整記錄", "修改紀錄", "修改記錄")
+
+
+def fill(api, page_id, proposal, sheets_dir, log=print):
+    """Insert the proposal content into an existing (template-made) page.
+
+    Anchor = the first top-level heading whose text contains 調整紀錄/修改紀錄; content goes right before it,
+    so the template's table of contents / 調整紀錄 skeleton stays intact. No anchor -> append at the end (warned).
+    """
+    top = api.children(page_id)
+    after = None
+    anchor_found = False
+    for i, b in enumerate(top):
+        if b["type"].startswith("heading_") and any(w in plain(b[b["type"]]["rich_text"]) for w in ADJUST_WORDS):
+            anchor_found = True
+            after = top[i - 1]["id"] if i > 0 else None
+            break
+    if not anchor_found:
+        log("  WARNING: no 調整紀錄 heading found; appending at the end of the page")
+        after = top[-1]["id"] if top else None
+    if anchor_found and after is None:
+        # Notion has no "insert before"; content can't go above the very first block.
+        raise SystemExit("[fill] 調整紀錄 is the first block of the page; add any block above it in the template, then rerun")
+    blocks = build(proposal, api=api, sheets_dir=sheets_dir, log=log)
+    api.append(page_id, blocks, after=after, log=log)
+    return len(blocks)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("mode", choices=["preview", "new", "swap"])
+    ap.add_argument("mode", choices=["preview", "new", "fill", "swap"])
     ap.add_argument("proposal")
     ap.add_argument("--parent")
     ap.add_argument("--page")
@@ -213,6 +245,11 @@ def main():
         page = api.create_page(a.parent, title, blocks, log=print, deep=True)
         print("verify top-level children:", api.count_children(page["id"]), "/", len(blocks))
         print("URL:", page["url"])
+    elif a.mode == "fill":
+        if not a.page:
+            sys.exit("--page <page_id> required")
+        n = fill(api, a.page, proposal, a.sheets)
+        print("inserted blocks:", n, "| top-level now:", api.count_children(a.page))
     else:
         if not a.page:
             sys.exit("--page <page_id> required")
