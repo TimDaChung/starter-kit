@@ -34,7 +34,8 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
   - **憑證剩餘天數**：讀 `credentials.json` 的 `expiresAt`（ISO 8601、UTC，例 `2026-10-05T16:00:00.000Z`），與今天相減取天數，三段處理——已過期 → 同上，生圖 skill 全停（imagen-banner 的驗收模式除外）；**剩 ≤14 天 → 結算表提醒一行**「憑證 N 天後（YYYY-MM-DD）到期；新一季憑證要等舊的失效才發，不用提前要，到期當天再找主任拿，那天別排生圖」；剩 >14 天 → 不提，保持安靜。措辭一律「找主任拿」，**不寫任何取得憑證的網址或流程**
 - **環境依賴**（企劃／原型／文件類 skill 不需要，只影響生圖、測試、試玩迴圈；data-report-builder 生成的報表 skill 另需 pandas + plotnine，用到再裝）：
   - `python --version` 有 3.10+？
-  - `python -c "import PIL"`、`python -c "import playwright"` 各自過不過？
+  - `python -c "import PIL"`、`python -c "import playwright"`、`python -c "import imageio_ffmpeg"` 各自過不過？（缺任一 → 第 3 節第 5 步的 `pip install -r` 一次補齊）
+  - `claude mcp list` 有 `claude.ai Google Sheets` 且 Connected？（art-request-sheet 寫表用；沒連只能在結算表提醒去 https://claude.ai/settings/connectors 連，不能代連）
   - Playwright 的 Chromium：`%LOCALAPPDATA%\ms-playwright\chromium*` 目錄存在？
   - `claude mcp list` 有 `chrome-devtools`？`npx --version` 有 Node？
   - Claude in Chrome 擴充功能：`%LOCALAPPDATA%\Google\Chrome\User Data\Default\Extensions\fcoeoabgfenejglbffodgkkbkcdhcgfn` 目錄存在？（只能偵測、不能代裝；沒有就結算表給連結）
@@ -69,6 +70,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 | 全部生圖 skill（boss／cannon／pet／weapon 線、imagen、imagen-banner、avatar-proposal） | plan-dept14-writer | 貼回企劃走 `scripts/paste_images.py`＋`references/image-slots.md`（只是交付指引，不影響生圖本身） |
 | cannon-wing、weapon-parts（pet-parts 自用） | pet-parts | `scripts/item_icon.py`（道具 ICON 後製：裁定稿、去灰底、疊底板，出 512＋256／128／64 預覽；只吃 Pillow，不用生圖引擎） |
 | boss-demo | generate2dsprite、boss-design | 去背腳本；`boss設計法則.md` 第四節 Spine 限制 |
+| art-request-sheet | plan-dept14-writer | `scripts/notion_rest.py`（部門金鑰讀企劃）、`references/notion-access.md`；另需 Google Sheets connector，貼圖用 Claude in Chrome（缺了退手貼清單） |
 
 使用者說「X 不要裝」要進略過清單時，先查這張表：X 若是某一列的「依賴」欄，一句話警告「略過 X 會讓 Y、Z 的某功能壞」（例：略過 generate2dsprite → imagen-ui 的去背不能跑）。使用者仍要略過就照辦，結算表 ⛔ 那行附註連帶影響。
 
@@ -207,6 +209,7 @@ https://github.com/TimDaChung/secretary-kit」
 ## 升級（「starter 升級」/「新手包升級」）
 
 1. `git -C %USERPROFILE%\starter-kit pull`
+   - **pull 失敗且訊息是歷史分歧**（`divergent branches`、`non-fast-forward`、`refusing to merge unrelated histories`、`Need to specify how to reconcile`）：維護者改寫過 kit 歷史（例：v3.19.0 清掉誤推的機密範例），本機沒有任何該保留的東西——kit 檔案本來就不准在本機改（見 CLAUDE.starter「異常與建議都走 SOP」）。先 `git -C %USERPROFILE%\starter-kit status --porcelain`：**乾淨 → 直接 `git -C %USERPROFILE%\starter-kit fetch origin` ＋ `git -C %USERPROFILE%\starter-kit reset --hard origin/main` 接回升級線**，不問，結算表註明「kit 歷史已改寫，已重新對齊 origin/main」；**有本機修改 → 停**，列出 diff 摘要，請使用者走 issue-triage 建議模式把修改回報後再對齊（使用者說「直接蓋掉」才 reset）
 2. 摘要 CHANGELOG 新增段落
 3. **執行 CHANGELOG「⚙️ 升級動作」**（有標才有,多數版本沒有）:各版本下的「⚙️ 升級動作」區塊 = pull 完精靈自動執行的清單。規則:(a) 只跑比 `~/.claude/starter-kit-version.txt`（一行版號）記錄新的版本,由舊到新逐版跑,跑完寫回最新版號;檔案不存在（舊裝機首次）→ 全部版本的動作都檢查一遍——**升級動作一律寫成冪等**（「缺才補」句型,重跑無害） (b) 純補檔/補設定的直接做;**要使用者選擇的（開新功能、要憑證/scope）問一句才做,不擅自開** (c) 失敗不硬解,顯示錯誤請使用者找 Tim
 4. 重跑第 1 到 6 節：junction 裝的自動生效；新出現的、以及使用者先前沒裝的 skills/agents 直接補裝（`starter-skip.md` 內的除外）；CLAUDE.starter.md 新增的規則直接併；agents 有 diff 進最終健檢。**其中第 3 節第 6 步「更新 skill map」是升級收尾必跑項，不可因「重跑 1–6 節」帶過而漏掉**：把 `~/.claude/starter-skill-map.md` 對到本次裝完的實況（新裝的補行、kit 移除的刪行、日期改今天），結算表要列出 map 新增／移除了哪幾行（前科：2026-10-01 維護者本機的 map 停在 9/17，升級 v3.15／v3.16 時只補了現況段落、沒走正式更新）

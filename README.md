@@ -24,7 +24,7 @@
 | 類別 | 內容 |
 |---|---|
 | 全域設定種子 | `CLAUDE.starter.md`(含最重要的 meta 規則:被糾正的事寫回檔案) |
-| 企劃 | plan-dept14-writer(一＋四部 house style,範本驅動,寫/改)、plan-doc-qa(一致性審查)、product-planning(通用版,跨部門/無範本/反寫 demo 的 fallback)、data-report-builder(一輪訪談→生成「定期分析某報表」的專屬 skill) |
+| 企劃 | plan-dept14-writer(一＋四部 house style,範本驅動,寫/改)、plan-doc-qa(一致性審查)、art-request-sheet(Notion 企劃 → Google Sheets 美術需求表,自動拆列、套格式、貼參考圖)、product-planning(通用版,跨部門/無範本/反寫 demo 的 fallback)、data-report-builder(一輪訪談→生成「定期分析某報表」的專屬 skill) |
 | 遊戲開發 | game-prototype、game-develop、playtest-loop、card-game、boss-demo(捕魚機 Boss 捕獲表演 demo;定稿後截分鏡圖寫回企劃) |
 | 美術生圖 | imagen、imagen-portrait、imagen-ui、imagen-banner(廣宣 / banner 生圖與驗收,20 條鐵則;**鐵則只約束廣宣圖,不外溢立繪 / UI / 插畫**)、generate2dsprite(像素 / HD / cel-shaded chibi 用 art_style 切)、generate2dmap、image-to-prompt、batch-image-brief、art-style-guard、cannon-wing → cannon-parts → cannon-storyboard(捕魚機炮台翅膀＋套裝 ICON(後製)、配件、技能分鏡)、pet-evolution → pet-parts(魚樂園寵物兩階進化圖 → 動畫分鏡／技能 ICON／專屬背景／道具 ICON(後製))、boss-design → boss-scene／boss-props(Boss 外觀 → 漁場邊框與表演背景／表演道具等級系列)、weapon-design → weapon-parts(魚樂園武具外觀 → 登場動畫分鏡／道具 ICON(後製))(生圖引擎 image-studio 由主任另行發放,缺它這幾支不能生圖) |
 | 測試 | webapp-testing(需 Python + Playwright) |

@@ -2,6 +2,19 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.19.0 (2026-10-05)
+
+- **新增 `art-request-sheet`**（組員建議）：Notion 企劃 → Google Sheets 美術需求表。讀〈呈現〉章逐畫面拆列、從〈規則〉章補數值與交付檔名、套固定格式（淺綠表頭、深綠分隔列、O/X 下拉、紅字片段）、把企劃示意圖與影片（轉 GIF）貼進參考圖欄、依 `v<版號>_<活動名>_<企劃名>` 改檔名，最後回報企劃缺漏。接在 plan-dept14-writer 寫完之後、發美術單之前；回報者以一部神幣兩份企劃（新系統一份、改版一份）實跑並對照 PM 手做的表修過一輪；實際範例屬機密，放網芳 `kit-assets\art-request-sheet\`，kit 內只留去識別化範例
+  - **收單時改寫讀 Notion 那段**：原版走 Notion MCP，違反 v3.16.2「讀寫都走部門金鑰＋REST」；改成 `scripts/fetch_plan.py` 用 `plan-dept14-writer/scripts/notion_rest.py` 取金鑰（id 指紋判部別、判不出一部四部輪流、兩支 404 即停），輸出 `plan.md`（保留紅字、灰／綠底、刪除線標記）並當場下載圖片與影片——原本手抄 S3 簽名網址的做法一併拿掉
+  - 貼圖走 Claude in Chrome 的合成 paste，標為**實驗性**：Google 改版可能失效，失效退回「哪張圖貼哪格」讓使用者手貼
+  - `build_sheet.py`：兩段紅字相鄰時不再產生重複起點的 run
+  - `plan-doc-qa` 列出「空白美術需求表」時附一句可用本 skill 產出；starter-setup 依賴表與環境健檢補 imageio-ffmpeg、Google Sheets connector
+- **kit 歷史改寫（2026-10-05）**：本版首次推送誤含企劃機密範例，已改寫 v3.18.5 之後的 git 歷史清除。**10/05 下午之前 pull 的人不受影響**；之後 pull 過的人 `git pull` 會報歷史分歧——升級精靈已會自動 `fetch` ＋ `reset --hard origin/main` 接回（本機 kit 有自改才停下來問）。舊版精靈遇到時手動跑：`git -C %USERPROFILE%\starter-kit fetch origin` 再 `git -C %USERPROFILE%\starter-kit reset --hard origin/main`
+- ⚙️ **升級動作**：
+
+1. 建立 `~/.claude/skills/art-request-sheet` junction 指向 kit 的 `skills/art-request-sheet`（已有同名實體資料夾＝回報者的個人版 → 備份到 `skills-backup/` 後換成 junction）
+2. `python -c "import imageio_ffmpeg"` 失敗 → `pip install -r %USERPROFILE%\starter-kit\requirements.txt`（新增 `imageio-ffmpeg>=0.5`）
+3. `claude mcp list` 沒有已連線的 `claude.ai Google Sheets` → 提醒一行「要用 art-request-sheet 請到 https://claude.ai/settings/connectors 連 Google Sheets」，不代連
 ## v3.18.5 (2026-10-05)
 
 - **`plan-dept14-writer` API 回寫後檢查巢狀編號格式**（組員回報）：API 新增的 `numbered_list_item` 沒有 `list_format`，每一層都顯示成數字（應為 1.→a.→i.），而 `list_format` 是唯讀欄位——`Notion-Version: 2025-09-03` 讀得到，新建與更新帶它都回 400（回報者 2026-10-05 實測三種寫法）。kit 原本寫「API 不回傳 list_format、驗不出來」，那是因為 `notion_rest.py` 固定用 2022-06-28 版，已更正

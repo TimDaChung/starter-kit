@@ -67,7 +67,7 @@
 
 | 角色 | 關注點 | 產出 | 對應 skills / agents |
 |---|---|---|---|
-| **企劃** | 玩家體驗、核心循環、商業目標、可驗證的假設；留存 / 付費 / 漏斗等 KPI 定義、A/B 假設如何驗證 | 企劃書、需求、驗收條件、Mermaid 流程；指標定義表、數據解讀報告 | plan-dept14-writer＋plan-doc-qa（一四部格式）、product-planning（通用）、card-game、data-report-builder；審核派 planning-doc-auditor |
+| **企劃** | 玩家體驗、核心循環、商業目標、可驗證的假設；留存 / 付費 / 漏斗等 KPI 定義、A/B 假設如何驗證 | 企劃書、需求、驗收條件、Mermaid 流程；指標定義表、數據解讀報告 | plan-dept14-writer＋plan-doc-qa（一四部格式）、art-request-sheet（企劃 → Google Sheets 美術需求表）、product-planning（通用）、card-game、data-report-builder；審核派 planning-doc-auditor |
 | **工程** | 可實作性、資料結構、狀態機、邊界條件、技術債 | prototype、可跑的 code、測試 | game-prototype、game-develop、webapp-testing |
 | **美術** | 風格一致、可讀性、資產規格（尺寸 / 切圖 / 命名） | 生圖 prompt、資產包、風格守則 | imagen 系列、generate2d 系列、image-to-prompt、batch-image-brief、art-style-guard、cannon-wing → cannon-parts → cannon-storyboard（捕魚機炮台翅膀＋套裝 ICON（後製）、配件、技能分鏡，依序）、pet-evolution → pet-parts（魚樂園寵物兩階進化圖 → 動畫分鏡／技能 ICON／專屬背景／道具 ICON（後製））、boss-design → boss-scene／boss-props（捕魚機 Boss 外觀 → 專屬背景／表演道具等級系列）、weapon-design → weapon-parts（魚樂園武具外觀 → 登場動畫分鏡／道具 ICON（後製）） |
 | **數值 / QA** | 平衡、機率、成長曲線、退化策略、重現步驟 | 模擬報告、數值表、bug 清單 | playtest-loop、issue-triage（kit 異常回報／優化建議）、boss-demo（Boss 捕獲表演 demo，定稿後截分鏡寫回企劃）；模擬派 game-balance-auditor |
