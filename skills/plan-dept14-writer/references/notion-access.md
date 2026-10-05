@@ -61,7 +61,8 @@ PM 用部門範本「建立複本」→ 把頁面網址貼給 Claude → Claude 
 
    **2026-09-23 實測（直接餵 block JSON 走 REST API）**：heading、紅字待補值、**灰底＋刪除線**（廢除標記）、**綠底**（`YYYY/MM/DD vN.N調整為→`）、表格、mermaid 程式碼區塊、callout **回讀比對全部無損**；三層巢狀編號的**結構**也正確寫入。
    關鍵在**用 block JSON 的 `annotations` 直接指定**（`color: "gray_background"`、`strikethrough: true`），不要先轉成 Markdown 再請對方解析——走 Markdown 轉換那條路才會掉格式。
-   ⚠️ **巢狀編號的顯示樣式驗不了**：API 不回傳 `list_format`，所以「是否顯示成 1.→a.→i.」只能靠人眼看頁面。已知 API 寫入的巢狀編號可能一律顯示 1.→1.→1.，需要 PM 在頁面手動調樣式——交付時主動告知這句。
+   ⚠️ **巢狀編號的顯示樣式寫不進去，但驗得出來**：`list_format`（`numbers`／`letters`／`roman`，只在清單第一項）要用 `Notion-Version: 2025-09-03` 才讀得到；新建與更新區塊帶它一律 400（2026-10-05 實測：只送 `list_format` → 「rich_text should be defined」、連 `rich_text` 一起送或 append 時帶 → 「list_format should be not present」）。API 新增的清單沒有這個欄位，**每一層都顯示成數字**。
+   所以回讀驗證必加一步：回寫完跑 `python %USERPROFILE%\starter-kit\skills\plan-dept14-writer\scripts\notion_rest.py check-lists <頁面網址>`（唯讀，只在這次讀取用新版 API，不影響寫入路徑），交付訊息**一律附「需手動改編號格式」清單**（位置、第一項文字、應改成 a. 或 i.），請 PM 在 Notion 點編號 → 清單格式改。**不可說已修好**，也不要再試 PATCH——平台不允許（前科：2026-10-05 陣營戰說明頁 1.c、2.1.b、2.2 三串交付時沒發現，被 PM 指出後才知道且改不了）。
    仍要回讀的原因：沒測過的排版（欄位版面、同步區塊、資料庫內嵌）不保證，寫錯了早點發現。
 4. **經手人會變成 bot**：實測 API 回寫後頁面的 `last_edited_by` 會變成該線的 writer bot（`pm4_casino_writer` 這類），**不是操作的人**，而且會蓋掉原本的真人編輯痕跡。所以調整紀錄一定要寫明實際操作人：`YYYY/MM/DD vN.N 調整為→ …（經手：<人名>）`
 5. 版本可還原：API 的編輯和人工編輯一樣會進 Notion 頁面編輯紀錄，改壞了可以從 `⋯` → 更新紀錄還原（保留天數依 workspace 方案）
@@ -75,7 +76,7 @@ PM 用部門範本「建立複本」→ 把頁面網址貼給 Claude → Claude 
 | 地雷 | 症狀與正解 |
 |---|---|
 | **建不出按鈕、不能搬 block** | `button` block API 不支援建立，block 也無法移動（只能刪掉重建）。所以骨架的目錄與「新增調整紀錄」按鈕只能靠範本頁自帶 |
-| **巢狀編號的顯示樣式** | API 寫入的多層 `numbered_list_item` 可能一律顯示 1.→1.→1.，不是 1.→a.→i.；而且 API **不回傳 `list_format`，程式驗不出來**。要請 PM 在頁面手動調樣式，**交付時主動講這句** |
+| **巢狀編號的顯示樣式** | API 新增的 `numbered_list_item` 沒有 `list_format`，每一層都顯示成數字，不是 1.→a.→i.；`list_format` 是唯讀欄位（2025-09-03 版讀得到，新建／更新都 400）。回寫後跑 `notion_rest.py check-lists <網址>` 找出要改的清單，**交付時逐條列給 PM 手動改** |
 | **整頁重灌會洗掉 PM 手調的樣式** | 十項以內的小修一律**對著 block id 做 PATCH**；只有大幅結構搬移才整段重建。重建前先撈一次 block id 樹，改完再撈一次比對有無增減 |
 | **用瀏覽器自動化點擊改 Notion** | **禁止**。頁面會非同步 re-render 與自動捲動，截圖當下的座標到點擊時已位移——前科：兩次點擊落到 heading 上，把標題整行覆寫，當下毫無察覺。正解一律走 API |
 | 插入位置 | `append children` 要用 `after` 錨定到指定 block，不然一律掉到頁尾 |

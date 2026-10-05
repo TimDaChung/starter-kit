@@ -2,6 +2,14 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.18.5 (2026-10-05)
+
+- **`plan-dept14-writer` API 回寫後檢查巢狀編號格式**（組員回報）：API 新增的 `numbered_list_item` 沒有 `list_format`，每一層都顯示成數字（應為 1.→a.→i.），而 `list_format` 是唯讀欄位——`Notion-Version: 2025-09-03` 讀得到，新建與更新帶它都回 400（回報者 2026-10-05 實測三種寫法）。kit 原本寫「API 不回傳 list_format、驗不出來」，那是因為 `notion_rest.py` 固定用 2022-06-28 版，已更正
+  - `notion_rest.py` 新增唯讀的 `Notion.check_list_format()` 與 CLI `python notion_rest.py check-lists <網址>`：只在檢查時用 2025-09-03 版讀取，不動全域 `VER` 與寫入路徑；依層級比對 1.→a.→i.（直接掛在「2.1 …」這類編號標題下的第一層算 a.），列出要改的清單第一項
+  - SKILL.md 第八節第 5、7 條與 `notion-access.md` 護欄 3、地雷表：回寫後必跑檢查，交付訊息一律附「需手動改編號格式」清單，不可說已修好
+  - 一起採納回報附帶的建議：**有連結的文字標藍**寫進第六節點色規則、第九節與第十節檢查清單；`rt()` 新增 `link` 參數，帶連結時預設藍字
+- ⚙️ **升級動作**：`git pull` 即生效，無設定變更。回報者本機為了繞過寫進 CLAUDE.md／memory 的暫時規則，kit 已涵蓋，可以移除
+
 ## v3.18.4 (2026-10-02)
 
 - **`imagen-banner` 機台廣宣在地化補第 0 步**：開工先問一句「直接用企劃 2.2《wow現有廣宣》那張翻，還是你會另外給我圖？」——使用者可能手上有更新或不同版位的原圖。給圖就以他的圖當 reference，企劃那張只當對照（Tim 定）。`plan-dept14-writer/references/image-slots.md` 對照表同步

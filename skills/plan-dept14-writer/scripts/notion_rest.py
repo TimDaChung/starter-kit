@@ -13,6 +13,10 @@ from pathlib import Path
 
 NOTION = "https://api.notion.com/v1"
 VER = "2022-06-28"
+# list_format (numbers/letters/roman) is only returned from this version on, and it is
+# read-only: create and update both reject it (400, tested 2026-10-05). Used for checks only.
+LIST_FORMAT_VER = "2025-09-03"
+LIST_FORMATS = ("numbers", "letters", "roman")
 SHARE_ROOT = r"grp.product.pm1\2. 產品改造\一四部企劃範本"
 READONLY = {"一部": "一部readonly_token.txt", "四部": "四部readonly_token.txt"}
 READWRITE = {"神幣": r"神幣(一部)\一部readwrite_token.txt", "娛樂城": r"娛樂城(四部)\娛樂城readwrite_token.txt",
@@ -113,10 +117,11 @@ class Notion:
         return self.call("PATCH", f"/blocks/{block_id}", body)
 
     # ---- blocks / pages
-    def children(self, block_id):
+    def children(self, block_id, version=None):
+        hdr = {"Notion-Version": version} if version else None
         out, cur = [], None
         while True:
-            d = self.call("GET", f"/blocks/{block_id}/children?page_size=100" + (f"&start_cursor={cur}" if cur else ""))
+            d = self.call("GET", f"/blocks/{block_id}/children?page_size=100" + (f"&start_cursor={cur}" if cur else ""), headers=hdr)
             out += d["results"]
             if not d.get("has_more"):
                 return out
@@ -128,6 +133,49 @@ class Notion:
             yield depth, b
             if b.get("has_children") and depth < max_depth:
                 yield from self.walk(b["id"], depth + 1, max_depth)
+
+    def check_list_format(self, block_id):
+        """Read-only check of numbered-list display formats against the house style 1.->a.->i.
+
+        API-created lists carry no list_format and render as plain numbers at every level, and
+        the API cannot set it. Returns the first item of every list that will look wrong:
+        [{"id", "text" (first 20 chars), "level", "have", "want"}]. A list directly under a
+        numbered heading ("2.1 ...") is treated as level 1 (a.), which is how the dept templates
+        number sections; follow the page's own siblings if they disagree.
+        """
+        import re
+        numbered = re.compile(r"\s*\d+(\.\d+)*[.\s]")
+        passthrough = ("column_list", "column", "synced_block", "toggle")
+        issues = []
+
+        def visit(bid, list_level, under_numbered):
+            # list_level: level of lists found here when inside a list item; None = plain container
+            prev_type, cur = None, 0
+            for b in self.children(bid, version=LIST_FORMAT_VER):
+                t = b["type"]
+                payload = b.get(t, {})
+                if t.startswith("heading_"):
+                    under_numbered = bool(numbered.match(plain(payload.get("rich_text"))))
+                if t == "numbered_list_item" and prev_type != "numbered_list_item":
+                    cur = list_level if list_level is not None else (1 if under_numbered else 0)
+                    want = LIST_FORMATS[cur % 3]
+                    have = payload.get("list_format")
+                    if (have or "numbers") != want:
+                        issues.append({"id": b["id"], "text": plain(payload.get("rich_text"))[:20],
+                                       "level": cur, "have": have or "(none = numbers)", "want": want})
+                if b.get("has_children"):
+                    if t == "numbered_list_item":
+                        visit(b["id"], cur + 1, under_numbered)
+                    elif t.startswith("heading_"):
+                        visit(b["id"], None, under_numbered)
+                    elif t in passthrough:
+                        visit(b["id"], list_level, under_numbered)
+                    else:
+                        visit(b["id"], None, False)
+                prev_type = t
+
+        visit(block_id, None, False)
+        return issues
 
     def append(self, block_id, blocks, after=None, log=None):
         res = []
@@ -159,7 +207,10 @@ class Notion:
 
 
 # ---------------------------------------------------------------- block builders
-def rt(text, bold=False, color=None, code=False):
+def rt(text, bold=False, color=None, code=False, link=None):
+    """Rich text. link: URL; linked text is blue unless another color is given (house style)."""
+    if link and not color:
+        color = "blue"
     out = []
     text = "" if text is None else str(text)
     chunks = [text[i:i + 1900] for i in range(0, len(text), 1900)] or [""]
@@ -171,7 +222,7 @@ def rt(text, bold=False, color=None, code=False):
             ann["code"] = True
         if color:
             ann["color"] = color
-        item = {"type": "text", "text": {"content": chunk}}
+        item = {"type": "text", "text": {"content": chunk, **({"link": {"url": link}} if link else {})}}
         if ann:
             item["annotations"] = ann
         out.append(item)
@@ -224,3 +275,31 @@ def column_list(*columns):
 
 def plain(rich):
     return "".join(x.get("plain_text", "") for x in rich or [])
+
+
+def _cli():
+    """python notion_rest.py check-lists <url or id>  (read-only; uses the readonly token)"""
+    import sys
+    sys.stdout.reconfigure(encoding="utf-8")
+    if len(sys.argv) != 3 or sys.argv[1] != "check-lists":
+        raise SystemExit(_cli.__doc__)
+    pid = page_id_from(sys.argv[2])
+    guess = dept_from_id(pid)
+    for dept in ([guess] if guess else ["一部", "四部"]):
+        try:
+            issues = Notion(find_token("readonly", dept=dept)).check_list_format(pid)
+            break
+        except RuntimeError as e:
+            if "-> 404" not in str(e):
+                raise
+    else:
+        raise SystemExit("404 with every readonly token: the page is not connected to the integration.")
+    fmt = {"numbers": "1.", "letters": "a.", "roman": "i."}
+    if not issues:
+        print("OK: every numbered list follows 1.->a.->i.")
+    for x in issues:
+        print(f"{x['id']}  level {x['level']}  now {x['have']}  -> set to {fmt[x['want']]}  「{x['text']}」")
+
+
+if __name__ == "__main__":
+    _cli()
