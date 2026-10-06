@@ -47,9 +47,9 @@ allowed-tools:
 
 ## 前置需求
 
-1. **image-studio 憑證**：`~/.config/image-studio/credentials.json`。401 時見 kit `references/image-studio-共用須知.md`〈憑證〉（找主任拿，不提前要）
-2. **Notion 讀取權**：道具之書＋功能之書（四部）。唯讀 token 在 `X:\grp.product.pm1\2. 產品改造\一四部企劃範本\四部readonly_token.txt`（X 讀不到換 Y:），自己去拿，不要問使用者
-   ⚠️ **Notion 一律走 REST，不走 MCP**。token 走環境變數 `NOTION_KEY`，不寫進任何檔案
+1. **image-studio 憑證**：`~/.config/image-studio/credentials.json`。401 時見 kit `references/image-studio-共用須知.md`〈憑證〉（Claude 照該節換季流程自己換，不提前換；本機沒裝過走〈首裝流程〉）
+2. **Notion 讀取權**：道具之書＋功能之書（四部）。自己的四部（pm4）憑證在本機，`fetch_plan.py` 自動取，不用傳任何 key、不要問使用者；沒有或過期照 `plan-dept14-writer/references/notion-access.md` §3 協助安裝／換新
+   ⚠️ **Notion 一律走部門 proxy＋REST，不走 MCP**。憑證值不印出、不寫進任何檔案
 
 ---
 
@@ -93,8 +93,7 @@ allowed-tools:
 對照 `參考素材索引.md`：既有 4 把是**劍（龍）、扇（鳳）、弩（麒麟）、盾（神獸頭）**，類型與神獸都要避開；另避開寵物線與炮台線已用的動物（例：貔貅在寵物線、貓在炮台線）。有 Notion 權限時重讀〈武具系統〉§2.7 與 §2.9，並查道具之書（`217e22985ac9817d8a65c6a6ed6a135c`）道具大類＝33. 武具 的頁面，確認清單沒過時：
 
 ```sh
-NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") \
-  python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py 25ee22985ac9803aa831d54f90bb1910 _工作暫存/武具系統
+python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py 25ee22985ac9803aa831d54f90bb1910 _工作暫存/武具系統
 ```
 
 ### Step B3 — 提案
@@ -145,15 +144,13 @@ WID：（佔位，待企劃分配；格式比照 3300001）
 **外觀企劃以該把的道具頁為準**（道具之書，道具大類＝33. 武具；2026-10-02 調研確認，id 見 `參考素材索引.md`）：`1. 基本資訊` 右欄有草圖、`2. 畫面呈現` 是單一一組分欄——左欄主題／外觀／動態，右欄《整體外形示意圖》《其他參考》。登場動畫概念（§2.9）與效果池（§3.5）仍在功能之書〈武具系統〉。**兩頁都抓**：
 
 ```sh
-NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") \
-  python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <武具道具頁 id> _工作暫存/<武具名>
+python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <武具道具頁 id> _工作暫存/<武具名>
 ```
 
 〈武具系統〉整頁抓下來再找該把在 §2.9 的段落：
 
 ```sh
-NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") \
-  python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py 25ee22985ac9803aa831d54f90bb1910 _工作暫存/武具系統
+python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py 25ee22985ac9803aa831d54f90bb1910 _工作暫存/武具系統
 ```
 
 產出 `plan.md`（全文）與 `img_NN.png`（企劃圖，簽名 URL 約 5 分鐘失效，腳本當下就下載）。**企劃圖要實際 Read 來看**——道具頁的草圖與參考圖、〈武具系統〉§2.9 每把下方的分鏡圖，文字與圖常不一致；道具頁與〈武具系統〉寫法衝突時以道具頁為準並點出。該把還沒有道具頁（例：離火飛鳳扇）才只靠〈武具系統〉。

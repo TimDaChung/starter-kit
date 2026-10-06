@@ -2,6 +2,21 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.21.0 (2026-10-06)
+
+- **Notion 存取改走部門 API proxy＋個人季度憑證**（公司政策：網芳上的長期 Notion token——各部 readonly、各線 readwrite——全部撤除）。主任拍板：不再有唯讀憑證，一部（pm1，神幣）、四部（pm4，娛樂城含機台／鬥地主／魚樂園）各一把 rw，**讀寫都用該部那把**；「只執行使用者授權的修改」與回寫五條護欄全部保留
+  - 新增 `references/scripts/notion_credentials.py`：本機憑證存 `~/.config/notion-pm/credentials.json`（寫前備份 `.bak`）；從 setup prompt 抽 base URL／Auth／到期日／更新頁；`--show`（不印 auth，只印長度）、`--from-file`、`--from-downloads`（依檔名 `notion-pm1/4-setup*.txt` 分部門，兩部可一次裝，只刪自己那部的下載檔）、`--from-clipboard`（使用者自己按頁面複製鈕的退路，裝完清空剪貼簿）、`--refresh-url`、`--migrate`（組員自己貼 prompt 裝、被寫進 `~/.claude/CLAUDE.md` 或 memory 的憑證搬進 json）。安裝新憑證時，舊 auth 若出現在 CLAUDE.md／memory 會原地換成新值與新到期日；拒裝已過期憑證；到期前 4 天提醒一次（記在 `notified`）
+  - `plan-dept14-writer/scripts/notion_rest.py` 改寫傳輸層：header 改 `Auth`（不再用 `Authorization: Bearer`）、URL 換成 proxy base、`timeout=75`、不跟隨轉址、`dev-` 開頭主機不走環境 proxy、**寫入逾時不重送**（拋 `WriteTimeout`，先回讀）、proxy 回 `error=expired` 拋 `CredentialExpired`。`find_token()` 呼叫介面不變（kind／line 參數保留並映射到部門），`NOTION_KEY` 移除，改為可選 `NOTION_PM_AUTH`＋`NOTION_PM_BASE`；新增 `open_page()`（一部 → 四部 404 輪流試）
+  - 呼叫點全部改走共用模組：`art-request-sheet`、`pet-evolution` 的 `fetch_plan.py`（boss／pet／weapon 線共用）、`avatar-proposal` 的 `ppt2notion.py` 等；各 SKILL.md 的 `NOTION_KEY=$(tr … < token.txt)` 範例拿掉，改成不用傳 key 的直接呼叫；`cannon-wing` 的 PowerShell 範例改讀本機憑證檔
+  - `notion-access.md` 改寫：憑證在本機不在網芳；**首裝與換新同一套流程，由 Claude 協助**（Claude in Chrome 開該部頁 → SSO 登入請使用者自己登 → JS 存成下載檔 → `--from-downloads` → `--show`；Chrome 不可用退剪貼簿）；setup prompt 叫 Claude 寫進 CLAUDE.md 時改存 json；過期判準只認 `error=expired`；部門判斷、回寫護欄、地雷表照舊
+  - 以假 setup prompt 與假家目錄跑 pytest 21 項（解析／安裝／備份／拒裝過期／discover＋migrate／原地替換／分部門下載／剪貼簿 mock／提醒一次／header 與 URL／expired／寫入逾時不重送／dev- 不走 proxy／404 輪流試）全過；**尚未對真 proxy 實測**
+- **image-studio 缺裝／過期改指向共用須知流程**：`image-studio-共用須知.md` 新增〈首裝流程〉（設定頁的 prompt 是含官方 `agent-install.py` 的完整安裝；auto mode 會擋，請使用者先 Shift+Tab 切離 auto mode 逐步批准、裝完切回；**未實測**）；`imagen` 系列、魚機各線、`starter-setup`、README／安裝說明／功能說明裡「找主任拿安裝包」改指向該節。生圖引擎唯一、不改走其他生圖途徑的條款不變
+- ⚙️ **升級動作**（自動執行，不先問）：
+  1. `py -3 %USERPROFILE%\starter-kit\references\scripts\notion_credentials.py --migrate`
+  2. 同腳本 `--show`，回報兩部的使用者與到期日（不印 auth）
+  3. 缺哪部（pm1／pm4）就直接照 `skills/plan-dept14-writer/references/notion-access.md` §3 的安裝流程裝，裝完再 `--show` 回報。只有被導到 SSO 登入頁時停下來請使用者在該分頁自己登入，登入後繼續
+  4. image-studio 不用做任何事
+
 ## v3.20.2 (2026-10-06)
 
 - **`CLAUDE.starter.md` Git 基本盤新增「機密疑慮先講、不自己弱化」**（緊接「禁推機密」）：要推上遠端或發給同事的東西碰到機密／安全疑慮時，Claude 要先警告並列出做法讓使用者拍板，不可自己縮成弱化版推出去。起因是 v3.20.0：Claude 因 kit 不寫網址，自行把換 key 縮成「使用者自己存檔」版推出並公告，維護者追問才改成 v3.20.1 全自動版。全域與 kit 同步收錄

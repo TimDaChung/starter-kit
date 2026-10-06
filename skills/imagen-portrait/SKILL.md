@@ -192,7 +192,7 @@ ornate costume design, vibrant accent colors, refined linework, 2D production-qu
 
 ### Step 3：確認引擎可用
 
-依 draw-engines.md §1 確認引擎可用（整個任務只判一次）：**可用** → Phase 5；**不可用** → 生圖停止，請使用者向主任索取安裝包，不改走其他生圖途徑。立繪常用的長寬比與解析度**沒有對應 flag**，一律寫進 prompt 文字（例：`3:4 portrait aspect ratio, 2K resolution`）。
+依 draw-engines.md §1 確認引擎可用（整個任務只判一次）：**可用** → Phase 5；**不可用** → 生圖停止，照 kit `references/image-studio-共用須知.md` 第二節處理（沒裝過走〈首裝流程〉、過期走換季流程），不改走其他生圖途徑。立繪常用的長寬比與解析度**沒有對應 flag**，一律寫進 prompt 文字（例：`3:4 portrait aspect ratio, 2K resolution`）。
 
 使用者只要 prompt 文字、不要實際生圖 → 以 common.md §9「生成資訊」格式交付英文 prompt + 建議參數 + 參考圖提醒。
 

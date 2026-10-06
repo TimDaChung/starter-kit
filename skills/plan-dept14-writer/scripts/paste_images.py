@@ -12,8 +12,9 @@
   python paste_images.py split   <grid.png> --grid 2x2 [--out DIR] [--trim 0.0]
         # cut a storyboard grid into cells (pages usually take one image per 分鏡)
 
-Writing needs the product line's readwrite token (--line 神幣/娛樂城/鬥地主/魚樂園; Tim only).
-Reading picks 一部/四部 readonly from the id fingerprint, falling back to trying both.
+--line 神幣/娛樂城/鬥地主/魚樂園 picks the dept credential for writes (神幣 = 一部, others = 四部).
+Reading picks 一部/四部 from the id fingerprint, falling back to trying both.
+One rw credential per dept; write guard rails (consent first, read back) still apply.
 See ../references/image-slots.md for WHERE each kind of image goes.
 """
 import argparse
@@ -21,7 +22,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from notion_rest import (LINE_DEPT, Notion, dept_from_id, find_token, image_block, page_id_from, para, plain)  # noqa: E402
+from notion_rest import (LINE_DEPT, CredentialExpired, Notion, dept_from_id, find_token, image_block, page_id_from, para, plain)  # noqa: E402
 
 PLACEHOLDER_WORDS = ("【待補】", "待補", "圖後補", "圖片放置區", "圖片待補", "美術完成後補上", "後補")
 TEXT_TYPES = ("paragraph", "heading_1", "heading_2", "heading_3", "bulleted_list_item", "numbered_list_item", "toggle", "callout", "quote")
@@ -37,9 +38,11 @@ def reader(page_id):
             api = Notion(find_token("readonly", dept=d))
             api.call("GET", f"/blocks/{page_id}")
             return api, d
+        except CredentialExpired:
+            raise
         except RuntimeError as e:
             last = e
-    raise SystemExit(f"[list] both readonly tokens failed (page not connected to the integration?): {last}")
+    raise SystemExit(f"[list] both dept credentials failed (page not connected to the integration?): {last}")
 
 
 def writer(line):

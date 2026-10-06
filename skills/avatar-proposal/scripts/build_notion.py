@@ -10,7 +10,8 @@
         # only when the user explicitly asks us to create the page ourselves
 
 Sheets: one PNG per group, matched by group "key" prefix (e.g. 01_newbie*.png) inside --sheets.
-Token: NOTION_KEY env or the readwrite token on the share (Tim only). See notion_api.find_token.
+Credential: the 一部 (pm1) Notion proxy credential, see notion_api.find_token and
+plan-dept14-writer/references/notion-access.md. Writes still need the user's go-ahead first.
 """
 import argparse
 import json

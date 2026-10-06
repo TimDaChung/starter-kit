@@ -3,21 +3,24 @@
 Shared by pet-evolution and boss-design.
 
 Usage:
-    NOTION_KEY=<readonly token> python fetch_plan.py <page_id> <out_dir>
-    NOTION_KEY=<readonly token> python fetch_plan.py --list pets
-    NOTION_KEY=<readonly token> python fetch_plan.py --list bosses
+    python fetch_plan.py <page_id> <out_dir>
+    python fetch_plan.py --list pets
+    python fetch_plan.py --list bosses
+
+The 四部 credential is picked up by plan-dept14-writer/scripts/notion_rest.py
+(see plan-dept14-writer/references/notion-access.md); nothing to pass on the command line.
 
 Writes <out_dir>/plan.md (block text in reading order, image placeholders inline)
 and <out_dir>/img_NN.png for every image block. Image URLs are signed and expire
 in ~5 minutes, so images are downloaded immediately during the walk.
 """
-import json
-import os
 import pathlib
 import sys
 import urllib.request
 
-API = "https://api.notion.com/v1"
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "plan-dept14-writer" / "scripts"))
+from notion_rest import Notion, find_token, open_page, page_id_from  # noqa: E402
+
 # kind -> (database id, select property, option values to keep; empty = keep all)
 LISTS = {
     "pets": ("217e22985ac9817d8a65c6a6ed6a135c", "道具大類", ["8. 寵物"]),
@@ -25,16 +28,13 @@ LISTS = {
 }
 
 
+_api: Notion | None = None
+
+
 def request(path: str, body: dict | None = None) -> dict:
-    headers = {
-        "Authorization": f"Bearer {os.environ['NOTION_KEY']}",
-        "Notion-Version": "2022-06-28",
-        "Content-Type": "application/json",
-    }
-    data = json.dumps(body).encode("utf-8") if body is not None else None
-    req = urllib.request.Request(f"{API}{path}", data=data, headers=headers, method="POST" if data else "GET")
-    with urllib.request.urlopen(req) as resp:
-        return json.load(resp)
+    """GET, or POST when a body is given (database queries are read-only POSTs)."""
+    assert _api is not None
+    return _api.call("POST" if body is not None else "GET", path, body)
 
 
 def rich_text(items: list) -> str:
@@ -100,11 +100,14 @@ def list_rows(kind: str) -> None:
 
 
 def main() -> None:
+    global _api
     sys.stdout.reconfigure(encoding="utf-8")
     if sys.argv[1] == "--list":
+        _api = Notion(find_token(dept="四部"))
         list_rows(sys.argv[2])
         return
-    page_id, out_dir = sys.argv[1], pathlib.Path(sys.argv[2])
+    page_id, out_dir = page_id_from(sys.argv[1]), pathlib.Path(sys.argv[2])
+    _api, _ = open_page(page_id)
     out_dir.mkdir(parents=True, exist_ok=True)
     lines: list[str] = []
     walk(page_id, out_dir, lines, 0, [0])

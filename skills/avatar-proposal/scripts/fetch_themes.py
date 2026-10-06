@@ -3,7 +3,7 @@
   python fetch_themes.py [--months 12] [--json out.json]
 
 Prints: option sets of 主要類別 / 要素, the last N months, and per-option counts in that window.
-Uses the dept-1 readonly token (NOTION_KEY env overrides).
+Uses the 一部 (pm1) Notion proxy credential (see plan-dept14-writer/references/notion-access.md).
 """
 import argparse
 import collections

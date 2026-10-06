@@ -51,8 +51,7 @@ allowed-tools:
 確認兩階定稿圖在手（沒有就先走 `pet-evolution`）。讀企劃：
 
 ```sh
-NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") \
-  python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <page_id> _工作暫存/<寵物名>
+python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <page_id> _工作暫存/<寵物名>
 ```
 
 從 `plan.md` 盤點（位置見 `配件規格.md` 第一節）：零星／三星動態、技能 ICON 描述、專屬背景、有沒有滿星貼圖；道具 ICON（本體縮圖＋碎片版）不用盤企劃，定稿一到就後製。列成清單給使用者確認後**一次派出**。

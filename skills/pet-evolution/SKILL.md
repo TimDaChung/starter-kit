@@ -45,9 +45,9 @@ allowed-tools:
 
 ## 前置需求
 
-1. **image-studio 憑證**：`~/.config/image-studio/credentials.json`。401 時見 kit `references/image-studio-共用須知.md`〈憑證〉（找主任拿，不提前要）
-2. **Notion 讀取權**：道具之書（四部）。唯讀 token 在 `X:\grp.product.pm1\2. 產品改造\一四部企劃範本\四部readonly_token.txt`（X 讀不到換 Y:），自己去拿，不要問使用者
-   ⚠️ **Notion 一律走 REST，不走 MCP**。token 走環境變數 `NOTION_KEY`，不寫進任何檔案
+1. **image-studio 憑證**：`~/.config/image-studio/credentials.json`。401 時見 kit `references/image-studio-共用須知.md`〈憑證〉（Claude 照該節換季流程自己換，不提前換；本機沒裝過走〈首裝流程〉）
+2. **Notion 讀取權**：道具之書（四部）。自己的四部（pm4）憑證在本機，`fetch_plan.py` 自動取，不用傳任何 key、不要問使用者；沒有或過期照 `plan-dept14-writer/references/notion-access.md` §3 協助安裝／換新
+   ⚠️ **Notion 一律走部門 proxy＋REST，不走 MCP**。憑證值不印出、不寫進任何檔案
 
 ---
 
@@ -90,7 +90,7 @@ allowed-tools:
 **發想前先重撈寵物清單**，對照 `參考素材索引.md` 列出已用題材：
 
 ```sh
-NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py --list pets
+python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py --list pets
 ```
 
 另外避開炮台線已有的動物造型（例：貓 → 避開喵公爵、廚神喵喵）。
@@ -149,8 +149,7 @@ NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") python ~/.clau
 問使用者要做哪一隻；沒指定就跑 `fetch_plan.py --list pets` 列候選讓他挑。
 
 ```sh
-NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") \
-  python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <page_id> _工作暫存/<寵物名>
+python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <page_id> _工作暫存/<寵物名>
 ```
 
 產出 `plan.md`（企劃全文）與 `img_NN.png`（企劃圖，簽名 URL 約 5 分鐘失效，腳本當下就下載）。**企劃圖要實際 Read 來看**——文字與圖常常不一致（例：摩卡企劃寫「叉子」、圖畫的是打蛋器）。

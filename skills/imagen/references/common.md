@@ -130,7 +130,7 @@
 
 ## §9 呼叫生圖引擎與 prompt 交付
 
-**引擎唯一**：image-studio GPT 線，完整規則（可用性判定、呼叫契約、失敗分流）見 `draw-engines.md`。引擎不可用 → 生圖停止、請使用者向主任索取安裝包，**不改走其他生圖途徑**。
+**引擎唯一**：image-studio GPT 線，完整規則（可用性判定、呼叫契約、失敗分流）見 `draw-engines.md`。引擎不可用 → 生圖停止、照 kit `references/image-studio-共用須知.md` 第二節處理（沒裝過走〈首裝流程〉、過期走換季流程），**不改走其他生圖途徑**。
 
 **標準指令**（draw-engines.md §3）：
 

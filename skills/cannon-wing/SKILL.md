@@ -45,10 +45,10 @@ allowed-tools:
 
 ## 前置需求
 
-1. **image-studio 憑證**：`~/.config/image-studio/credentials.json`。401 時見 kit `references/image-studio-共用須知.md`〈憑證〉（找主任拿，不提前要）。
+1. **image-studio 憑證**：`~/.config/image-studio/credentials.json`。401 時見 kit `references/image-studio-共用須知.md`〈憑證〉（Claude 照該節換季流程自己換，不提前換；本機沒裝過走〈首裝流程〉）。
 2. **Python 套件**：Pillow、numpy。
-3. **Notion 讀取權**：企劃在「道具之書」資料庫（四部）。token 檔位置見下方 Step 1。
-   ⚠️ **Notion 一律走 REST，不走 MCP**（MCP 已移除）。
+3. **Notion 讀取權**：企劃在「道具之書」資料庫（四部）。用自己的四部（pm4）憑證，存在本機，腳本自動取、不要問使用者；沒有或過期照 `plan-dept14-writer/references/notion-access.md` §3 協助安裝／換新。
+   ⚠️ **Notion 一律走部門 proxy＋REST，不走 MCP**（MCP 已移除）。
 
 ---
 
@@ -139,19 +139,28 @@ lv2 造型變化：
 
 問使用者要做哪一組（炮台名＋翅膀名）。沒指定就列出候選讓他挑。
 
-從道具之書讀取（PowerShell ＋ REST）：
+讀單一企劃頁（文字＋圖片）一律用共用腳本，不用傳任何 key：
+
+```sh
+python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <page_id> _工作暫存/<套裝名>
+```
+
+要列道具之書候選（database query）時才用 PowerShell ＋ REST，憑證從本機檔讀（找不到 → 先 `py -3 %USERPROFILE%\starter-kit\references\scripts\notion_credentials.py --migrate`，還是沒有就照 notion-access.md §3）：
 
 ```powershell
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$tok = (Get-Content "X:\grp.product.pm1\2. 產品改造\一四部企劃範本\四部readonly_token.txt" -Raw).Trim()
-$h = @{ "Authorization" = "Bearer $tok"; "Notion-Version" = "2022-06-28" }
+$c = (Get-Content "$env:USERPROFILE\.config\notion-pm\credentials.json" -Raw -Encoding UTF8 | ConvertFrom-Json).pm4
+$h = @{ "Auth" = $c.auth; "Notion-Version" = "2022-06-28" }   # header name is Auth, not Authorization
 # 道具之書 database id: 217e22985ac9817d8a65c6a6ed6a135c
+# Invoke-RestMethod -Method Post "$($c.baseUrl)/v1/databases/<id>/query" -Headers $h -ContentType "application/json" -Body $bytes -TimeoutSec 75 -MaximumRedirection 0
 ```
+
+不要把 `$c.auth` 印出來。主機名 `dev-` 開頭的機器（不走環境 proxy）改用 Python 腳本，不用這段 PowerShell。過期判準：回應 JSON 的 `error` 是 `expired` 才算（一般 403 不算）。
 
 ⚠️ **PowerShell 5.1 送含中文的 request body 會被轉成 `?` 而回 400**（`Could not find property with name or id: ????`）。
 解法：`-Body ([Text.Encoding]::UTF8.GetBytes($json))`，或乾脆不帶 filter 整批撈回本地再篩。
 
-遞迴撈 `GET /v1/blocks/{id}/children` 取出企劃文字。表格內容在 `table_row.cells`（二維陣列），要另外處理才讀得到 WID 與關聯道具。
+自己遞迴撈 `GET /v1/blocks/{id}/children` 時（`fetch_plan.py` 已代勞）：表格內容在 `table_row.cells`（二維陣列），要另外處理才讀得到 WID 與關聯道具。
 
 ### Step 2 — 解析企劃、判斷分支
 

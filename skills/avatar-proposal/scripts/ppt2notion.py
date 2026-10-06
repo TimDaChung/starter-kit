@@ -4,25 +4,22 @@ Usage:
   python ppt2notion.py parse  <deck.pptx>                 # print parsed structure as JSON
   python ppt2notion.py build  <deck.pptx> <parent_page_id> [--title T] [--no-images]
 
-Env: NOTION_KEY (readwrite token). Images are uploaded with the File Upload API.
+Uses the 一部 (pm1) Notion proxy credential via notion_api / notion_rest
+(see plan-dept14-writer/references/notion-access.md). Images are uploaded with the File Upload API.
 """
 import io
 import json
-import os
 import re
 import sys
-import time
-import urllib.error
-import urllib.request
-import uuid
 from pathlib import Path
 
 from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 from pptx.util import Emu
 
-NOTION = "https://api.notion.com/v1"
-VER = "2022-06-28"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from notion_api import Notion, find_token  # noqa: E402
+
 FULLWIDTH = str.maketrans("０１２３４５６７８９", "0123456789")
 
 ALL_PARTS = ["五官", "臉型", "服飾", "髮型", "髮飾", "眼鏡", "鬍子", "裝飾", "耳環", "武器", "特效", "翅膀"]
@@ -184,35 +181,24 @@ def parse_deck(path):
 
 
 # ----------------------------------------------------------------- notion
-def api(method, path, body=None, raw=None, headers=None):
-    h = {"Authorization": f"Bearer {os.environ['NOTION_KEY']}", "Notion-Version": VER}
-    if body is not None:
-        h["Content-Type"] = "application/json"
-    if headers:
-        h.update(headers)
-    data = json.dumps(body).encode() if body is not None else raw
-    req = urllib.request.Request(NOTION + path, data=data, headers=h, method=method)
-    for attempt in range(4):
-        try:
-            with urllib.request.urlopen(req, timeout=120) as r:
-                return json.load(r)
-        except urllib.error.HTTPError as e:
-            msg = e.read().decode()[:400]
-            if e.code == 429 or e.code >= 500:
-                time.sleep(2 + attempt * 2)
-                continue
-            raise RuntimeError(f"{method} {path} -> {e.code} {msg}")
-    raise RuntimeError(f"{method} {path} -> gave up after retries")
+_client: Notion | None = None
 
 
-def upload_image(blob, ext, name):
-    ctype = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "gif": "image/gif", "webp": "image/webp"}.get(ext.lower(), "image/jpeg")
-    fu = api("POST", "/file_uploads", {"mode": "single_part", "filename": f"{name}.{ext}", "content_type": ctype})
-    boundary = "----np" + uuid.uuid4().hex
-    body = (f"--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"{name}.{ext}\"\r\n"
-            f"Content-Type: {ctype}\r\n\r\n").encode() + blob + f"\r\n--{boundary}--\r\n".encode()
-    api("POST", f"/file_uploads/{fu['id']}/send", raw=body, headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
-    return fu["id"]
+def client() -> Notion:
+    """Lazily built 一部 (pm1) client: 神娃 pages live in the 一部 workspace."""
+    global _client
+    if _client is None:
+        _client = Notion(find_token(dept="一部"))
+    return _client
+
+
+def api(method: str, path: str, body: object = None, raw: bytes | None = None,
+        headers: dict[str, str] | None = None) -> dict:
+    return client().call(method, path, body=body, raw=raw, headers=headers)
+
+
+def upload_image(blob: bytes, ext: str, name: str) -> str:
+    return client().upload_image(blob, ext, name)
 
 
 def rt(text, bold=False, color=None, code=False):

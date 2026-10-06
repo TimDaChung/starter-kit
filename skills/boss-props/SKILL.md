@@ -53,8 +53,7 @@ allowed-tools:
 **模式 A（既有企劃）**：讀企劃
 
 ```sh
-NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") \
-  python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <page_id> _工作暫存/<Boss名>
+python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <page_id> _工作暫存/<Boss名>
 ```
 
 在彩金表演、玩法、機制段落找出所有道具，列成清單給使用者確認：

@@ -50,7 +50,7 @@ for t in tabs[-8:]:
 
 **執行角色**：主線 session（要開瀏覽器、寫本機憑證檔，不派 sub-agent）。需要 Claude in Chrome 已連線。
 
-1. 取得憑證頁位址（從本機既有憑證的 `baseUrl` 組出來，kit 不寫死網址）：`py -3 RC --page-url`
+1. 取得憑證頁位址（有本機憑證時由 `baseUrl` 組出；沒裝過時印預設 `https://image-studio.vgs.tw/agent-api`）：`py -3 RC --page-url`
 2. Claude in Chrome 開新分頁到該位址。**先看分頁停在哪**（`tabs_context_mcp`）：
    - 被導到公司 SSO 登入頁 → **請使用者在那個分頁登入**（密碼一律不代填），登入後再開一次第 1 步的位址
    - 分頁自己跳回 `chrome://newtab`、JS 無法執行 → 多半也是 SSO 過期，改開 `baseUrl` 首頁確認，會停在登入頁
@@ -78,7 +78,14 @@ for t in tabs[-8:]:
 |---|---|
 | Claude in Chrome 沒連上 | 請使用者自己開憑證頁（`--page-url` 印出的位址），把 setup prompt 整段存成 `Downloads\image-studio-setup.txt`，再由 Claude 跑第 4 步 |
 | 頁面結構變了（找不到 textarea） | 同上 |
-| `--page-url` 報「not installed」 | 本機從沒裝過 image-studio，不是換季——找主任拿安裝包 |
+| `--page-url` 印出預設網址、`--show` 報 no credential | 本機從沒裝過 image-studio，不是換季——走下面〈首裝流程〉 |
+
+### 首裝流程（本機從沒裝過；未實測）
+
+1. 開 image-studio 設定頁`https://image-studio.vgs.tw/agent-api`（`py -3 RC --page-url` 也會印這個）。被導到公司 SSO 登入頁 → 請使用者在該分頁自己登入（密碼不代填）
+2. 該頁的 prompt 是**完整安裝**（含下載並執行官方 `agent-install.py`），不是只有憑證
+3. Claude Code auto mode 會擋「下載外部程式再執行」（組員 2026-10-06 實測，加 allow 規則也沒用）。所以請使用者**先按 Shift+Tab 切離 auto mode**（切到預設模式，逐步批准），再把 prompt 交給 Claude 照做；裝完再切回 auto mode
+4. 裝好後之後的換季一律走上面的換季流程（`RC`），不用再跑官方安裝程式
 
 請使用者接手時講清楚：去哪一頁、複製哪段、存成什麼檔名，存好後 Claude 接手裝。**不要請使用者把 setup prompt 貼進對話**——那會讓 token 進 session 紀錄。
 

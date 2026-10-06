@@ -6,7 +6,7 @@ that block and writes it to ~/.config/image-studio/credentials.json without ever
 printing the token.
 
 Usage:
-    py -3 refresh_credentials.py --page-url        # print the setup page URL (built from the local baseUrl)
+    py -3 refresh_credentials.py --page-url        # print the setup page URL (local baseUrl, else the default page)
     py -3 refresh_credentials.py --from-downloads  # install the newest ~/Downloads/image-studio-setup*.txt
     py -3 refresh_credentials.py --from-file <setup-prompt.txt> [--keep-source]
     py -3 refresh_credentials.py --show            # report current expiry only
@@ -27,6 +27,7 @@ from typing import Any
 CREDENTIALS_PATH = Path.home() / ".config" / "image-studio" / "credentials.json"
 REQUIRED_KEYS = ("baseUrl", "token", "expiresAt")
 SETUP_PAGE_PATH = "/agent-api"
+DEFAULT_SETUP_PAGE = "https://image-studio.vgs.tw" + SETUP_PAGE_PATH
 DOWNLOAD_GLOB = "image-studio-setup*.txt"
 JSON_BLOCK = re.compile(r"\{[^{}]*\"token\"[^{}]*\}", re.DOTALL)
 
@@ -83,10 +84,10 @@ def show_current() -> int:
 
 
 def page_url() -> int:
-    """Print the setup page URL, derived from the installed credential's baseUrl."""
+    """Print the setup page URL: from the installed baseUrl, else the default page (first install)."""
     if not CREDENTIALS_PATH.exists():
-        print(f"no credential at {CREDENTIALS_PATH}; image-studio is not installed yet", file=sys.stderr)
-        return 1
+        print(DEFAULT_SETUP_PAGE)
+        return 0
     current = json.loads(CREDENTIALS_PATH.read_text(encoding="utf-8"))
     print(current["baseUrl"].rstrip("/") + SETUP_PAGE_PATH)
     return 0

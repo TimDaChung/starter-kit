@@ -53,8 +53,8 @@ allowed-tools:
 
 ## 前置需求
 
-1. **image-studio 憑證**：`~/.config/image-studio/credentials.json`。401 時見 kit `references/image-studio-共用須知.md`〈憑證〉（找主任拿，不提前要）
-2. **Notion 讀取權**：魚類之書（四部）。唯讀 token 在 `X:\grp.product.pm1\2. 產品改造\一四部企劃範本\四部readonly_token.txt`（X 讀不到換 Y:），自己去拿，不要問使用者。token 走環境變數 `NOTION_KEY`
+1. **image-studio 憑證**：`~/.config/image-studio/credentials.json`。401 時見 kit `references/image-studio-共用須知.md`〈憑證〉（Claude 照該節換季流程自己換，不提前換；本機沒裝過走〈首裝流程〉）
+2. **Notion 讀取權**：魚類之書（四部）。自己的四部（pm4）憑證在本機，`fetch_plan.py` 自動取，不用傳任何 key、不要問使用者；沒有或過期照 `plan-dept14-writer/references/notion-access.md` §3 協助安裝／換新
 3. **Python 套件**：Pillow
 
 ---
@@ -75,8 +75,7 @@ allowed-tools:
 **模式 A（既有企劃）**：讀企劃
 
 ```sh
-NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") \
-  python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <page_id> _工作暫存/<Boss名>
+python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <page_id> _工作暫存/<Boss名>
 ```
 
 在 `plan.md` 裡找所有背景段落（搜「背景」「場景」），**列成清單給使用者確認要做哪幾張**：

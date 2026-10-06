@@ -54,8 +54,7 @@ allowed-tools:
 確認定稿圖在手（沒有就先走 `weapon-design`）。讀企劃：
 
 ```sh
-NOTION_KEY=$(tr -d '\r\n ' < "<四部readonly_token.txt 路徑>") \
-  python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py 25ee22985ac9803aa831d54f90bb1910 _工作暫存/武具系統
+python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py 25ee22985ac9803aa831d54f90bb1910 _工作暫存/武具系統
 ```
 
 從 `plan.md` 盤點（位置見 `配件規格.md` 第一節）：§2.9 該把的登場動畫四步、§2.9 第 3 點金閃、§2.7〈追擊動畫〉。把**分鏡四格的拆法**列給使用者確認後**一次派出**。從零發想的武具沒有企劃 → 依 mini 企劃的「登場動畫概念」拆四格，一樣先確認。

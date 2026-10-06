@@ -27,7 +27,7 @@ allowed-tools:
 - `references/format.md` — 表格格式規格（欄位、顏色、欄寬、字型、紅字規則、命名格式）。**寫表前先讀**
 - `references/writing-rules.md` — 拆列與設計描述的寫法、參考圖分配規則、去識別化範例列（實際案例屬機密，在網芳 `X:\grp.product.pm1\2. 產品改造\一四部企劃範本\kit-assets\art-request-sheet\實際範例.md`（X 讀不到換 Y:），讀得到就先讀）
 - `references/chrome-paste.md` — 用 Chrome 貼圖的做法與已知坑。**貼圖前先讀**
-- `scripts/fetch_plan.py` — 用部門金鑰走 REST 讀企劃：輸出 `plan.md`（保留紅字／灰綠底／刪除線標記）並當場下載圖片與影片
+- `scripts/fetch_plan.py` — 用部門憑證走 Notion proxy＋REST 讀企劃：輸出 `plan.md`（保留紅字／灰綠底／刪除線標記）並當場下載圖片與影片
 - `scripts/prep_images.py` — mp4 轉 GIF、縮圖到欄寬、改 ASCII 檔名，輸出到可上傳的資料夾
 - `scripts/build_sheet.py` — 從內容 spec 產出寫入值、格式化請求、紅字 runs、貼圖清單
 
@@ -39,7 +39,7 @@ allowed-tools:
 
 | 工具 | 用途 | 缺了怎麼辦 |
 |---|---|---|
-| Notion 部門唯讀金鑰（網芳 X:／Y:，見 `plan-dept14-writer/references/notion-access.md`） | 讀企劃 | 讀不到金鑰或兩部都 404 → 照實回報，請使用者連網芳或請頁面擁有者連接 integration；不改用任何 Notion MCP、不用瀏覽器抓文字 |
+| Notion 部門憑證（本機個人憑證，見 `plan-dept14-writer/references/notion-access.md`） | 讀企劃 | 沒憑證或過期 → 照該檔 §3 協助安裝／換新；兩部都 404 → 照實回報，請頁面擁有者連接 integration；不改用任何 Notion MCP、不用瀏覽器抓文字 |
 | Google Sheets connector | 寫文字與格式 | 請使用者在這個對話開啟；不能用 Drive 另建新檔代替 |
 | Claude in Chrome | 貼圖（**實驗性**：靠 Sheets 頁面結構，Google 改版可能失效） | 跳過貼圖，交付時列出「哪張圖貼哪格」讓使用者手貼 |
 | Python：pillow、imageio-ffmpeg | 縮圖、影片轉 GIF | `pip install -r %USERPROFILE%\starter-kit\requirements.txt` |
@@ -48,7 +48,7 @@ allowed-tools:
 
 ## 1. 讀企劃並下載媒體
 
-1. `python scripts/fetch_plan.py <Notion 連結> "%USERPROFILE%\Downloads\<活動名>_美術需求參考圖"`。金鑰與部別由腳本自己判（頁面 id 指紋 → 判不出就一部、四部輪流試），**兩支都 404 就停**，回報頁面沒連接 integration。
+1. `python scripts/fetch_plan.py <Notion 連結> "%USERPROFILE%\Downloads\<活動名>_美術需求參考圖"`。憑證與部別由腳本自己判（頁面 id 指紋 → 判不出就一部、四部輪流試），**兩部都 404 就停**，回報頁面沒連接 integration。
 2. 腳本輸出 `plan.md`（第一行是頁面標題）與 `NN_<圖名>.<副檔名>` 媒體檔：圖名取 block 說明文字，沒有就取上方最近的《圖名》行。Notion 的檔案網址是簽名網址、幾分鐘到一小時就過期，所以讀頁面時當場下載，不另外抄網址。
 3. 讀 `plan.md`。企劃結構通常是：1.目的 → 2.流程圖 → **3.呈現**（逐畫面，左欄說明、右欄示意圖）→ **4.規則**（數值、盤面、檔名對照）→ 5.說明頁 → 6.設定 → 7.後台 → 8.調整紀錄。行內標記：`<span color="red">` 紅字、`gray_background`／`green_background` 調整標記、`~~..~~` 刪除線。
 4. 下載失敗的檔會在 `plan.md` 標 `DOWNLOAD FAILED`，重跑一次腳本即可（會拿到新網址）。媒體檔名若和畫面對不上，照 `plan.md` 裡 `[image ..]` 出現的位置改成「序號_畫面名_狀態」（例：`05_主介面_已達門檻.jpg`），序號照企劃順序。

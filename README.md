@@ -31,7 +31,7 @@
 | 異常處理 | issue-triage(回報模式:標準異常回報;建議模式:skill 沒壞但不順手想改的四欄建議單;收單模式:維護端驗證修復 SOP) |
 | Agents | dialogue-writer(對白)、game-balance-auditor(數值模擬)、planning-doc-auditor(企劃vs實作對照)、my-voice 範本(自己的分身自己建) |
 
-企劃與遊戲原型類裝完即用;生圖要先裝 image-studio(向主任索取),測試與 playtest-loop 另需 Python 套件或 chrome-devtools MCP,安裝精靈會偵測缺什麼並問你要不要順手裝(細節見 `安裝說明.md` 前置表)。
+企劃與遊戲原型類裝完即用;生圖要先裝 image-studio(首裝流程見 references/image-studio-共用須知.md 第二節),測試與 playtest-loop 另需 Python 套件或 chrome-devtools MCP,安裝精靈會偵測缺什麼並問你要不要順手裝(細節見 `安裝說明.md` 前置表)。
 
 ## 升級
 

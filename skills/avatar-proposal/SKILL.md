@@ -31,11 +31,11 @@ allowed-tools:
 - `scripts/gen_sheets.py` — 從 proposal.json 組 prompt、**序列**呼叫 image-studio、每組一張
 - `scripts/build_notion.py` — proposal.json → Notion 分欄頁（`new` 建頁／`swap` 原地換圖／`preview` 不打 API）
 - `scripts/ppt2notion.py` — 舊的人物設定 pptx 整份轉 Notion（遷移用，自含）
-- `scripts/notion_api.py` — 共用 REST 封裝（token 自動到網芳拿、檔案上傳、原地換圖、分欄 block）
+- `scripts/notion_api.py` — 共用 REST 封裝（部門憑證自動取、檔案上傳、原地換圖、分欄 block）
 
 共用的：
 
-- Notion 金鑰與權限：`plan-dept14-writer/references/notion-access.md`（讀用一部 readonly；**建頁與換圖要一部 readwrite，只有 Tim 有**，組員跑到那步會停下來請他執行）
+- Notion 憑證與權限：`plan-dept14-writer/references/notion-access.md`（讀寫都用使用者自己的一部 `pm1` 憑證；沒有或過期照該檔 §3 協助安裝／換新）。**建頁與換圖前一定先取得使用者同意**
 - 生圖層面的問題：`kit 根目錄/references/image-studio-共用須知.md`
 
 ---
@@ -49,7 +49,7 @@ allowed-tools:
 | 主題提案（3 案）與查重 | 活動企劃書（走期、名稱、VIP、ID）→ `plan-dept14-writer` |
 | 六組×男女的小主題、主色、部件勾選、重點需求 | 對稿、神娃會議、發單 → SOP 步驟一 貳～伍，人工 |
 | 示意圖（每組一張，前景背景畫在圖裡） | 正式美術稿 → 美術 |
-| 把內容填進使用者用範本建好的 Notion 頁（預設）；口頭要求才代建 | 主題庫回寫 → 目前人工（readwrite 限 Tim） |
+| 把內容填進使用者用範本建好的 Notion 頁（預設）；口頭要求才代建 | 主題庫回寫 → 目前人工 |
 
 一期的量：**六組**（新手／一般1／一般2／儲值／BOSS1／BOSS2）× 男女 ＝ 12 個角色、6 張示意圖、前景 7 個、背景 4 個、更衣室背景 1 個。**儲值裝神娃版已於 2026-05 移除，但人物系統仍做，示意圖照算**（測試時可略，正式不可）。
 
@@ -112,7 +112,7 @@ python <skill-dir>/scripts/gen_sheets.py proposal.json --out _工作暫存/<期�
 **預設：請使用者用 Notion 範本建好頁、把網址貼來，skill 只填內容。** 理由：範本自帶的目錄與「新增調整紀錄」按鈕 API 建不出來，而且拿到網址就不用問 workspace 與父頁。**只有使用者口頭明說「你幫我建」才用 `new`。**
 
 ```bash
-# 預設：內容插在範本「調整紀錄」標題之前，示意圖直接上傳插入（需 readwrite）
+# 預設：內容插在範本「調整紀錄」標題之前，示意圖直接上傳插入（寫入，先取得同意）
 python <skill-dir>/scripts/build_notion.py fill proposal.json --page <頁 id> --sheets _工作暫存/<期別>/sheets
 # 範本已放卡位圖（圖說「示意圖｜<組別>」）：原地換圖，不動其他內容
 python <skill-dir>/scripts/build_notion.py swap proposal.json --page <頁 id> --sheets _工作暫存/<期別>/sheets
@@ -127,7 +127,7 @@ python <skill-dir>/scripts/build_notion.py new  proposal.json --parent <父頁 i
 ### 6. 交付
 
 - Notion 連結；桌面資料夾（六張示意圖＋proposal.json）照 `feedback_work_habits` 慣例開給使用者
-- 提醒後續 SOP：主題庫那列要填活動名稱／類別／要素（readwrite 限 Tim）；企劃原檔放美術網芳 `●Avatar魔鬼營\YYYYMM_M月大活動(大活動)`；對稿群 `4p_好麻對稿群`
+- 提醒後續 SOP：主題庫那列要填活動名稱／類別／要素（人工填）；企劃原檔放美術網芳 `●Avatar魔鬼營\YYYYMM_M月大活動(大活動)`；對稿群 `4p_好麻對稿群`
 
 ---
 
@@ -151,7 +151,7 @@ python <skill-dir>/scripts/build_notion.py new  proposal.json --parent <父頁 i
 | 2026-10-02 | B 案初稿「狐面」當前景寫了兩次 | 同系列前景背景不重複 |
 | 2026-10-02 | 一般裝背景自己長出鳥居與石燈籠 | 排除項明列宗教建築，背景描述寫「不要畫鳥居」 |
 | 2026-10-02 | 一般裝畫得比九月一般裝精緻 | 模板加「中強度、花紋大而少」 |
-| 2026-10-01 | 讀 SOP 先打 Notion MCP 404、再繞瀏覽器丟了表格標記 | Notion 讀寫一律 token＋REST |
+| 2026-10-01 | 讀 SOP 先打 Notion MCP 404、再繞瀏覽器丟了表格標記 | Notion 讀寫一律部門憑證＋REST |
 
 ## 貼回企劃（2026-10-02 起）
 

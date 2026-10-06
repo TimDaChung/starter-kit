@@ -1,9 +1,9 @@
-"""Read a Notion plan page via the department REST token: dump text and download media.
+"""Read a Notion plan page via the department Notion proxy: dump text and download media.
 
-Token and department come from plan-dept14-writer/scripts/notion_rest.py
-(env NOTION_KEY wins; otherwise the X:/Y: share). The department is guessed
-from the page id fingerprint; if unknown, 一部 then 四部 are tried, and two
-404s mean the page is not connected to the integration.
+Credential and department come from plan-dept14-writer/scripts/notion_rest.py
+(personal pm1/pm4 credential, see plan-dept14-writer/references/notion-access.md).
+The department is guessed from the page id fingerprint; if unknown, 一部 then 四部
+are tried, and two 404s mean the page is not connected to the integration.
 
 Writes into <out_dir>:
   plan.md   page title + blocks in reading order. Inline marks keep what the
@@ -27,7 +27,7 @@ import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "plan-dept14-writer" / "scripts"))
-from notion_rest import Notion, dept_from_id, find_token, page_id_from  # noqa: E402
+from notion_rest import Notion, open_page, page_id_from  # noqa: E402
 
 MEDIA = ("image", "video", "file", "pdf")
 KEEP_COLORS = ("red", "gray_background", "green_background", "red_background", "yellow_background")
@@ -123,22 +123,6 @@ class Walker:
             elif b.get("has_children"):
                 inner = depth if kind in ("column_list", "column", "synced_block", "table") else depth + 1
                 self.walk(b["id"], inner)
-
-
-def open_page(page_id: str) -> tuple[Notion, dict]:
-    guess = dept_from_id(page_id)
-    depts = [guess] if guess else ["一部", "四部"]
-    errors = []
-    for dept in depts:
-        api = Notion(find_token("readonly", dept=dept))
-        try:
-            return api, api.call("GET", f"/pages/{page_id}")
-        except RuntimeError as exc:
-            if "-> 404" not in str(exc):
-                raise
-            errors.append(dept)
-    raise SystemExit(f"404 with {'/'.join(errors)} token(s): the page is not connected to the integration. "
-                     "Ask the page owner to add the connection (… -> Connections).")
 
 
 def main() -> None:

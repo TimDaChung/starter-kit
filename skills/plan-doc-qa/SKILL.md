@@ -23,8 +23,8 @@ description: 企劃書一致性審查（一＋四部 house style，部門專屬�
 
 ## 執行步驟
 
-1. **完整讀取**：用部門金鑰走 Notion REST API 讀取所有 block（不走個人 Notion MCP，理由見 `notion-access.md`），含子頁面、表格、流程圖（mermaid）、圖片（`image` 區塊要下載來看——文案與版面常整段放在圖裡，見 `notion-access.md` §1）。不可只讀前幾段。
-    - **金鑰**：讀取用部門的**唯讀**金鑰，位置與取用流程見 `../plan-dept14-writer/references/notion-access.md`——**自己照該檔去拿，不要問使用者**；token 走環境變數（如 `NOTION_KEY`）傳入，不寫進腳本或設定檔
+1. **完整讀取**：用部門憑證走 Notion proxy＋REST API 讀取所有 block（不走個人 Notion MCP，理由見 `notion-access.md`），含子頁面、表格、流程圖（mermaid）、圖片（`image` 區塊要下載來看——文案與版面常整段放在圖裡，見 `notion-access.md` §1）。不可只讀前幾段。
+    - **憑證**：用該部的個人憑證（本機，`plan-dept14-writer/scripts/notion_rest.py` 自動取），取用與首裝／換新流程見 `../plan-dept14-writer/references/notion-access.md`——**不要問使用者**；憑證值不印出、不寫進腳本或設定檔
     - 讀不到頁面（404／無權限）→ **停下回報**：常見是該頁沒分享給 integration，或不在認證的同一個 workspace。請 PM 分享頁面或貼出內容，**不要從標題或殘缺片段推測內容就開始審**
 2. **建立詞彙庫**：列出全部關鍵名詞（幣別、排行榜名稱、按鈕文字、時間名詞如「結束時間 vs 關閉時間」、模式名稱），記錄每個名詞在各章節的寫法。
 3. **逐類檢查**（十一大類，逐一過完才輸出）：
@@ -46,7 +46,7 @@ description: 企劃書一致性審查（一＋四部 house style，部門專屬�
    - ✅ **已確認無誤的重點**（簡短）
    - 合規提醒（如適用）
    - 結尾固定詢問：「要我直接幫你改嗎？」若使用者同意，直接以 Notion API 修改並逐項回報。
-   - **回寫用該產品線的讀寫金鑰**（位置與五條護欄見 `notion-access.md` §2）：**只改 PM 自己建的複本頁**、先列出要改哪些區塊取得同意、**寫完一律回讀驗證**（Notion 會吃格式）、調整紀錄註明實際操作人（頁面的 `last_edited_by` 會變成 writer bot，不是人）。不確定是不是自己建的頁 → 輸出「可直接貼上的修正片段」交 PM，不要硬寫。
+   - **回寫用同一把該部憑證**（五條護欄見 `notion-access.md` §2，照舊全做）：**只改 PM 自己建的複本頁**、先列出要改哪些區塊取得同意、**寫完一律回讀驗證**（Notion 會吃格式）、調整紀錄註明實際操作人（頁面的 `last_edited_by` 會變成 integration 的 bot，不是人）。不確定是不是自己建的頁 → 輸出「可直接貼上的修正片段」交 PM，不要硬寫。
 
 ## 複查模式（「再次檢查」）
 

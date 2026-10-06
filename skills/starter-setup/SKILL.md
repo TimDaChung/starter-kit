@@ -30,8 +30,8 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 - `~/.claude/agents/` 現有清單
 - `%USERPROFILE%\starter-kit` 已 clone？（已有就 `git pull`，記 CHANGELOG 新增段落）
 - secretary(skills/secretary)→ 歸「自有」，本精靈完全不碰
-- **image-studio 已裝？**（生圖的唯一引擎，主任另行發放、不在 kit 內）：`~/.claude/skills/image-studio/` 目錄存在？`~/.config/image-studio/credentials.json` 存在？——**只偵測、不能代裝、不給安裝路徑與憑證細節**；未裝或憑證過期＝**沒有替代線**，結算表提醒一行「生圖引擎未裝／憑證過期 → 所有生圖 skill（imagen 系列、generate2dsprite、generate2dmap、cannon-*、boss-design／boss-props／boss-scene、pet-*）完全不能用，必須找主任拿安裝包」（imagen-banner 的驗收模式、三條線的道具 ICON 後製 `pet-parts/scripts/item_icon.py` 都只吃 Pillow，缺引擎仍可用，提醒時附註一句）
-  - **憑證剩餘天數**：讀 `credentials.json` 的 `expiresAt`（ISO 8601、UTC，例 `2026-10-05T16:00:00.000Z`），與今天相減取天數，三段處理——已過期 → 同上，生圖 skill 全停（imagen-banner 的驗收模式除外）；**剩 ≤14 天 → 結算表提醒一行**「憑證 N 天後（YYYY-MM-DD）到期；新一季憑證要等舊的失效才發，不用提前要，到期後第一次生圖撞 401，Claude 會照共用須知第二節自己換（SSO 過期時要你登入一次）」；剩 >14 天 → 不提，保持安靜。措辭一律「找主任拿」，**不寫任何取得憑證的網址或流程**
+- **image-studio 已裝？**（生圖的唯一引擎，不在 kit 內）：`~/.claude/skills/image-studio/` 目錄存在？`~/.config/image-studio/credentials.json` 存在？——**本精靈只偵測、不代裝**，首裝流程在 `references/image-studio-共用須知.md` 第二節〈首裝流程〉；未裝或憑證過期＝**沒有替代線**，結算表提醒一行「生圖引擎未裝／憑證過期 → 所有生圖 skill（imagen 系列、generate2dsprite、generate2dmap、cannon-*、boss-design／boss-props／boss-scene、pet-*）完全不能用，照共用須知第二節〈首裝流程〉安裝（要先切離 auto mode）」（imagen-banner 的驗收模式、三條線的道具 ICON 後製 `pet-parts/scripts/item_icon.py` 都只吃 Pillow，缺引擎仍可用，提醒時附註一句）
+  - **憑證剩餘天數**：讀 `credentials.json` 的 `expiresAt`（ISO 8601、UTC，例 `2026-10-05T16:00:00.000Z`），與今天相減取天數，三段處理——已過期 → 同上，生圖 skill 全停（imagen-banner 的驗收模式除外）；**剩 ≤14 天 → 結算表提醒一行**「憑證 N 天後（YYYY-MM-DD）到期；新一季憑證要等舊的失效才發，不用提前要，到期後第一次生圖撞 401，Claude 會照共用須知第二節自己換（SSO 過期時要你登入一次）」；剩 >14 天 → 不提，保持安靜。流程一律指向共用須知第二節，不在這裡重寫
 - **環境依賴**（企劃／原型／文件類 skill 不需要，只影響生圖、測試、試玩迴圈；data-report-builder 生成的報表 skill 另需 pandas + plotnine，用到再裝）：
   - `python --version` 有 3.10+？
   - `python -c "import PIL"`、`python -c "import playwright"`、`python -c "import imageio_ffmpeg"` 各自過不過？（缺任一 → 第 3 節第 5 步的 `pip install -r` 一次補齊）
@@ -61,16 +61,17 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 | game-develop | imagen、imagen-ui、generate2dsprite、generate2dmap、webapp-testing、art-style-guard、image-to-prompt | 生圖 / 後製 / QA 全部轉派這些 sub-skill |
 | playtest-loop | agents dialogue-writer、game-balance-auditor | 收割後的文筆 / 數值修正轉派 |
 | plan-dept14-writer | plan-doc-qa | 產出後的一致性複查 |
-| plan-doc-qa | plan-dept14-writer | `references/notion-access.md`（Notion 金鑰位置與紀律，兩支共用） |
+| plan-doc-qa | plan-dept14-writer | `references/notion-access.md`（Notion 憑證取用、首裝／換新與紀律，兩支共用） |
 | cannon-parts、cannon-storyboard | cannon-wing | 定稿圖當參考；cannon-parts 另用 `scripts/recolor.py` |
 | boss-design、boss-props、boss-scene、pet-parts、weapon-design、weapon-parts | pet-evolution | `scripts/fetch_plan.py`（讀 Notion 企劃） |
+| pet-evolution、art-request-sheet、avatar-proposal、plan-doc-qa（所有讀寫 Notion 的 skill） | plan-dept14-writer | `scripts/notion_rest.py`（Notion proxy 共用模組）；它再吃 kit 根目錄 `references/scripts/notion_credentials.py`（本機憑證管理，不是 skill、不用裝，在 clone 裡即可） |
 | boss-scene、pet-parts、weapon-design、weapon-parts | boss-design | `scripts/fit_canvas.py`（`--cover` 背景裁 16:9；weapon 線用 `--height`／`--whole` 補灰底） |
 | weapon-parts | weapon-design、pet-parts | 定稿圖當參考；pet-parts 的 `scripts/label_frames.py`（分鏡標籤） |
-| avatar-proposal | image-studio、plan-dept14-writer | `image-studio-client.py`（示意圖）；`plan-dept14-writer/scripts/notion_rest.py`（Notion REST 共用模組，`scripts/notion_api.py` 只是轉接）；`references/notion-access.md`（金鑰位置與部門判斷）；建頁／換圖需一部 readwrite（Tim） |
+| avatar-proposal | image-studio、plan-dept14-writer | `image-studio-client.py`（示意圖）；`plan-dept14-writer/scripts/notion_rest.py`（Notion REST 共用模組，`scripts/notion_api.py` 只是轉接）；`references/notion-access.md`（憑證與部門判斷）；建頁／換圖用一部憑證，先取得同意 |
 | 全部生圖 skill（boss／cannon／pet／weapon 線、imagen、imagen-banner、avatar-proposal） | plan-dept14-writer | 貼回企劃走 `scripts/paste_images.py`＋`references/image-slots.md`（只是交付指引，不影響生圖本身） |
 | cannon-wing、weapon-parts（pet-parts 自用） | pet-parts | `scripts/item_icon.py`（道具 ICON 後製：裁定稿、去灰底、疊底板，出 512＋256／128／64 預覽；只吃 Pillow，不用生圖引擎） |
 | boss-demo | generate2dsprite、boss-design | 去背腳本；`boss設計法則.md` 第四節 Spine 限制 |
-| art-request-sheet | plan-dept14-writer | `scripts/notion_rest.py`（部門金鑰讀企劃）、`references/notion-access.md`；另需 Google Sheets connector，貼圖用 Claude in Chrome（缺了退手貼清單） |
+| art-request-sheet | plan-dept14-writer | `scripts/notion_rest.py`（部門憑證讀企劃）、`references/notion-access.md`；另需 Google Sheets connector，貼圖用 Claude in Chrome（缺了退手貼清單） |
 
 使用者說「X 不要裝」要進略過清單時，先查這張表：X 若是某一列的「依賴」欄，一句話警告「略過 X 會讓 Y、Z 的某功能壞」（例：略過 generate2dsprite → imagen-ui 的去背不能跑）。使用者仍要略過就照辦，結算表 ⛔ 那行附註連帶影響。
 
@@ -132,7 +133,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 ### 環境
 
 - **仍缺的依賴**：第 3 節第 5 步沒裝或裝失敗的 → 逐項列「缺 X → Y skill 不能跑 / 退到 Z fallback」（例：缺 chrome-devtools MCP → playtest-loop 退到手貼 `exportDevNotes()`；缺 playwright → webapp-testing 不能跑，game-develop 的玩法 QA 走 chrome-devtools fallback）
-- **生圖引擎缺席**：image-studio 未裝或 `credentials.json` 過期 → 列一行「生圖 skill 全部停用（沒有替代線；imagen-banner 的驗收模式仍可用）→ 找主任拿安裝包」；kit 不代裝、不寫安裝路徑與憑證細節
+- **生圖引擎缺席**：image-studio 未裝或 `credentials.json` 過期 → 列一行「生圖 skill 全部停用（沒有替代線；imagen-banner 的驗收模式仍可用）→ 照 `references/image-studio-共用須知.md` 第二節〈首裝流程〉安裝（需使用者先切離 auto mode）」；kit 不寫憑證細節
 - **憑證即將到期**（第 1 節讀到的 `expiresAt` 剩 ≤14 天）：列一行「憑證 N 天後（YYYY-MM-DD）到期；新一季憑證要等舊的失效才發，到期後第一次生圖撞 401，Claude 會照共用須知第二節自己換（SSO 過期時要你登入一次）」——健檢模式只跑第 1、5 節，這行是定期健檢的人唯一會看到預警的地方，不可略過；剩 >14 天不列
 - **僅健檢模式**（第 1 節 + 第 5 節）：一樣列出來，附指令，不裝
 
@@ -179,8 +180,8 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 ```
 🩺 開場健檢:CLAUDE.md 96 行 / skills 0 / agents 0 / secretary 無
 🧰 環境:Python 3.13 ✔ / Pillow ✔ / Playwright ✔(本次裝) / chrome-devtools MCP ✘(你說先不裝→playtest-loop 退手貼模式)
-🎨 生圖引擎 image-studio:✘ 未裝 → 所有生圖 skill(imagen 系列 / generate2dsprite / generate2dmap / cannon-* / boss-design、props、scene / pet-*)完全不能用,沒有替代線,找主任拿安裝包(imagen-banner 的驗收模式只吃 Pillow,仍可用)
-   (已裝但憑證快到期時改成這行)⏳ 生圖引擎憑證:17 天後(2026-10-05)到期;新一季憑證要等舊的失效才發,到期當天再找主任拿,那天別排生圖
+🎨 生圖引擎 image-studio:✘ 未裝 → 所有生圖 skill(imagen 系列 / generate2dsprite / generate2dmap / cannon-* / boss-design、props、scene / pet-*)完全不能用,沒有替代線,照 references/image-studio-共用須知.md 第二節〈首裝流程〉安裝(imagen-banner 的驗收模式只吃 Pillow,仍可用)
+   (已裝但憑證快到期時改成這行)⏳ 生圖引擎憑證:17 天後(2026-10-05)到期;新一季憑證要等舊的失效才發,撞到 401 時 Claude 會照共用須知第二節自己換
 🧩 Claude in Chrome:未裝 → 自己點一下 https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn,裝完在 Claude Code 打 /chrome 選 Enabled by default
 ✅ 新裝 skills(N,junction):starter-setup、product-planning、imagen …
 ✅ 新裝 agents(3):dialogue-writer、game-balance-auditor、planning-doc-auditor

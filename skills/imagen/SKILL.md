@@ -106,7 +106,7 @@ allowed-tools:
 
 使用者確認後直接把中文 prompt 翻成英文（忠於原文、不增不減，common.md §4）。**長寬比與解析度沒有對應 flag，要寫進 prompt 文字**（例：`3:4 portrait aspect ratio, 2K resolution`）。
 
-接著依 draw-engines.md §1 確認引擎可用（image-studio 已裝＋憑證未過期，**整個任務只判這一次**）：可用 → Phase 5；不可用 → 生圖停止，請使用者向主任索取安裝包，不改走其他生圖途徑。
+接著依 draw-engines.md §1 確認引擎可用（image-studio 已裝＋憑證未過期，**整個任務只判這一次**）：可用 → Phase 5；不可用 → 生圖停止，照 kit `references/image-studio-共用須知.md` 第二節處理（沒裝過走〈首裝流程〉、過期走換季流程），不改走其他生圖途徑。
 
 使用者只要 prompt 文字、不要實際生圖 → 走 Phase 5.5。
 
