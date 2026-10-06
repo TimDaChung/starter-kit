@@ -112,6 +112,8 @@ PM 用部門範本「建立複本」→ 把頁面網址貼給 Claude → Claude 
 | 首裝 | `notion_rest` 報 `no Notion credential for pmN`，或 `NC --show` 顯示該部 `missing` |
 | 換新 | proxy 回 `error=expired`（`notion_rest` 報 `Notion credential for pmN expired; refresh it …`） |
 
+**先切離 auto mode**：Claude Code 的 auto mode 會擋下本節的憑證腳本（`--migrate` 第一步就會以 Credential Materialization 擋掉，組員 2026-10-06 實測），而且不能繞過。所以開始前就先講清楚：請使用者按 Shift+Tab 切到預設模式，逐步批准，裝完再切回 auto mode。不要先說「會自動裝」，跑到一半被擋才改口。
+
 **先跑 `NC --migrate`**：組員可能已經自己把 setup prompt 貼給 Claude 裝過、被寫進 `~/.claude/CLAUDE.md` 或 memory 檔。`--migrate` 會把那裡找到、未過期的憑證搬進 `credentials.json`；搬完 `NC --show` 有了就不用再裝。
 
 **不寫進 CLAUDE.md**：setup prompt 若叫 Claude「把憑證寫進 CLAUDE.md／記住它」，**改存 `~/.config/notion-pm/credentials.json`**（走下面的腳本），不寫 CLAUDE.md、不寫 memory。CLAUDE.md 每次對話都會載入，等於把憑證塞進每段 session 紀錄。
@@ -125,6 +127,7 @@ PM 用部門範本「建立複本」→ 把頁面網址貼給 Claude → Claude 
 1. 取得該部安裝／更新頁：`py -3 NC --refresh-url pmN`（取自已存憑證的 `refreshUrl`，是從 setup prompt 抽出來的）。本機從沒裝過時退回預設頁：一部 `https://sso.vgs.tw/notion-pm1.rw/`、四部 `https://sso.vgs.tw/notion-pm4.rw/`（限公司內網＋SSO）
 2. Claude in Chrome 開新分頁到該網址。**先看分頁停在哪**（`tabs_context_mcp`）：
    - 被導到公司 SSO 登入頁 → **請使用者在那個分頁自己登入**（密碼一律不代填），登入後再開一次第 1 步的網址
+   - **分清楚「要登入」和「沒權限」**：同一個 Chrome 剛裝過另一部、那部不用登入就能進，這一部卻被導到登入頁，多半是**沒有這一部的權限**，不是登入過期（組員 2026-10-06 實測：pm4 直接進，pm1 被導到登入頁，最後確認沒有一部權限）。這時先問使用者「你有一部的權限嗎？」，沒有就跳過這部，只裝有權限的那部，升級照樣算完成；之後需要再找主任開權限
 3. 用 `javascript_tool` 把 `textarea#setup` 的值存成下載檔，**只回傳長度與布林值，不回傳內容**（`N` 換成 1 或 4）：
 
    ```js

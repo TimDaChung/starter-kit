@@ -6,7 +6,9 @@
 
 - **Notion 首裝先確定部別，只裝需要的那部**（組員建議）：v3.21.0 升級動作第 3 步寫「缺哪部就直接裝」，兩部都缺時 Claude 會兩部都裝；實跑時先裝 pm4，開 pm1 時卡在 SSO 登入頁，等使用者登入後才知道他只屬於四部。`notion-access.md` §3 新增：兩部都 `missing` 時，先從 memory／工作內容推斷部別再用一句話確認，推斷不出來就直接問；使用者明說兩部都要才兩部都裝。換新不受影響
 - **設定頁叫使用者「貼給 Claude」的文案，kit 端先擋**（組員建議，部分採納）：SSO 設定頁的 setup prompt 開頭寫「寫入你的持久 memory（CLAUDE.md／AGENTS.md）」，使用者照做就會把 auth 貼進對話（2026-10-06 實際發生）。設定頁不在 kit 的管轄範圍，頁面文案要由頁面維護方改（待主任轉達）；kit 這邊在 `notion-access.md` §3 開頭與退路第 1 步補上：請使用者開設定頁時，先講一句「頁面會叫你貼給 Claude，不要貼」；已經貼了就照實告知 auth 已進紀錄、回報主任
-- ⚙️ **升級動作**（取代 v3.21.0 第 3 步）：`--show` 若有部門是 `missing`，先照 `notion-access.md` §3〈首裝先確定部別〉判斷使用者屬於哪部，只裝那部；已經兩部都裝好的不用動
+- **Notion 憑證安裝要先切離 auto mode**（組員建議）：v3.21.0 升級動作寫「自動執行，不先問」，但在 auto mode 下第 1 步 `--migrate` 就被分類器以 Credential Materialization 擋掉，使用者聽到的是「會自動裝」，結果跟實際對不上，多來回兩輪。`notion-access.md` §3 開頭補上：開始前先請使用者 Shift+Tab 切到預設模式、逐步批准，裝完切回（寫法同 image-studio 首裝）。`starter-setup` 執行升級動作的規則新增 (d)：動到憑證、外部程式的升級動作先講要切離 auto mode，不要被擋了才改口
+- **SSO 分清楚「要登入」和「沒權限」**（組員建議）：§3 主路徑第 2 步補上：同一個 Chrome 另一部不用登入就能進、這一部卻被導到登入頁，多半是沒有這部的權限。先問使用者，沒有就跳過這部，升級照樣算完成
+- ⚙️ **升級動作**（取代 v3.21.0 第 3 步；在 auto mode 下要先請使用者切離）：`--show` 若有部門是 `missing`，先照 `notion-access.md` §3〈首裝先確定部別〉判斷使用者屬於哪部，只裝那部；已經兩部都裝好的不用動
 
 ## v3.21.0 (2026-10-06)
 
@@ -17,7 +19,7 @@
   - `notion-access.md` 改寫：憑證在本機不在網芳；**首裝與換新同一套流程，由 Claude 協助**（Claude in Chrome 開該部頁 → SSO 登入請使用者自己登 → JS 存成下載檔 → `--from-downloads` → `--show`；Chrome 不可用退剪貼簿）；setup prompt 叫 Claude 寫進 CLAUDE.md 時改存 json；過期判準只認 `error=expired`；部門判斷、回寫護欄、地雷表照舊
   - 以假 setup prompt 與假家目錄跑 pytest 21 項（解析／安裝／備份／拒裝過期／discover＋migrate／原地替換／分部門下載／剪貼簿 mock／提醒一次／header 與 URL／expired／寫入逾時不重送／dev- 不走 proxy／404 輪流試）全過；**尚未對真 proxy 實測**
 - **image-studio 缺裝／過期改指向共用須知流程**：`image-studio-共用須知.md` 新增〈首裝流程〉（設定頁的 prompt 是含官方 `agent-install.py` 的完整安裝；auto mode 會擋，請使用者先 Shift+Tab 切離 auto mode 逐步批准、裝完切回；**未實測**）；`imagen` 系列、魚機各線、`starter-setup`、README／安裝說明／功能說明裡「找主任拿安裝包」改指向該節。生圖引擎唯一、不改走其他生圖途徑的條款不變
-- ⚙️ **升級動作**（自動執行，不先問）：
+- ⚙️ **升級動作**（~~自動執行，不先問~~ 已於 v3.21.1 推翻：auto mode 會擋，先請使用者切離）：
   1. `py -3 %USERPROFILE%\starter-kit\references\scripts\notion_credentials.py --migrate`
   2. 同腳本 `--show`，回報兩部的使用者與到期日（不印 auth）
   3. ~~缺哪部（pm1／pm4）就直接照 `skills/plan-dept14-writer/references/notion-access.md` §3 的安裝流程裝~~（已於 v3.21.1 推翻：先確定部別，只裝需要的那部），裝完再 `--show` 回報。只有被導到 SSO 登入頁時停下來請使用者在該分頁自己登入，登入後繼續
