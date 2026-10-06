@@ -40,11 +40,24 @@ for t in tabs[-8:]:
 
 `~/.config/image-studio/credentials.json` 裡的 `expiresAt` 就是到期時間。過期後一律 401、生不了圖。
 
-- 換發方式：到期或 401 後**找主任拿**新一季憑證，照主任給的 setup 流程裝上；kit 與 image-studio 官方 skill 都不含換發腳本
 - **不要提前換**：新一季的憑證要等舊的失效才會發布，提早抓只會拿到同一份
-- kit 不含任何憑證，組員缺裝時找主任拿
+- kit 不含任何憑證；新一季的 setup prompt 自己沒有管道拿就**找主任拿**
 
----
+### 換季只換憑證：用 kit 的腳本裝，不跑官方安裝程式
+
+client 程式沒改的季度，換季只需要覆寫 `credentials.json`（`baseUrl`／`token`／`expiresAt` 三欄）。**不要每季都跑官方 `agent-install.py`**——Claude Code 開 auto mode 時，「下載外部程式再執行」會被安全機制擋下，而且加 allow 規則也沒用（組員 2026-10-06 實測兩次）。
+
+1. 把新一季的 setup prompt **整段存成一個 txt 檔**（例：`Downloads\image-studio-setup.txt`）。**不要貼進對話**——裡面有 token，貼了就進 session 紀錄
+2. 請 Claude 跑（或自己在提示列用 `!` 開頭跑）：
+
+   ```
+   py -3 %USERPROFILE%\starter-kit\references\scripts\refresh_credentials.py --from-file %USERPROFILE%\Downloads\image-studio-setup.txt
+   ```
+
+3. 腳本會：抽出那段 JSON（三欄缺一就報錯不寫）→ 拒裝已過期的憑證 → 舊檔備份成 `credentials.json.bak` → 寫入新檔 → **刪掉來源 txt**（加 `--keep-source` 才保留）→ 印出不含 token 的摘要（網址、到期日、剩幾天）
+4. 只想查目前憑證幾天後到期：`--show`
+
+**什麼時候還是要跑官方安裝程式**：官方發布說明有提到 client 或 SKILL.md 改版、或 `~/.claude/skills/image-studio/` 根本不存在（新裝）。這時被 auto mode 擋下，請使用者自己在提示列用 `!` 跑那支安裝程式；**不要把含 token 的 JSON 寫在 `!` 指令裡**，改成先存檔。
 
 ## 三、平台會偶發異常
 
