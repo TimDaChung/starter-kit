@@ -31,7 +31,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 - `%USERPROFILE%\starter-kit` 已 clone？（已有就 `git pull`，記 CHANGELOG 新增段落）
 - secretary(skills/secretary)→ 歸「自有」，本精靈完全不碰
 - **image-studio 已裝？**（生圖的唯一引擎，主任另行發放、不在 kit 內）：`~/.claude/skills/image-studio/` 目錄存在？`~/.config/image-studio/credentials.json` 存在？——**只偵測、不能代裝、不給安裝路徑與憑證細節**；未裝或憑證過期＝**沒有替代線**，結算表提醒一行「生圖引擎未裝／憑證過期 → 所有生圖 skill（imagen 系列、generate2dsprite、generate2dmap、cannon-*、boss-design／boss-props／boss-scene、pet-*）完全不能用，必須找主任拿安裝包」（imagen-banner 的驗收模式、三條線的道具 ICON 後製 `pet-parts/scripts/item_icon.py` 都只吃 Pillow，缺引擎仍可用，提醒時附註一句）
-  - **憑證剩餘天數**：讀 `credentials.json` 的 `expiresAt`（ISO 8601、UTC，例 `2026-10-05T16:00:00.000Z`），與今天相減取天數，三段處理——已過期 → 同上，生圖 skill 全停（imagen-banner 的驗收模式除外）；**剩 ≤14 天 → 結算表提醒一行**「憑證 N 天後（YYYY-MM-DD）到期；新一季憑證要等舊的失效才發，不用提前要，到期當天再找主任拿，那天別排生圖；拿到後照共用須知第二節用 kit 腳本裝」；剩 >14 天 → 不提，保持安靜。措辭一律「找主任拿」，**不寫任何取得憑證的網址或流程**
+  - **憑證剩餘天數**：讀 `credentials.json` 的 `expiresAt`（ISO 8601、UTC，例 `2026-10-05T16:00:00.000Z`），與今天相減取天數，三段處理——已過期 → 同上，生圖 skill 全停（imagen-banner 的驗收模式除外）；**剩 ≤14 天 → 結算表提醒一行**「憑證 N 天後（YYYY-MM-DD）到期；新一季憑證要等舊的失效才發，不用提前要，到期後第一次生圖撞 401，Claude 會照共用須知第二節自己換（SSO 過期時要你登入一次）」；剩 >14 天 → 不提，保持安靜。措辭一律「找主任拿」，**不寫任何取得憑證的網址或流程**
 - **環境依賴**（企劃／原型／文件類 skill 不需要，只影響生圖、測試、試玩迴圈；data-report-builder 生成的報表 skill 另需 pandas + plotnine，用到再裝）：
   - `python --version` 有 3.10+？
   - `python -c "import PIL"`、`python -c "import playwright"`、`python -c "import imageio_ffmpeg"` 各自過不過？（缺任一 → 第 3 節第 5 步的 `pip install -r` 一次補齊）
@@ -133,7 +133,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 
 - **仍缺的依賴**：第 3 節第 5 步沒裝或裝失敗的 → 逐項列「缺 X → Y skill 不能跑 / 退到 Z fallback」（例：缺 chrome-devtools MCP → playtest-loop 退到手貼 `exportDevNotes()`；缺 playwright → webapp-testing 不能跑，game-develop 的玩法 QA 走 chrome-devtools fallback）
 - **生圖引擎缺席**：image-studio 未裝或 `credentials.json` 過期 → 列一行「生圖 skill 全部停用（沒有替代線；imagen-banner 的驗收模式仍可用）→ 找主任拿安裝包」；kit 不代裝、不寫安裝路徑與憑證細節
-- **憑證即將到期**（第 1 節讀到的 `expiresAt` 剩 ≤14 天）：列一行「憑證 N 天後（YYYY-MM-DD）到期；新一季憑證要等舊的失效才發，到期當天再找主任拿，那天別排生圖；拿到後照共用須知第二節用 kit 腳本裝」——健檢模式只跑第 1、5 節，這行是定期健檢的人唯一會看到預警的地方，不可略過；剩 >14 天不列
+- **憑證即將到期**（第 1 節讀到的 `expiresAt` 剩 ≤14 天）：列一行「憑證 N 天後（YYYY-MM-DD）到期；新一季憑證要等舊的失效才發，到期後第一次生圖撞 401，Claude 會照共用須知第二節自己換（SSO 過期時要你登入一次）」——健檢模式只跑第 1、5 節，這行是定期健檢的人唯一會看到預警的地方，不可略過；剩 >14 天不列
 - **僅健檢模式**（第 1 節 + 第 5 節）：一樣列出來，附指令，不裝
 
 ### skills

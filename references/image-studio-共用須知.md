@@ -38,26 +38,53 @@ for t in tabs[-8:]:
 
 ## 二、憑證到期
 
-`~/.config/image-studio/credentials.json` 裡的 `expiresAt` 就是到期時間。過期後一律 401、生不了圖。
+`~/.config/image-studio/credentials.json` 裡的 `expiresAt` 就是到期時間。過期後算圖一律回 **HTTP 401**（client 報 `API key expired/invalid`）。
 
-- **不要提前換**：新一季的憑證要等舊的失效才會發布，提早抓只會拿到同一份
-- kit 不含任何憑證；新一季的 setup prompt 自己沒有管道拿就**找主任拿**
+- **不要提前換**：新一季的憑證要等舊的失效才會發布，提早抓只會拿到同一份。**只在撞到 401 之後換**
+- **token 全程不得出現在對話、log、commit、Slack**。以下流程刻意讓 token 只走「瀏覽器 → 下載檔 → 腳本 → `credentials.json`」
+- 換季只換憑證，**不要每季都跑官方 `agent-install.py`**——Claude Code 開 auto mode 時「下載外部程式再執行」會被擋，加 allow 規則也沒用（組員 2026-10-06 實測兩次）
 
-### 換季只換憑證：用 kit 的腳本裝，不跑官方安裝程式
+腳本：`%USERPROFILE%\starter-kit\references\scripts\refresh_credentials.py`（以下簡稱 `RC`）
 
-client 程式沒改的季度，換季只需要覆寫 `credentials.json`（`baseUrl`／`token`／`expiresAt` 三欄）。**不要每季都跑官方 `agent-install.py`**——Claude Code 開 auto mode 時，「下載外部程式再執行」會被安全機制擋下，而且加 allow 規則也沒用（組員 2026-10-06 實測兩次）。
+### 撞到 401 時，Claude 自己換（主路徑，使用者不用動手）
 
-1. 把新一季的 setup prompt **整段存成一個 txt 檔**（例：`Downloads\image-studio-setup.txt`）。**不要貼進對話**——裡面有 token，貼了就進 session 紀錄
-2. 請 Claude 跑（或自己在提示列用 `!` 開頭跑）：
+**執行角色**：主線 session（要開瀏覽器、寫本機憑證檔，不派 sub-agent）。需要 Claude in Chrome 已連線。
 
+1. 取得憑證頁位址（從本機既有憑證的 `baseUrl` 組出來，kit 不寫死網址）：`py -3 RC --page-url`
+2. Claude in Chrome 開新分頁到該位址。**先看分頁停在哪**（`tabs_context_mcp`）：
+   - 被導到公司 SSO 登入頁 → **請使用者在那個分頁登入**（密碼一律不代填），登入後再開一次第 1 步的位址
+   - 分頁自己跳回 `chrome://newtab`、JS 無法執行 → 多半也是 SSO 過期，改開 `baseUrl` 首頁確認，會停在登入頁
+3. 用 `javascript_tool` 把頁面 textarea 裡的 setup prompt 存成下載檔，**只回傳長度與布林值，不回傳內容**：
+
+   ```js
+   const ta = document.querySelector('textarea');
+   const blob = new Blob([ta.value], {type: 'text/plain'});
+   const a = document.createElement('a');
+   a.href = URL.createObjectURL(blob);
+   a.download = 'image-studio-setup.txt';
+   document.body.appendChild(a); a.click(); a.remove();
+   JSON.stringify({len: ta.value.length, ok: ta.value.includes('credentials.json')})
    ```
-   py -3 %USERPROFILE%\starter-kit\references\scripts\refresh_credentials.py --from-file %USERPROFILE%\Downloads\image-studio-setup.txt
-   ```
 
-3. 腳本會：抽出那段 JSON（三欄缺一就報錯不寫）→ 拒裝已過期的憑證 → 舊檔備份成 `credentials.json.bak` → 寫入新檔 → **刪掉來源 txt**（加 `--keep-source` 才保留）→ 印出不含 token 的摘要（網址、到期日、剩幾天）
-4. 只想查目前憑證幾天後到期：`--show`
+   回傳裡看到 token 就是做錯了。`ok` 為 false 或找不到 textarea → 走下面的退路
+4. 裝上：`py -3 RC --from-downloads`。腳本會抽出 JSON（三欄缺一就報錯不寫）→ 拒裝已過期的 → 舊檔備份成 `credentials.json.bak` → 寫入新檔 → **刪掉下載資料夾裡所有 `image-studio-setup*.txt`** → 印出不含 token 的摘要
+5. 關掉分頁，回報新的到期日，**重跑原本被 401 擋下的那次算圖**
 
-**什麼時候還是要跑官方安裝程式**：官方發布說明有提到 client 或 SKILL.md 改版、或 `~/.claude/skills/image-studio/` 根本不存在（新裝）。這時被 auto mode 擋下，請使用者自己在提示列用 `!` 跑那支安裝程式；**不要把含 token 的 JSON 寫在 `!` 指令裡**，改成先存檔。
+> **剪貼簿路線不可用**：憑證頁的「複製」按鈕在自動化分頁裡按下去寫不進系統剪貼簿，一律走上面的下載檔。
+
+### 退路（照順序退，不跳級）
+
+| 狀況 | 怎麼辦 |
+|---|---|
+| Claude in Chrome 沒連上 | 請使用者自己開憑證頁（`--page-url` 印出的位址），把 setup prompt 整段存成 `Downloads\image-studio-setup.txt`，再由 Claude 跑第 4 步 |
+| 頁面結構變了（找不到 textarea） | 同上 |
+| `--page-url` 報「not installed」 | 本機從沒裝過 image-studio，不是換季——找主任拿安裝包 |
+
+請使用者接手時講清楚：去哪一頁、複製哪段、存成什麼檔名，存好後 Claude 接手裝。**不要請使用者把 setup prompt 貼進對話**——那會讓 token 進 session 紀錄。
+
+### 什麼時候還是要跑官方安裝程式
+
+新裝 image-studio，或官方發布說明有提到 client／SKILL.md 改版。被 auto mode 擋下時請使用者自己在提示列用 `!` 跑；**不要把含 token 的 JSON 寫在 `!` 指令裡**，先存檔再讀。
 
 ## 三、平台會偶發異常
 

@@ -6,8 +6,10 @@ that block and writes it to ~/.config/image-studio/credentials.json without ever
 printing the token.
 
 Usage:
+    py -3 refresh_credentials.py --page-url        # print the setup page URL (built from the local baseUrl)
+    py -3 refresh_credentials.py --from-downloads  # install the newest ~/Downloads/image-studio-setup*.txt
     py -3 refresh_credentials.py --from-file <setup-prompt.txt> [--keep-source]
-    py -3 refresh_credentials.py --show          # report current expiry only
+    py -3 refresh_credentials.py --show            # report current expiry only
 """
 
 from __future__ import annotations
@@ -24,6 +26,8 @@ from typing import Any
 
 CREDENTIALS_PATH = Path.home() / ".config" / "image-studio" / "credentials.json"
 REQUIRED_KEYS = ("baseUrl", "token", "expiresAt")
+SETUP_PAGE_PATH = "/agent-api"
+DOWNLOAD_GLOB = "image-studio-setup*.txt"
 JSON_BLOCK = re.compile(r"\{[^{}]*\"token\"[^{}]*\}", re.DOTALL)
 
 
@@ -78,6 +82,26 @@ def show_current() -> int:
     return 0
 
 
+def page_url() -> int:
+    """Print the setup page URL, derived from the installed credential's baseUrl."""
+    if not CREDENTIALS_PATH.exists():
+        print(f"no credential at {CREDENTIALS_PATH}; image-studio is not installed yet", file=sys.stderr)
+        return 1
+    current = json.loads(CREDENTIALS_PATH.read_text(encoding="utf-8"))
+    print(current["baseUrl"].rstrip("/") + SETUP_PAGE_PATH)
+    return 0
+
+
+def newest_download() -> Path | None:
+    """Newest setup prompt saved by the browser into ~/Downloads (handles 'name (1).txt')."""
+    candidates = sorted(
+        (Path.home() / "Downloads").glob(DOWNLOAD_GLOB),
+        key=lambda p: p.stat().st_mtime,
+        reverse=True,
+    )
+    return candidates[0] if candidates else None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--from-file", type=Path, help="file holding the setup prompt")
@@ -89,7 +113,25 @@ def main() -> int:
     parser.add_argument(
         "--show", action="store_true", help="report the installed credential's expiry"
     )
+    parser.add_argument(
+        "--page-url", action="store_true", help="print the setup page URL from the local baseUrl"
+    )
+    parser.add_argument(
+        "--from-downloads",
+        action="store_true",
+        help=f"install the newest ~/Downloads/{DOWNLOAD_GLOB}",
+    )
     args = parser.parse_args()
+
+    if args.page_url:
+        return page_url()
+
+    if args.from_downloads:
+        found = newest_download()
+        if found is None:
+            print(f"no {DOWNLOAD_GLOB} in {Path.home() / 'Downloads'}", file=sys.stderr)
+            return 1
+        args.from_file = found
 
     if args.show or args.from_file is None:
         return show_current()
@@ -112,6 +154,10 @@ def main() -> int:
     write_credentials(credentials)
     if not args.keep_source:
         source.unlink()
+        if args.from_downloads:
+            # older browser copies hold tokens too; never leave them lying around
+            for leftover in (Path.home() / "Downloads").glob(DOWNLOAD_GLOB):
+                leftover.unlink()
     print(f"installed {CREDENTIALS_PATH}")
     print(describe(credentials))
     return 0

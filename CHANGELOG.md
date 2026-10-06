@@ -2,6 +2,15 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.20.1 (2026-10-06)
+
+- **image-studio 換 key 改成 Claude 自己抓**（Tim 指出 v3.20.0 還要使用者自己存檔）：撞到 401 時 Claude 用 Claude in Chrome 開憑證頁、把 setup prompt 存成下載檔、跑腳本裝好，使用者只有在公司 SSO 登入過期時要登入一次。憑證頁位址由本機 `credentials.json` 的 `baseUrl` 組出，kit 照舊不寫死網址
+  - `refresh_credentials.py` 新增 `--page-url`（印出憑證頁位址）與 `--from-downloads`（自動找下載資料夾最新的 `image-studio-setup*.txt`，裝完把同名舊檔一併刪除——舊檔也含 token）
+  - `image-studio-共用須知.md` 第二節改寫：主路徑＝Claude 自己抓；SSO 登入頁與分頁跳回 newtab 的處理；Chrome 沒連上才退回請使用者存檔
+  - `starter-setup` 到期提醒句改成「撞 401 時 Claude 會自己換」
+  - Tim 機器上以真憑證頁實跑：開頁 → 下載 → `--from-downloads` 裝上，全程 token 未出現在對話；組員機器上的 Chrome 段未驗證
+- ⚙️ **升級動作**：`git pull` 即生效，無設定變更
+
 ## v3.20.0 (2026-10-06)
 
 - **新增 `references/scripts/refresh_credentials.py`：image-studio 換季只換憑證**（組員回報）：回報者換季時照官方流程讓 Claude 下載並執行 `agent-install.py`，被 Claude Code auto mode 以「執行外部程式」擋下，加 allow 規則也沒用（實測兩次），只能自己用 `!` 指令跑。client 沒改的季度其實只要覆寫 `credentials.json` 三欄——本腳本從存成檔的 setup prompt 抽出 JSON、拒裝過期憑證、備份舊檔、寫入新檔、刪掉含 token 的來源檔，輸出全程不含 token。原為 Tim 本機自用，2026-10-06 以假憑證四情境（無 JSON／已過期／正常／備份與刪檔）測過，同日以真憑證換發成功
