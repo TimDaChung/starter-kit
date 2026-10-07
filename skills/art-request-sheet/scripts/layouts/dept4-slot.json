@@ -1,0 +1,94 @@
+{
+  "name": "dept4-slot",
+  "note": "四部機台美術需求表。規格與每個值的來源（哪份範例、哪些待主任拍板）見 references/format-dept4-slot.md；改這份就要同步改那份。",
+  "body_font": null,
+  "tabs": [
+    {
+      "key": "static",
+      "title": "靜態",
+      "columns": [
+        {"header": "項目", "width": 100, "key": "item", "kind": "text", "center": true},
+        {"header": "子項目", "width": 120, "key": "sub", "kind": "text", "center": true},
+        {"header": "重要度", "width": 50, "key": "importance", "kind": "text", "center": true},
+        {"header": "動態", "width": 40, "key": "dynamic", "kind": "dynamic", "center": true},
+        {"header": "企劃示意圖", "width": 400, "key": "plan_image", "kind": "image"},
+        {"header": "描述", "width": 450, "key": "desc", "kind": "desc"},
+        {"header": "美術字需求", "width": 150, "key": "art_text", "kind": "desc"},
+        {"header": "參考圖1", "width": 300, "kind": "ref", "ref": 0},
+        {"header": "參考圖2", "width": 300, "kind": "ref", "ref": 1}
+      ],
+      "header": {"bg": "#4A86E8", "fg": "#FFFFFF", "font_family": "Microsoft JhengHei"},
+      "row2": {"bg": "#C9DAF8", "text": "ETA︰"},
+      "dynamic": {"values": ["Y", "N"], "default": ""},
+      "group_key": "item",
+      "vmerge": ["item", "plan_image", "desc"],
+      "borders": "group_bottom",
+      "group_border_style": "DOUBLE",
+      "freeze_rows": 2,
+      "row_height": {"min_px": 60, "chars_per_line": 32, "line_px": 17, "key": "desc"}
+    },
+    {
+      "key": "dynamic",
+      "title": "動態",
+      "columns": [
+        {"header": "項目", "width": 110, "key": "item", "kind": "text", "center": true},
+        {"header": "時機", "width": 130, "key": "timing", "kind": "text", "center": true},
+        {"header": "企劃示意圖", "width": 380, "key": "plan_image", "kind": "image"},
+        {"header": "描述", "width": 240, "key": "desc", "kind": "desc"},
+        {"header": "動態參考", "width": 200, "kind": "ref", "ref": 0},
+        {"header": "動態參考2", "width": 200, "kind": "ref", "ref": 1}
+      ],
+      "header": {"bg": "#4A86E8", "fg": "#FFFFFF", "font_family": "Microsoft JhengHei"},
+      "row2": {"bg": "#C9DAF8", "text": ""},
+      "group_key": "item",
+      "vmerge": ["item", "plan_image", "desc"],
+      "borders": "group_bottom",
+      "group_border_style": "DOUBLE",
+      "freeze_rows": 2,
+      "row_height": {"min_px": 60, "chars_per_line": 17, "line_px": 17, "key": "desc"}
+    },
+    {
+      "key": "naming",
+      "title": "動態命名表",
+      "columns": [
+        {"header": "No", "width": 120, "key": "no", "kind": "text", "center": true},
+        {"header": "名稱", "width": 170, "key": "name", "kind": "text"},
+        {"header": "動態檔案名稱", "width": 260, "key": "file", "kind": "text"},
+        {"header": "動態檔案裡的ANIMATION NAME", "width": 280, "key": "anim", "kind": "text", "header_bg": "#B7B7B7"},
+        {"header": "說明", "width": 320, "key": "desc", "kind": "desc"},
+        {"header": "秒數", "width": 60, "key": "secs", "kind": "text"},
+        {"header": "備註及重要流程描述", "width": 320, "key": "note", "kind": "desc"},
+        {"header": "示意圖", "width": 400, "key": "plan_image", "kind": "image"},
+        {"header": "競品參考", "width": 120, "kind": "ref", "ref": 0},
+        {"header": "補充", "width": 300, "key": "extra", "kind": "desc"}
+      ],
+      "body_font": {"family": "Microsoft JhengHei", "size": 15},
+      "header": {"bg": "#E2EFD9", "bold": true, "font_family": "Microsoft JhengHei", "font_size": 15},
+      "section": {"bg": "#70AD47", "fg": "#FFFFFF"},
+      "group_key": "name",
+      "vmerge": ["no", "name", "file"],
+      "borders": "all",
+      "freeze_rows": 1,
+      "row_height": {"min_px": 21, "chars_per_line": 18, "line_px": 22, "key": "note"}
+    },
+    {
+      "key": "help",
+      "title": "說明頁",
+      "columns": [
+        {"header": "", "width": 70, "key": "page", "kind": "text"},
+        {"header": "標題語言ID", "width": 90, "key": "lang_id", "kind": "text", "center": true},
+        {"header": "英文標題", "width": 100, "key": "title_en", "kind": "text", "center": true},
+        {"header": "繁中標題", "width": 100, "key": "title_zh", "kind": "text", "center": true},
+        {"header": "翻譯", "width": 60, "key": "translation", "kind": "text"},
+        {"header": "中文", "width": 380, "key": "text", "kind": "desc"},
+        {"header": "圖片說明", "width": 450, "key": "plan_image", "kind": "image"}
+      ],
+      "header": {"bg": "#8DB3E2", "fg": "#FFFFFF", "bold": true, "font_family": "Microsoft JhengHei", "font_size": 14},
+      "group_key": "page",
+      "vmerge": [],
+      "borders": "none",
+      "freeze_rows": 1,
+      "row_height": {"min_px": 340, "chars_per_line": 27, "line_px": 17, "key": "text"}
+    }
+  ]
+}

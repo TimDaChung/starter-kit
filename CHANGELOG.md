@@ -2,6 +2,17 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.22.0 (2026-10-06)
+
+- **`art-request-sheet` 2.0.0：拆成「一部」與「四部機台」兩套格式**。四部機台的美術需求表跟一部完全不同（多分頁、藍表頭、畫面×元件拆列、Y/N），原本只有一部格式，機台企劃只能硬套
+  - 開工先**判線**（判準同 `notion-access.md` §1：機台一律四部）：神幣＝`dept1`、機台＝`dept4-slot`；**四部非機台**（娛樂城活動、鬥地主、魚樂園）目前沒有範例格式，照實告知並停下，不硬套
+  - 參考檔分線：`format.md`／`writing-rules.md` 改名 `format-dept1.md`／`writing-rules-dept1.md`（內容不動）；新增 `format-dept4-slot.md`、`writing-rules-dept4-slot.md`，依 4 份四部 PM 實際機台表（匯出 xlsx 逐格讀過格式）整理：靜態／動態必有、動態命名表與說明頁選用；表頭 `#4A86E8` 白字、第 2 列 `#C9DAF8`（靜態寫「ETA︰」）；A 欄畫面垂直合併、B 欄元件、獎圖一 symbol 一列；描述「風格／樣式／規格」；動態分頁從企劃 2.N 動畫需求表一列對一列搬；章節對應表；版號改抓頁面屬性「上線版本」。範例彼此不一致處標「待主任拍板」：檔名格式、分頁名、重要度欄、參考圖欄數、ETA 列、凍結列數、Y/N 下拉（範例 4 份都是手打、沒有下拉）
+  - 動態命名表企劃不會寫：只建空表頭、列入缺漏，不編 spine 命名；重要度企劃不寫，留空請使用者填
+  - `build_sheet.py` 參數化：格式移到 `scripts/layouts/dept1.json`、`dept4-slot.json`，程式本體不再寫死；spec 用 `"layout"` 指定（省略＝dept1，舊 spec 照用）；支援 `tabs[]` 多分頁，第 2 個以後的分頁由 `add_sheets.json` 用 addSheet 建（spec 指定 sheetId、回覆要核對；不符就寫回 spec 重跑），每個分頁各自 `values_<k>.json`，`paste_plan.json` 多分頁時帶 `tab`
+  - 新增 `scripts/test_build_sheet.py`（pytest 15 項）：dept1 輸出與改版前 v1 腳本**逐位元相同**（基準檔在 `test_fixtures/dept1_expected/`）；dept4-slot 驗證 4 個分頁表頭、A 欄與企劃示意圖欄垂直合併、Y/N 下拉、群組雙線、紅字、多分頁貼圖清單、sheetId 撞號
+  - **尚未對真的 Google Sheets 實跑 dept4-slot**（addSheet 指定 sheetId、多分頁寫入都只驗證了 payload）
+- ⚙️ **升級動作**：無，`git pull` 即生效
+
 ## v3.21.1 (2026-10-06)
 
 - **Notion 首裝先確定部別，只裝需要的那部**（組員建議）：v3.21.0 升級動作第 3 步寫「缺哪部就直接裝」，兩部都缺時 Claude 會兩部都裝；實跑時先裝 pm4，開 pm1 時卡在 SSO 登入頁，等使用者登入後才知道他只屬於四部。`notion-access.md` §3 新增：兩部都 `missing` 時，先從 memory／工作內容推斷部別再用一句話確認，推斷不出來就直接問；使用者明說兩部都要才兩部都裝。換新不受影響

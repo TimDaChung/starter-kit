@@ -1,0 +1,29 @@
+{
+  "name": "dept1",
+  "note": "一部（神幣）美術需求表。規格說明見 references/format-dept1.md；改這份就要同步改那份。",
+  "body_font": {"family": "Microsoft JhengHei", "size": 10},
+  "tabs": [
+    {
+      "key": "main",
+      "title": "美術需求表",
+      "columns": [
+        {"header": "項目", "width": 220, "key": "item", "kind": "text", "center": true},
+        {"header": "子項目", "width": 50, "key": "sub", "kind": "text"},
+        {"header": "是否有動態", "width": 75, "key": "dynamic", "kind": "dynamic", "center": true},
+        {"header": "美術設計圖", "width": 75, "kind": "blank"},
+        {"header": "設計描述", "width": 600, "key": "desc", "kind": "desc"},
+        {"header": "美術字", "width": 140, "key": "art_text", "kind": "art_text"},
+        {"header": "參考圖1", "width": 550, "kind": "ref", "ref": 0},
+        {"header": "參考圖2", "width": 550, "kind": "ref", "ref": 1},
+        {"header": "參考圖3", "width": 550, "kind": "ref", "ref": 2}
+      ],
+      "header": {"bg": "#E2EFD9", "bold": true},
+      "row2": {"bg": "#93C47D", "merge_cols": [0, 8], "text": ""},
+      "dynamic": {"values": ["O", "X"], "default": "X"},
+      "borders": "all",
+      "freeze_rows": 0,
+      "vmerge": [],
+      "row_height": {"min_px": 330, "chars_per_line": 44, "line_px": 17, "key": "desc"}
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "layout": "dept4-slot",
+  "tabs": [
+    {
+      "tab": "static",
+      "sheet_id": 0,
+      "rows": [
+        {"item": "機台icon", "sub": "小icon", "importance": "-", "dynamic": "Y", "plan_image": "r01.png",
+         "desc": ["風格：XX 風", "", "樣式：", "1.主角手持招牌道具", "2.需求大、小icon"]},
+        {"sub": "大icon", "importance": "-", "dynamic": "Y", "plan_image": "r02.png"},
+        {"item": "主介面", "sub": "A.天列", "importance": "4", "dynamic": "N", "plan_image": "r03.png",
+         "desc": ["樣式：", "1.沿用 XX 機台天列"]},
+        {"sub": "B.背景", "importance": "3", "dynamic": "N",
+         "desc": ["風格：XX 風", "", "樣式：", "1.夜景，主色 {紫}"], "refs": ["r04.png", "r05.png"]},
+        {"sub": "C.地列", "importance": "4", "dynamic": "N", "desc": ["樣式：", "1.由左至右：投注額、贏得、開始"]},
+        {"item": "獎圖", "sub": "symbol 1", "dynamic": "Y", "plan_image": "r06.png",
+         "desc": ["樣式：", "1.依角數區分強弱"], "art_text": ["x2、x3"]},
+        {"sub": "symbol 2", "dynamic": "Y"},
+        {"sub": "symbol 3", "dynamic": "Y"},
+        {"item": "Dialog", "sub": "觸發免費轉", "dynamic": "Y", "plan_image": "r07.png",
+         "desc": ["樣式：", "1.全屏背景壓黑"], "art_text": ["1.文字：恭喜", "2.按鈕文字：開始"]}
+      ]
+    },
+    {
+      "tab": "dynamic",
+      "sheet_id": 910001,
+      "rows": [
+        {"item": "動態icon", "timing": "大廳常駐", "plan_image": "r08.png", "desc": ["動態需求：", "1.主角揮手"]},
+        {"item": "主角", "timing": "待機", "plan_image": "r09.png", "desc": ["動態需求：", "1.呼吸、眨眼"]},
+        {"timing": "觸發", "desc": ["動態需求：", "1.抬手擲出光球"], "refs": ["r10.gif"]}
+      ]
+    },
+    {"tab": "naming", "sheet_id": 910002, "rows": []},
+    {
+      "tab": "help",
+      "sheet_id": 910003,
+      "rows": [
+        {"title_zh": "基本玩法", "text": ["每局開始前可選擇投注。", "", "三出局後結算。"], "plan_image": "r11.png"}
+      ]
+    }
+  ]
+}
