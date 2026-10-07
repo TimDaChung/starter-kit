@@ -10,7 +10,7 @@
   - 動態命名表企劃不會寫：只建空表頭、列入缺漏，不編 spine 命名；重要度企劃不寫，留空請使用者填
   - `build_sheet.py` 參數化：格式移到 `scripts/layouts/dept1.json`、`dept4-slot.json`，程式本體不再寫死；spec 用 `"layout"` 指定（省略＝dept1，舊 spec 照用）；支援 `tabs[]` 多分頁，第 2 個以後的分頁由 `add_sheets.json` 用 addSheet 建（spec 指定 sheetId、回覆要核對；不符就寫回 spec 重跑），每個分頁各自 `values_<k>.json`，`paste_plan.json` 多分頁時帶 `tab`
   - 新增 `scripts/test_build_sheet.py`（pytest 15 項）：dept1 輸出與改版前 v1 腳本**逐位元相同**（基準檔在 `test_fixtures/dept1_expected/`）；dept4-slot 驗證 4 個分頁表頭、A 欄與企劃示意圖欄垂直合併、Y/N 下拉、群組雙線、紅字、多分頁貼圖清單、sheetId 撞號
-  - **尚未對真的 Google Sheets 實跑 dept4-slot**（addSheet 指定 sheetId、多分頁寫入都只驗證了 payload）
+  - **dept4-slot 已用一份真實機台企劃對空白測試表實跑完整流程**（2026-10-07）：addSheet 指定 sheetId、四分頁寫入、合併／凍結／下拉／紅字、跨分頁貼圖 23 張，全部讀回驗證通過；與美術原表比對，靜態分頁列數與拆法一致
   - **E2E 實跑抓到的 8 個問題，發版前一併修正**：
     1. `prep_images.py` 影片轉 GIF 沒有長度與大小上限（91 秒影片轉出 79 MB，超過 Chrome `file_upload` 10 MB）：改用 ffmpeg palettegen／paletteuse，預設只取前 10 秒、約 6fps、寬 360px（同一支影片實測 0.82 MB、1.4 秒轉完），`--gif-seconds`／`--gif-fps`／`--gif-width` 可調；超過 9 MB 印警告；長片印進度、輸出全部 flush；舊版留下的超大 GIF 會重轉
     2. 縮圖上限不再寫死 530×300：改讀 layout 各圖片欄的 `thumb`（新增 `--layout`、`--spec`，每張圖照它要貼的欄縮）；dept1 維持 530×300
