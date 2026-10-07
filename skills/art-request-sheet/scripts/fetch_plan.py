@@ -12,6 +12,8 @@ Writes into <out_dir>:
               <span color="gray_background">..</span> / green_background
               ~~..~~                            strikethrough (revision marks)
             media lines look like: [image 05_主介面_已達門檻.jpg]
+            table rows are one line each, cells joined by " | "; a line
+            break inside a cell is written as <br> and "|" as \\|
   NN_<caption>.<ext>  every image / video / file block, downloaded right away
             (signed URLs expire). Caption = block caption, else the nearest
             preceding 《..》 line, else the original file name.
@@ -48,6 +50,12 @@ def styled(items: list) -> str:
             text = f'<span color="{color}">{text}</span>'
         out.append(text)
     return "".join(out)
+
+
+def table_cell(items: list) -> str:
+    """One table cell for plan.md: line breaks -> <br>, "|" escaped, so a row stays on one line."""
+    text = styled(items).replace("\r\n", "\n").replace("\r", "\n")
+    return text.replace("|", "\\|").replace("\n", "<br>")
 
 
 def plain(items: list) -> str:
@@ -97,7 +105,7 @@ class Walker:
             if kind in MEDIA:
                 self.save_media(kind, payload, indent)
             elif kind == "table_row":
-                self.lines.append(indent + " | ".join(styled(c) for c in payload.get("cells", [])))
+                self.lines.append(indent + " | ".join(table_cell(c) for c in payload.get("cells", [])))
             elif kind == "child_page":
                 self.lines.append(f"{indent}[child page: {payload.get('title', '')}]")
                 continue

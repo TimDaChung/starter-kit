@@ -13,9 +13,9 @@
         {"header": "美術設計圖", "width": 75, "kind": "blank"},
         {"header": "設計描述", "width": 600, "key": "desc", "kind": "desc"},
         {"header": "美術字", "width": 140, "key": "art_text", "kind": "art_text"},
-        {"header": "參考圖1", "width": 550, "kind": "ref", "ref": 0},
-        {"header": "參考圖2", "width": 550, "kind": "ref", "ref": 1},
-        {"header": "參考圖3", "width": 550, "kind": "ref", "ref": 2}
+        {"header": "參考圖1", "width": 550, "kind": "ref", "ref": 0, "thumb": [530, 300]},
+        {"header": "參考圖2", "width": 550, "kind": "ref", "ref": 1, "thumb": [530, 300]},
+        {"header": "參考圖3", "width": 550, "kind": "ref", "ref": 2, "thumb": [530, 300]}
       ],
       "header": {"bg": "#E2EFD9", "bold": true},
       "row2": {"bg": "#93C47D", "merge_cols": [0, 8], "text": ""},

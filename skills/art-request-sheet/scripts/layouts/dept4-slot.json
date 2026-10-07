@@ -11,11 +11,11 @@
         {"header": "子項目", "width": 120, "key": "sub", "kind": "text", "center": true},
         {"header": "重要度", "width": 50, "key": "importance", "kind": "text", "center": true},
         {"header": "動態", "width": 40, "key": "dynamic", "kind": "dynamic", "center": true},
-        {"header": "企劃示意圖", "width": 400, "key": "plan_image", "kind": "image"},
+        {"header": "企劃示意圖", "width": 400, "key": "plan_image", "kind": "image", "thumb": [380, 300]},
         {"header": "描述", "width": 450, "key": "desc", "kind": "desc"},
         {"header": "美術字需求", "width": 150, "key": "art_text", "kind": "desc"},
-        {"header": "參考圖1", "width": 300, "kind": "ref", "ref": 0},
-        {"header": "參考圖2", "width": 300, "kind": "ref", "ref": 1}
+        {"header": "參考圖1", "width": 300, "kind": "ref", "ref": 0, "thumb": [280, 300]},
+        {"header": "參考圖2", "width": 300, "kind": "ref", "ref": 1, "thumb": [280, 300]}
       ],
       "header": {"bg": "#4A86E8", "fg": "#FFFFFF", "font_family": "Microsoft JhengHei"},
       "row2": {"bg": "#C9DAF8", "text": "ETA︰"},
@@ -33,10 +33,10 @@
       "columns": [
         {"header": "項目", "width": 110, "key": "item", "kind": "text", "center": true},
         {"header": "時機", "width": 130, "key": "timing", "kind": "text", "center": true},
-        {"header": "企劃示意圖", "width": 380, "key": "plan_image", "kind": "image"},
+        {"header": "企劃示意圖", "width": 380, "key": "plan_image", "kind": "image", "thumb": [360, 300]},
         {"header": "描述", "width": 240, "key": "desc", "kind": "desc"},
-        {"header": "動態參考", "width": 200, "kind": "ref", "ref": 0},
-        {"header": "動態參考2", "width": 200, "kind": "ref", "ref": 1}
+        {"header": "動態參考", "width": 200, "kind": "ref", "ref": 0, "thumb": [180, 300]},
+        {"header": "動態參考2", "width": 200, "kind": "ref", "ref": 1, "thumb": [180, 300]}
       ],
       "header": {"bg": "#4A86E8", "fg": "#FFFFFF", "font_family": "Microsoft JhengHei"},
       "row2": {"bg": "#C9DAF8", "text": ""},
@@ -58,8 +58,8 @@
         {"header": "說明", "width": 320, "key": "desc", "kind": "desc"},
         {"header": "秒數", "width": 60, "key": "secs", "kind": "text"},
         {"header": "備註及重要流程描述", "width": 320, "key": "note", "kind": "desc"},
-        {"header": "示意圖", "width": 400, "key": "plan_image", "kind": "image"},
-        {"header": "競品參考", "width": 120, "kind": "ref", "ref": 0},
+        {"header": "示意圖", "width": 400, "key": "plan_image", "kind": "image", "thumb": [380, 300]},
+        {"header": "競品參考", "width": 120, "kind": "ref", "ref": 0, "thumb": [100, 300]},
         {"header": "補充", "width": 300, "key": "extra", "kind": "desc"}
       ],
       "body_font": {"family": "Microsoft JhengHei", "size": 15},
@@ -81,7 +81,7 @@
         {"header": "繁中標題", "width": 100, "key": "title_zh", "kind": "text", "center": true},
         {"header": "翻譯", "width": 60, "key": "translation", "kind": "text"},
         {"header": "中文", "width": 380, "key": "text", "kind": "desc"},
-        {"header": "圖片說明", "width": 450, "key": "plan_image", "kind": "image"}
+        {"header": "圖片說明", "width": 450, "key": "plan_image", "kind": "image", "thumb": [430, 300]}
       ],
       "header": {"bg": "#8DB3E2", "fg": "#FFFFFF", "bold": true, "font_family": "Microsoft JhengHei", "font_size": 14},
       "group_key": "page",

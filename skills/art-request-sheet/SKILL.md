@@ -29,7 +29,7 @@ allowed-tools:
 - `references/writing-rules-<線>.md` — 拆列與描述寫法、參考圖分配、企劃章節對應、去識別化範例。實際案例屬機密，在網芳 `X:\grp.product.pm1\2. 產品改造\一四部企劃範本\kit-assets\art-request-sheet\`（X 讀不到換 Y:）：一部看 `實際範例.md`、四部機台看 `實際範例-dept4-slot.md`，讀得到就先讀
 - `references/chrome-paste.md` — 用 Chrome 貼圖的做法與已知坑。**貼圖前先讀**
 - `scripts/fetch_plan.py` — 用部門憑證走 Notion proxy＋REST 讀企劃：輸出 `plan.md`（保留紅字／灰綠底／刪除線標記）並當場下載圖片與影片
-- `scripts/prep_images.py` — mp4 轉 GIF、縮圖到欄寬、改 ASCII 檔名，輸出到可上傳的資料夾
+- `scripts/prep_images.py` — mp4 轉 GIF（預設只取前 10 秒、6fps、寬 360px）、依 layout 各圖片欄的縮圖上限縮圖、改 ASCII 檔名，輸出到可上傳的資料夾
 - `scripts/build_sheet.py` — 從內容 spec 產出寫入值、格式化請求、紅字 runs、貼圖清單；格式來自 `scripts/layouts/<線>.json`（程式本體不寫死格式）
 - `scripts/test_build_sheet.py` — pytest：一部輸出與 v1 逐位元相同、四部機台多分頁格式
 
@@ -70,6 +70,7 @@ allowed-tools:
    - 一部：1.目的 → 2.流程圖 → **3.呈現**（逐畫面）→ **4.規則**（數值、盤面、檔名對照）→ 5.說明頁 → 6.設定 → 7.後台 → 8.調整紀錄
    - 四部機台：1.玩法簡介 → **2.畫面呈現**（入口／ICON、稱號、Loading、獎圖、主介面、Dialog…、**2.N 動畫需求**）→ 3.詳細玩法 → **4.說明頁** → 5.數值 → 6.監控 → 後台 → 調整紀錄（對應表見 `writing-rules-dept4-slot.md`）
    - 行內標記：`<span color="red">` 紅字、`gray_background`／`green_background` 調整標記、`~~..~~` 刪除線
+   - 表格（如動畫需求表）一列一行、儲存格用 ` | ` 分隔；**儲存格內的換行寫成 `<br>`**、儲存格內的 `|` 寫成 `\|`。搬進 spec 時 `<br>` 換回換行（描述拆成多行），不要把 `<br>` 原樣寫進表
 4. 下載失敗的檔會在 `plan.md` 標 `DOWNLOAD FAILED`，重跑一次腳本即可（會拿到新網址）。媒體檔名若和畫面對不上，照 `plan.md` 裡 `[image ..]` 出現的位置改成「序號_畫面名_狀態」（例：`05_主介面_已達門檻.jpg`），序號照企劃順序。
 
 ## 2. 拆列與寫內容
@@ -93,20 +94,24 @@ allowed-tools:
 ## 3. 寫入表格
 
 1. `get_spreadsheet`（`fields: ["properties.title","sheets.properties"]`）拿既有分頁的 `sheetId`、分頁名，以及**所有已用掉的 sheetId**。
-2. `python scripts/build_sheet.py spec.json --out <scratchpad>/b`，產出（摘要會印出每個檔要寫到哪個範圍）：
+2. 先備圖：`python scripts/prep_images.py <Downloads 參考圖資料夾> <scratchpad>/up --spec spec.json`（細節見第 4 節第 1 步）。列高要看縮完的圖多高，所以圖要在 build 之前備好。
+3. `python scripts/build_sheet.py spec.json --out <scratchpad>/b --images <scratchpad>/up`，產出（摘要會印出每個檔要寫到哪個範圍）。有圖（`plan_image`／`refs`）的列，列高至少是縮完的圖高＋10px；合併列共用一張圖時，高度平均分攤到合併範圍。沒給 `--images` 或讀不到圖就用該欄縮圖上限（多半是 300px）估：
    - `add_sheets.json`（只有多分頁才有）→ **第一個**送：一次 `update_spreadsheet`，用 addSheet 建第 2 個以後的分頁，分頁名直接是最終名稱。sheetId 由 spec 指定（沒寫就是 910000＋分頁序號，送之前先對照第 1 步的已用 id）。**核對回覆**：`replies[i].addSheet.properties.sheetId` 要等於摘要印的 id；撞號被拒或回傳不同 id → 把實際 id 寫回 spec 的 `tabs[i].sheet_id`、重跑 build_sheet.py（已建好的分頁不要再送 addSheet），再接下一步
    - `values.json` → 第一個分頁的 `update_values`，範圍用分頁**目前**的名稱（例 `'工作表1'!A1:I<n>`）
    - `values_2.json`、`values_3.json`… → 各自一次 `update_values`，範圍用摘要印的新分頁名（例 `'動態'!A1:F<n>`）
    - `requests.json` → **所有 values 都寫完後**一次 `update_spreadsheet`（改名、凍結、字型、顏色、合併、下拉、框線、欄寬列高、紅字 runs）。順序不能反：紅字 runs 要套在已寫入的文字上
    - `paste_plan.json` → 第 4 步貼圖用（多分頁時每筆有 `tab`）
-3. 用 Read 讀出各 json，原樣送進工具，不要手改；要改內容就改 spec 重跑。
+4. 用 Read 讀出各 json，原樣送進工具，不要手改；要改內容就改 spec 重跑。
    - 腳本已處理 Windows 260 字元路徑限制（scratchpad 路徑很長），子資料夾名稱仍盡量短（`b/`、`up/`）
    - 寫入值時字串照常送；`O`／`X`／`Y`／`N`、`1. ...` 開頭的多行文字不會被 Sheets 誤判成數字
-4. `get_values` 讀回每個分頁核對文字（分頁已改名：一部「美術需求表」；四部「靜態」「動態」…）。
+5. `get_values` 讀回每個分頁核對文字（分頁已改名：一部「美術需求表」；四部「靜態」「動態」…）。
 
 ## 4. 準備圖片並貼進表
 
-1. `python scripts/prep_images.py <Downloads 參考圖資料夾> <scratchpad>/up`：mp4 轉 GIF、縮到 530×300 內、改成 `r01.png` 這類 ASCII 名。**一定要輸出到 scratchpad**：Chrome 的 `file_upload` 只收 scratchpad 裡的檔案，工作目錄和 Downloads 都會被拒。
+1. 圖在第 3 節第 2 步已用 `prep_images.py --spec spec.json` 備好（還沒跑就現在跑，跑完要用 `--images` 重跑 build_sheet，列高才對）：
+   - mp4 轉 GIF：預設只取**前 10 秒**、約 6fps、寬 360px（ffmpeg palettegen／paletteuse，實測 1–2 MB）；長片會印進度。GIF 超過 9 MB 會印警告（`file_upload` 單次上限 10 MB），用 `--gif-seconds`／`--gif-fps`／`--gif-width` 調小；企劃要看的段落不在前 10 秒時，用 `--gif-seconds` 調整並在缺漏清單註明只截了哪段
+   - 縮圖上限照 layout 各圖片欄的 `thumb`（一部參考圖欄 530×300；四部機台各欄不同，例：靜態企劃示意圖 380×300、動態參考 180×300、說明頁 430×300）。有 `--spec` 時每張圖照它要貼的欄縮（同一張貼兩欄取較小）；沒 `--spec` 一律用 layout 最小的框，四部會印警告
+   - 改成 `r01.png` 這類 ASCII 名。**一定要輸出到 scratchpad**：Chrome 的 `file_upload` 只收 scratchpad 裡的檔案，工作目錄和 Downloads 都會被拒。
 2. 照 `references/chrome-paste.md` 貼圖，格子照 `paste_plan.json`。一部：圖都進參考圖欄。四部機台：企劃示意圖進「企劃示意圖」欄（合併區第一格）、其他進參考圖／動態參考欄；多分頁時先切到 `tab` 指定的分頁再貼。**不要用「插入 → 圖片」選單**：Google 圖片挑選器開著時 Chrome 截圖會卡死。
 3. 縮放切到 50% 逐段截圖，確認每張圖在對的列；確認完**把縮放改回 100%**、關掉分頁。
 
@@ -132,7 +137,7 @@ allowed-tools:
 2. 跟使用者原本預期不同的地方（例如沒先確認清單、改用企劃原圖）。
 3. **交給美術前要確認的**：缺漏清單，每條講清楚是什麼、我先怎麼寫。
    - 一部常見：企劃圖和規則數值不一致、命名對應是推測的（小／中／大 vs 1／2／3）、動態標記不確定（公版刷光算不算）、圖後補、秒數後補、說明頁要不要列
-   - 四部機台常見：重要度待填、動態命名表待填、靜態標 Y 但動畫需求表沒寫的元件、「Client 看」的演出要不要美術出、說明頁待補、版號／檔名格式
+   - 四部機台常見：重要度待填、動態命名表待填、靜態標 Y 但動畫需求表沒寫的元件、反過來畫面應有動態（Dialog 開關、刷光）但動畫表沒列而先標 N 的元件、「Client 看」的演出要不要美術出、說明頁待補、版號／檔名格式
 4. 參考圖原檔放在哪個資料夾。
 
 不要主動改 Notion 企劃（例如更新企劃裡的美術需求表連結）；需要的話提一句讓使用者決定。

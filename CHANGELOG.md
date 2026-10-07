@@ -11,6 +11,16 @@
   - `build_sheet.py` 參數化：格式移到 `scripts/layouts/dept1.json`、`dept4-slot.json`，程式本體不再寫死；spec 用 `"layout"` 指定（省略＝dept1，舊 spec 照用）；支援 `tabs[]` 多分頁，第 2 個以後的分頁由 `add_sheets.json` 用 addSheet 建（spec 指定 sheetId、回覆要核對；不符就寫回 spec 重跑），每個分頁各自 `values_<k>.json`，`paste_plan.json` 多分頁時帶 `tab`
   - 新增 `scripts/test_build_sheet.py`（pytest 15 項）：dept1 輸出與改版前 v1 腳本**逐位元相同**（基準檔在 `test_fixtures/dept1_expected/`）；dept4-slot 驗證 4 個分頁表頭、A 欄與企劃示意圖欄垂直合併、Y/N 下拉、群組雙線、紅字、多分頁貼圖清單、sheetId 撞號
   - **尚未對真的 Google Sheets 實跑 dept4-slot**（addSheet 指定 sheetId、多分頁寫入都只驗證了 payload）
+  - **E2E 實跑抓到的 8 個問題，發版前一併修正**：
+    1. `prep_images.py` 影片轉 GIF 沒有長度與大小上限（91 秒影片轉出 79 MB，超過 Chrome `file_upload` 10 MB）：改用 ffmpeg palettegen／paletteuse，預設只取前 10 秒、約 6fps、寬 360px（同一支影片實測 0.82 MB、1.4 秒轉完），`--gif-seconds`／`--gif-fps`／`--gif-width` 可調；超過 9 MB 印警告；長片印進度、輸出全部 flush；舊版留下的超大 GIF 會重轉
+    2. 縮圖上限不再寫死 530×300：改讀 layout 各圖片欄的 `thumb`（新增 `--layout`、`--spec`，每張圖照它要貼的欄縮）；dept1 維持 530×300
+    3. `build_sheet.py` 列高只看文字，有圖的列圖會壓到下一列：有 `plan_image`／`refs` 的列至少是縮完的圖高＋10px（`--images` 讀 prep 後的實際尺寸，讀不到用欄的上限），合併列共用一張圖時分攤到合併範圍；SKILL.md 流程改成先備圖再 build
+    4. `fetch_plan.py` 表格儲存格內的換行讓 `plan.md` 表格斷行：改寫成 `<br>`（`|` 跳脫成 `\|`），SKILL.md 讀企劃段補說明
+    5. 說明頁分頁只看第 4 章標題有沒有「待補」會誤判（章標題標紅字待補、子節其實寫好）：改看子節有沒有實際內容
+    6. 動態欄補反向檢查：畫面應有動態（Dialog 開關、刷光等）但動畫需求表沒列 → 標 N 並列入缺漏請使用者確認
+    7. `chrome-paste.md` 補切換分頁寫法：`claudeGo("'動態'!C3")`（名稱方塊帶分頁名，實測可行）
+    8. `requests.json` 相鄰且尺寸相同的列／欄合併成一個 `updateDimensionProperties`（E2E spec：166 → 141 個 request、31.8 KB → 27.9 KB）；dept1 基準更新前先以新測試把合併的 range 展開回逐列逐欄，與 v1 基準（保留為 `requests_v1_per_index.json`）逐筆相同，values／paste_plan 仍逐位元相同
+    - 測試：`test_build_sheet.py` 增至 25 項、新增 `test_prep_and_fetch.py` 12 項（測試影片用 ffmpeg 現場產生，不進 repo），共 37 項全過
 - ⚙️ **升級動作**：無，`git pull` 即生效
 
 ## v3.21.1 (2026-10-06)

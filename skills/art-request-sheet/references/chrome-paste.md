@@ -8,9 +8,9 @@
 |---|---|---|
 | 「插入 → 圖片 → 插入儲存格內／上方」之後截圖一直逾時 | Google 圖片挑選器是跨網域 iframe，開著時 Chrome 擷取畫面會卡住 | 不用選單；按 Escape 關掉挑選器即可恢復 |
 | `file_upload` 回「only files this session is allowed to read」 | 只收 scratchpad 裡的檔案；工作目錄、Downloads 都被拒 | `prep_images.py` 輸出到 scratchpad |
-| 貼出來的圖超大 | 原圖 2496px 寬，照原尺寸貼 | 先用 `prep_images.py` 縮到 530×300 內 |
+| 貼出來的圖超大 | 原圖 2496px 寬，照原尺寸貼 | 先用 `prep_images.py --spec spec.json` 縮到各欄的縮圖上限內（一部 530×300；四部依欄位） |
 | paste 沒反應 | activeElement 是自己塞的 input，不是 Sheets 編輯器 | 先用名稱方塊跳格，確認 `document.activeElement.id === 'waffle-rich-text-editor'` 再送 |
-| 單次上傳失敗 | `file_upload` 單次總量上限 10 MB | 分批上傳，或先確認 GIF 大小 |
+| 單次上傳失敗 | `file_upload` 單次總量上限 10 MB（2026-10-07 E2E：91 秒影片舊版轉出 79 MB） | `prep_images.py` 預設只轉前 10 秒、約 2 MB；仍超過就分批上傳 |
 | 貼完圖後第一次截圖逾時 | 剛貼上的圖還在選取狀態 | 先按 Escape 取消選取再截圖（2026-10-05 改版企劃測試重現） |
 
 ## 步驟
@@ -54,6 +54,16 @@ wait 1
 javascript_tool: claudePaste('r05.png')     → 回傳 ["waffle-rich-text-editor", true] 才算成功
 wait 3（GIF 等 5–6 秒）
 ```
+
+   **切換分頁**（多分頁時 `paste_plan.json` 每筆有 `tab`）：名稱方塊直接輸入「分頁名!儲存格」就會切過去並選到那格，分頁名用單引號包住（2026-10-07 E2E 實測可行）：
+
+```
+javascript_tool: claudeGo("'動態'!C3")
+wait 2
+javascript_tool: claudePaste('r11.png')
+```
+
+   同一分頁接下來的圖可以只寫 `claudeGo('E5')`；換分頁時再帶分頁名。
 
 5. 全部貼完 `claudeGo('A1')`，縮放下拉選 50%，逐段 scroll + screenshot 檢查每張圖在對的列。
 6. 縮放改回 100%（縮放是使用者自己的檢視設定，不能留著 50%），`tabs_close_mcp` 關分頁。重新整理或關分頁時，塞進去的輸入框就會消失，不會留在檔案裡。

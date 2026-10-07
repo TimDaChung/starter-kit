@@ -50,12 +50,46 @@ def merges(reqs: list[Json], sid: int) -> set[tuple[int, int, int, int]]:
 # ---------- dept1 regression ----------
 
 def test_dept1_output_is_byte_identical_to_v1(tmp_path: Path) -> None:
-    """Expected files were produced by build_sheet.py v1.0.0 before the layout refactor."""
+    """values / paste_plan are byte-identical to build_sheet.py v1.0.0; requests.json is the
+    merged-dimension version, whose meaning test_dept1_requests_mean_the_same_as_v1 pins to v1."""
     run_cli(FIXTURES / 'dept1_spec.json', tmp_path)
     for name in ('values.json', 'requests.json', 'paste_plan.json'):
         assert (tmp_path / name).read_bytes() == (FIXTURES / 'dept1_expected' / name).read_bytes(), name
     assert not (tmp_path / 'add_sheets.json').exists()
     assert not (tmp_path / 'values_2.json').exists()
+
+
+def expand_dimensions(reqs: list[Json]) -> list[Json]:
+    """Split every multi-index updateDimensionProperties back into one request per row / column."""
+    out: list[Json] = []
+    for r in reqs:
+        dim = r.get('updateDimensionProperties')
+        if dim is None:
+            out.append(r)
+            continue
+        rng = dim['range']
+        for i in range(rng['startIndex'], rng['endIndex']):
+            out.append({'updateDimensionProperties': {**dim, 'range': {**rng, 'startIndex': i, 'endIndex': i + 1}}})
+    return out
+
+
+def test_dept1_requests_mean_the_same_as_v1(tmp_path: Path) -> None:
+    """requests_v1_per_index.json is the v1.0.0 requests.json (one dimension request per row / column).
+    Expanding the merged ranges must give it back exactly, request by request."""
+    run_cli(FIXTURES / 'dept1_spec.json', tmp_path)
+    new = load(tmp_path / 'requests.json')
+    old = load(FIXTURES / 'dept1_expected' / 'requests_v1_per_index.json')
+    assert len(new) < len(old)
+    assert expand_dimensions(new) == old
+
+
+def test_dimension_requests_merge_adjacent_equal_sizes_only() -> None:
+    reqs = build_sheet.dimension_requests(7, 'ROWS', [(2, 330), (3, 330), (4, 400), (6, 400), (7, 400)])
+    spans = [(r['updateDimensionProperties']['range']['startIndex'],
+              r['updateDimensionProperties']['range']['endIndex'],
+              r['updateDimensionProperties']['properties']['pixelSize']) for r in reqs]
+    assert spans == [(2, 4, 330), (4, 5, 400), (6, 8, 400)]  # gap at 5 breaks the run
+    assert all(r['updateDimensionProperties']['range']['dimension'] == 'ROWS' for r in reqs)
 
 
 def test_spec_without_layout_defaults_to_dept1() -> None:
@@ -196,3 +230,89 @@ def test_layouts_have_no_hardcoded_names() -> None:
     text += (SCRIPTS / 'test_fixtures' / 'dept4_slot_spec.json').read_text(encoding='utf-8')
     for banned in ('docs.google.com', 'notion.so', 'notion.com'):
         assert banned not in text
+
+
+# ---------- thumbnail boxes and image row heights ----------
+
+def row_heights(reqs: list[Json], sid: int) -> dict[int, int]:
+    out: dict[int, int] = {}
+    for r in expand_dimensions(reqs):
+        d = r.get('updateDimensionProperties')
+        if d and d['range']['dimension'] == 'ROWS' and d['range']['sheetId'] == sid:
+            out[d['range']['startIndex']] = d['properties']['pixelSize']
+    return out
+
+
+def test_dept1_thumb_box_stays_530x300() -> None:
+    layout = build_sheet.load_layout('dept1')
+    boxes = {build_sheet.thumb_box(c) for c in layout['tabs'][0]['columns'] if c['kind'] == 'ref'}
+    assert boxes == {(530, 300)}
+    assert build_sheet.layout_min_box(layout) == (530, 300)
+    per_file = build_sheet.file_boxes(load(FIXTURES / 'dept1_spec.json'), layout)
+    assert per_file and set(per_file.values()) == {(530, 300)}
+
+
+def test_dept4_thumb_box_follows_column() -> None:
+    layout = build_sheet.load_layout('dept4-slot')
+    spec = {'layout': 'dept4-slot', 'tabs': [
+        {'tab': 'static', 'rows': [{'item': 'a', 'plan_image': 'r01.png', 'refs': ['r02.png']}]},
+        {'tab': 'dynamic', 'rows': [{'item': 'b', 'plan_image': 'r01.png', 'refs': ['r03.gif']}]},
+        {'tab': 'help', 'rows': [{'page': 'P1', 'plan_image': 'r04.png'}]}]}
+    boxes = build_sheet.file_boxes(spec, layout)
+    assert boxes['r01.png'] == (360, 300)   # static 400px and dynamic 380px: the tighter one
+    assert boxes['r02.png'] == (280, 300)   # static ref column 300px
+    assert boxes['r03.gif'] == (180, 300)   # dynamic ref column 200px
+    assert boxes['r04.png'] == (430, 300)   # help image column 450px
+    assert build_sheet.fit_size(1920, 1080, boxes['r04.png']) == (430, 241)
+    assert build_sheet.fit_size(100, 50, boxes['r04.png']) == (100, 50)  # never scaled up
+
+
+def test_thumb_box_default_without_layout_thumb() -> None:
+    assert build_sheet.thumb_box({'width': 250, 'kind': 'ref'}) == (230, 300)
+
+
+def test_image_row_uses_box_height_when_file_unknown() -> None:
+    spec = {'layout': 'dept4-slot', 'tabs': [{'tab': 'static', 'rows': [
+        {'item': 'a', 'desc': ['x'], 'plan_image': 'r01.png'},
+        {'item': 'b', 'desc': ['x']}]}]}
+    h = row_heights(build_sheet.build(spec)['requests'], 0)
+    assert h[2] == 300 + build_sheet.IMG_ROW_PAD   # box height, file not readable
+    assert h[3] == 60                              # text-only row keeps min_px
+
+
+def test_image_row_uses_real_size(tmp_path: Path) -> None:
+    from PIL import Image
+    Image.new('RGB', (760, 300)).save(tmp_path / 'r01.png')   # fits 380x300 as 380x150
+    Image.new('RGB', (100, 40)).save(tmp_path / 'r02.png')    # ref smaller than min_px
+    spec = {'layout': 'dept4-slot', 'tabs': [{'tab': 'static', 'rows': [
+        {'item': 'a', 'desc': ['x'], 'plan_image': 'r01.png', 'refs': ['r02.png']},
+        {'item': 'b', 'desc': ['x'], 'refs': ['r02.png']}]}]}
+    h = row_heights(build_sheet.build(spec, images_dir=tmp_path)['requests'], 0)
+    assert h[2] == 150 + build_sheet.IMG_ROW_PAD
+    assert h[3] == 60
+
+
+def test_shared_image_height_spreads_over_merged_rows() -> None:
+    rows = [{'item': 'g', 'sub': 'A', 'desc': ['x'], 'plan_image': 'r01.png'},
+            {'sub': 'B', 'desc': ['y']}, {'sub': 'C', 'desc': ['z']}]
+    out = build_sheet.build({'layout': 'dept4-slot', 'tabs': [{'tab': 'static', 'rows': rows}]})
+    assert (2, 5, 4, 5) in merges(out['requests'], 0)   # E column merged over the three rows
+    h = row_heights(out['requests'], 0)
+    assert sum(h[r] for r in (2, 3, 4)) >= 300 + build_sheet.IMG_ROW_PAD
+    assert h[2] == h[3] == h[4] == 104                    # 60 each + ceil((310 - 180) / 3)
+
+
+def test_tall_text_row_is_not_lowered_by_image() -> None:
+    long_desc = ['字' * 32] * 30   # 30 lines * 17 + 30 = 540 px
+    spec = {'layout': 'dept4-slot', 'tabs': [{'tab': 'static', 'rows': [
+        {'item': 'a', 'desc': long_desc, 'plan_image': 'r01.png'}]}]}
+    assert row_heights(build_sheet.build(spec)['requests'], 0)[2] == 540
+
+
+def test_slot_requests_merge_dimensions(slot: Json) -> None:
+    cols = [r['updateDimensionProperties'] for r in slot['requests'] if 'updateDimensionProperties' in r
+            and r['updateDimensionProperties']['range']['dimension'] == 'COLUMNS'
+            and r['updateDimensionProperties']['range']['sheetId'] == 0]
+    # static widths 100 120 50 40 400 450 150 300 300: only H:I share a size
+    assert len(cols) == 8
+    assert (cols[-1]['range']['startIndex'], cols[-1]['range']['endIndex']) == (7, 9)

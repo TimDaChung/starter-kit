@@ -65,7 +65,14 @@ Outputs in --out:
 Order: add_sheets.json -> every values file -> requests.json -> paste images.
 The red text runs apply to written text, so requests.json goes after values.
 
-Usage: python build_sheet.py spec.json --out <dir>
+Row heights: a row with a plan_image or refs is at least as tall as the
+image after shrinking (+ IMG_ROW_PAD). Pass --images <dir> (the output of
+prep_images.py) to use the real image sizes; without it, or when a file is
+missing, the column's thumbnail box height is used. An image shared by a
+vertically merged range spreads the extra height over the merged rows.
+Adjacent rows / columns with the same size share one updateDimensionProperties.
+
+Usage: python build_sheet.py spec.json --out <dir> [--images <prep out dir>]
 """
 from __future__ import annotations
 
@@ -82,10 +89,14 @@ LONG_PREFIX = '\\\\?\\'
 LAYOUT_DIR = Path(__file__).resolve().parent / 'layouts'
 DEFAULT_LAYOUT = 'dept1'
 NEW_SHEET_ID_BASE = 910000
+THUMB_PAD_W = 20   # default thumbnail box: column width minus this
+THUMB_MAX_H = 300  # default thumbnail box height
+IMG_ROW_PAD = 10   # px kept below a pasted image
 BLACK = {'red': 0, 'green': 0, 'blue': 0}
 RED = {'red': 1, 'green': 0, 'blue': 0}
 
 Json = dict[str, Any]
+Box = tuple[int, int]
 
 
 def lp(path: str) -> str:
@@ -159,6 +170,130 @@ def row_height(text: str, cfg: Json) -> int:
     return max(cfg['min_px'], lines * cfg['line_px'] + 30)
 
 
+def thumb_box(col: Json) -> Box:
+    """Max (w, h) an image pasted into this column is shrunk to.
+
+    Uses the column's "thumb": [w, h] from the layout, else width - 20 by 300.
+    prep_images.py and the row heights here both use this, so they agree.
+    """
+    if 'thumb' in col:
+        w, h = col['thumb']
+        return int(w), int(h)
+    return max(1, int(col['width']) - THUMB_PAD_W), THUMB_MAX_H
+
+
+def fit_size(w: int, h: int, box: Box) -> Box:
+    """Scale (w, h) down to fit inside box, never up."""
+    s = min(box[0] / w, box[1] / h, 1)
+    return max(1, int(w * s)), max(1, int(h * s))
+
+
+def image_columns(tab_cfg: Json) -> tuple[list[tuple[int, str]], list[tuple[int, int]]]:
+    """Return ([(col index, row key)] of image columns, [(ref no, col index)] of ref columns)."""
+    cols = tab_cfg['columns']
+    images = [(i, c['key']) for i, c in enumerate(cols) if c['kind'] == 'image']
+    refs = sorted((c['ref'], i) for i, c in enumerate(cols) if c['kind'] == 'ref')
+    return images, refs
+
+
+def row_images(row: Json, tab_cfg: Json) -> list[tuple[int, str]]:
+    """[(col index, file)] for every image a content row pastes."""
+    images, refs = image_columns(tab_cfg)
+    out = [(c_idx, row[key]) for c_idx, key in images if row.get(key)]
+    out += [(c_idx, f) for (_, c_idx), f in zip(refs, row.get('refs', []))]
+    return out
+
+
+def layout_min_box(layout: Json) -> Box:
+    """Smallest thumbnail box over every image / ref column of the layout."""
+    boxes = [thumb_box(c) for t in layout['tabs'] for c in t['columns'] if c['kind'] in ('image', 'ref')]
+    if not boxes:
+        return THUMB_MAX_H, THUMB_MAX_H
+    return min(b[0] for b in boxes), min(b[1] for b in boxes)
+
+
+def file_boxes(spec: Json, layout: Json) -> dict[str, Box]:
+    """Thumbnail box per image file named in the spec (the tightest one if used in several columns)."""
+    cfg_by_key = {t['key']: t for t in layout['tabs']}
+    out: dict[str, Box] = {}
+    for tab_spec in normalize_spec(spec, layout):
+        tab_cfg = cfg_by_key.get(tab_spec['tab'])
+        if tab_cfg is None:
+            continue
+        for row in tab_spec.get('rows', []):
+            if 'section' in row:
+                continue
+            for c_idx, f in row_images(row, tab_cfg):
+                box = thumb_box(tab_cfg['columns'][c_idx])
+                old = out.get(f, box)
+                out[f] = (min(old[0], box[0]), min(old[1], box[1]))
+    return out
+
+
+def read_image_size(path: Path) -> Box | None:
+    """(w, h) of an image file, or None when it is missing or unreadable."""
+    try:
+        from PIL import Image
+    except ImportError:
+        return None
+    try:
+        with Image.open(lp(str(path))) as im:
+            return im.size
+    except OSError:
+        return None
+
+
+def dimension_requests(sid: int, dim: str, sizes: list[tuple[int, int]]) -> list[Json]:
+    """updateDimensionProperties for (index, px) pairs; adjacent equal sizes share one range."""
+    spans: list[list[int]] = []  # [start, end, px]
+    for idx, px in sizes:
+        if spans and spans[-1][1] == idx and spans[-1][2] == px:
+            spans[-1][1] = idx + 1
+        else:
+            spans.append([idx, idx + 1, px])
+    return [{'updateDimensionProperties': {
+        'range': {'sheetId': sid, 'dimension': dim, 'startIndex': start, 'endIndex': end},
+        'properties': {'pixelSize': px}, 'fields': 'pixelSize'}} for start, end, px in spans]
+
+
+def merge_runs(rows: list[Json], group: list[int], key: str, group_key: str) -> list[list[int]]:
+    """Split one item group into vertical merge runs for column `key`."""
+    runs: list[list[int]] = []
+    for i in group:
+        if not runs or (key != group_key and not is_empty(rows[i].get(key))):
+            runs.append([i])
+        else:
+            runs[-1].append(i)
+    return runs
+
+
+def fit_images(rows: list[Json], tab_cfg: Json, start: int, heights: dict[int, int],
+               col_runs: dict[int, list[list[int]]], images_dir: Path | None) -> None:
+    """Raise row heights in place so every pasted image fits its row or merged range."""
+    cols = tab_cfg['columns']
+    span_of: dict[tuple[int, int], list[int]] = {}
+    for c_idx, runs in col_runs.items():
+        for run in runs:
+            span_of[(c_idx, run[0])] = run
+    needs: list[tuple[list[int], int]] = []
+    for i, row in enumerate(rows):
+        if 'section' in row:
+            continue
+        for c_idx, f in row_images(row, tab_cfg):
+            box = thumb_box(cols[c_idx])
+            size = read_image_size(images_dir / f) if images_dir else None
+            img_h = fit_size(*size, box)[1] if size else box[1]
+            span = [r + start for r in span_of.get((c_idx, i), [i])]
+            needs.append((span, img_h + IMG_ROW_PAD))
+    # single rows first; an image shared by merged rows spreads its deficit evenly
+    for span, need in sorted(needs, key=lambda x: len(x[0])):
+        have = sum(heights[r] for r in span)
+        if have < need:
+            extra = math.ceil((need - have) / len(span))
+            for r in span:
+                heights[r] += extra
+
+
 def grid(sid: int, r0: int, r1: int, c0: int, c1: int) -> Json:
     return {'sheetId': sid, 'startRowIndex': r0, 'endRowIndex': r1, 'startColumnIndex': c0, 'endColumnIndex': c1}
 
@@ -226,7 +361,7 @@ def find_groups(rows: list[Json], group_key: str) -> list[list[int]]:
     return groups
 
 
-def build_tab(tab_spec: Json, tab_cfg: Json, layout: Json, sid: int
+def build_tab(tab_spec: Json, tab_cfg: Json, layout: Json, sid: int, images_dir: Path | None = None
               ) -> tuple[list[list[str]], list[Json], list[Json], int, str]:
     """Build values, requests and paste plan for one tab."""
     cols = tab_cfg['columns']
@@ -242,10 +377,9 @@ def build_tab(tab_spec: Json, tab_cfg: Json, layout: Json, sid: int
         values.append([row2.get('text', '')] + [''] * (ncols - 1))
     requests: list[Json] = []
     run_reqs: list[Json] = []
-    heights: list[tuple[int, int]] = []
+    heights: dict[int, int] = {}
     plan: list[Json] = []
-    ref_cols = sorted((c['ref'], i) for i, c in enumerate(cols) if c['kind'] == 'ref')
-    image_cols = [(i, c['key']) for i, c in enumerate(cols) if c['kind'] == 'image']
+    image_cols, ref_cols = image_columns(tab_cfg)
     height_cfg = tab_cfg['row_height']
     section_rows: list[int] = []
 
@@ -268,7 +402,7 @@ def build_tab(tab_spec: Json, tab_cfg: Json, layout: Json, sid: int
                     'rows': [{'values': [{'textFormatRuns': runs_for(text, spans)}]}],
                     'fields': 'textFormatRuns',
                     'start': {'sheetId': sid, 'rowIndex': r, 'columnIndex': c_idx}}})
-        heights.append((r, row_height(height_text, height_cfg)))
+        heights[r] = row_height(height_text, height_cfg)
         for c_idx, key in image_cols:
             if row.get(key):
                 plan.append({'cell': f'{col_letter(c_idx)}{r + 1}', 'file': row[key]})
@@ -277,6 +411,14 @@ def build_tab(tab_spec: Json, tab_cfg: Json, layout: Json, sid: int
             print(f'warning: row {r + 1} has {len(refs)} refs, only {len(ref_cols)} ref columns', file=sys.stderr)
         for (_, c_idx), f in zip(ref_cols, refs):
             plan.append({'cell': f'{col_letter(c_idx)}{r + 1}', 'file': f})
+
+    groups = find_groups(rows, group_key)
+    key_cols = {c['key']: i for i, c in enumerate(cols) if c.get('key')}
+    col_runs: dict[int, list[list[int]]] = {}
+    for key in tab_cfg.get('vmerge', []):
+        col_runs[key_cols[key]] = [run for g in groups if 'section' not in rows[g[0]]
+                                   for run in merge_runs(rows, g, key, group_key)]
+    fit_images(rows, tab_cfg, start, heights, col_runs, images_dir)
 
     full = grid(sid, 0, n, 0, ncols)
     props: Json = {'sheetId': sid, 'title': title}
@@ -340,8 +482,7 @@ def build_tab(tab_spec: Json, tab_cfg: Json, layout: Json, sid: int
                                   'values': [{'userEnteredValue': v} for v in tab_cfg['dynamic']['values']]},
                     'strict': True, 'showCustomUi': True}}})
 
-    groups = find_groups(rows, group_key)
-    borders = tab_cfg.get('borders', 'all')
+    borders =tab_cfg.get('borders', 'all')
     line = {'style': 'SOLID', 'color': BLACK}
     if borders == 'all':
         requests.append({'updateBorders': {'range': full, 'top': line, 'bottom': line, 'left': line, 'right': line,
@@ -352,14 +493,8 @@ def build_tab(tab_spec: Json, tab_cfg: Json, layout: Json, sid: int
             last = g[-1] + start
             requests.append({'updateBorders': {'range': grid(sid, last, last + 1, 0, ncols), 'bottom': sep}})
 
-    for c_idx, col in enumerate(cols):
-        requests.append({'updateDimensionProperties': {
-            'range': {'sheetId': sid, 'dimension': 'COLUMNS', 'startIndex': c_idx, 'endIndex': c_idx + 1},
-            'properties': {'pixelSize': col['width']}, 'fields': 'pixelSize'}})
-    for r, h in heights:
-        requests.append({'updateDimensionProperties': {
-            'range': {'sheetId': sid, 'dimension': 'ROWS', 'startIndex': r, 'endIndex': r + 1},
-            'properties': {'pixelSize': h}, 'fields': 'pixelSize'}})
+    requests += dimension_requests(sid, 'COLUMNS', [(c_idx, col['width']) for c_idx, col in enumerate(cols)])
+    requests += dimension_requests(sid, 'ROWS', sorted(heights.items()))
 
     section = tab_cfg.get('section')
     for r in section_rows:
@@ -371,27 +506,17 @@ def build_tab(tab_spec: Json, tab_cfg: Json, layout: Json, sid: int
             'fields': 'userEnteredFormat.backgroundColor,userEnteredFormat.textFormat.bold,'
                       'userEnteredFormat.textFormat.foregroundColorStyle'}})
 
-    key_cols = {c['key']: i for i, c in enumerate(cols) if c.get('key')}
     for key in tab_cfg.get('vmerge', []):
         c_idx = key_cols[key]
-        for g in groups:
-            if 'section' in rows[g[0]]:
-                continue
-            runs: list[list[int]] = []
-            for i in g:
-                if not runs or (key != group_key and not is_empty(rows[i].get(key))):
-                    runs.append([i])
-                else:
-                    runs[-1].append(i)
-            for run in runs:
-                if len(run) > 1:
-                    requests.append({'mergeCells': {'range': grid(sid, run[0] + start, run[-1] + start + 1,
-                                                                  c_idx, c_idx + 1), 'mergeType': 'MERGE_ALL'}})
+        for run in col_runs[c_idx]:
+            if len(run) > 1:
+                requests.append({'mergeCells': {'range': grid(sid, run[0] + start, run[-1] + start + 1,
+                                                              c_idx, c_idx + 1), 'mergeType': 'MERGE_ALL'}})
 
     return values, requests + run_reqs, plan, n, title
 
 
-def build(spec: Json, layout: Json | None = None) -> Json:
+def build(spec: Json, layout: Json | None = None, images_dir: Path | None = None) -> Json:
     """Return {'tabs': [...], 'add_sheets': [...], 'requests': [...], 'plan': [...]}."""
     if layout is None:
         layout = load_layout(spec.get('layout', DEFAULT_LAYOUT))
@@ -408,7 +533,7 @@ def build(spec: Json, layout: Json | None = None) -> Json:
         if sid in seen_ids:
             sys.exit(f'duplicate sheet_id {sid}')
         seen_ids.add(sid)
-        values, requests, plan, n, title = build_tab(tab_spec, tab_cfg, layout, sid)
+        values, requests, plan, n, title = build_tab(tab_spec, tab_cfg, layout, sid, images_dir)
         if k > 0:
             out['add_sheets'].append({'addSheet': {'properties': {'sheetId': sid, 'title': title}}})
         if multi:
@@ -431,10 +556,11 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('spec')
     ap.add_argument('--out', required=True)
+    ap.add_argument('--images', help='prep_images.py output dir; row heights then use the real image sizes')
     args = ap.parse_args()
     with open(lp(args.spec), encoding='utf-8') as fh:
         spec = json.load(fh)
-    result = build(spec)
+    result = build(spec, images_dir=Path(args.images) if args.images else None)
     os.makedirs(lp(args.out), exist_ok=True)
     tabs = result['tabs']
     if result['add_sheets']:
