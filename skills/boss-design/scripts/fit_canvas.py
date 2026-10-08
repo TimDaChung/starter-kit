@@ -7,6 +7,8 @@ happen) nor honours "body height = 55% of the screen" (a test run gave 90% and
 Usage:
     python fit_canvas.py <in.png> <out.png> [--height 0.55] [--max-width 0.5]
                          [--width 1920] [--gray auto|R,G,B] [--threshold 28]
+    python fit_canvas.py <in.png> <out.png> --transparent
+                         [--key-low 10] [--key-high 40] [--feather 1] [--margin 0]
 
 Steps:
 1. Background gray = average of the four corner pixels (--gray auto), so the
@@ -26,6 +28,21 @@ Steps:
 box is meaningless).
 --cover: center-crop the source to 16:9 and scale to fill (for full-bleed
 scenes such as boss-scene backgrounds; no gray bars).
+--transparent: key out the gray instead of placing on a canvas. Output is an
+RGBA PNG cropped to the subject box (plus --margin), at source resolution, no
+16:9 and no scaling. For demos, decks and cut-ins that need the boss alone.
+  1. background gray = corner average (same as above)
+  2. alpha = max channel delta from that gray, ramped from --key-low (fully
+     transparent) to --key-high (fully opaque)
+  3. MinFilter(3) erodes one pixel so the gray fringe is not kept, then a
+     GaussianBlur(--feather) softens the edge
+  4. edge colors are un-mixed from the gray (color = (pixel - (1-a)*gray) / a),
+     so half-transparent edges and soft shadows do not carry a gray halo
+  5. crop to the bounding box of alpha > 8, padded by --margin pixels
+  Known limit: parts of the subject whose color is close to the background gray
+  (gray armour, white-gray smoke) become see-through, and a neutral drop
+  shadow is kept as a gray patch (it differs from the gray as much as the
+  subject does). Check on a dark and a light background before use.
 
 Prints the source and final screen ratios so the caller can verify, and warns
 when the subject had to be upscaled (loses detail; regenerate larger instead).
@@ -83,9 +100,55 @@ def fit_cover(rgb: Image.Image, canvas_w: int) -> tuple[Image.Image, list[str]]:
     return cropped.resize((canvas_w, canvas_h), Image.LANCZOS), [note]
 
 
+def key_alpha(rgb: Image.Image, gray: tuple[int, int, int], low: int, high: int, feather: float) -> Image.Image:
+    """Alpha from the max per-channel distance to the background gray."""
+    r, g, b = ImageChops.difference(rgb, Image.new("RGB", rgb.size, gray)).split()
+    delta = ImageChops.lighter(ImageChops.lighter(r, g), b)
+    span = max(high - low, 1)
+    alpha = delta.point(lambda v: 0 if v <= low else 255 if v >= high else (v - low) * 255 // span)
+    alpha = alpha.filter(ImageFilter.MinFilter(3))
+    if feather > 0:
+        alpha = alpha.filter(ImageFilter.GaussianBlur(feather))
+    return alpha
+
+
+def unmix_gray(rgb: Image.Image, alpha: Image.Image, gray: tuple[int, int, int]) -> Image.Image:
+    """Remove the gray contribution from partially transparent pixels."""
+    import numpy as np  # only the --transparent path needs numpy
+
+    p = np.asarray(rgb, dtype=np.float32)
+    a = np.asarray(alpha, dtype=np.float32)[..., None] / 255.0
+    g = np.array(gray, dtype=np.float32)
+    out = (p - (1.0 - a) * g) / np.maximum(a, 1e-3)
+    out = np.where(a > 0, out, p)
+    return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8), "RGB")
+
+
+def fit_transparent(rgb: Image.Image, gray: tuple[int, int, int], args: argparse.Namespace) -> tuple[Image.Image, list[str]]:
+    alpha = key_alpha(rgb, gray, args.key_low, args.key_high, args.feather)
+    box = alpha.point(lambda v: 255 if v > 8 else 0).getbbox()
+    if box is None:
+        raise SystemExit("no subject found: image is uniform gray")
+    left, top, right, bottom = box
+    m = args.margin
+    crop = (max(left - m, 0), max(top - m, 0), min(right + m, rgb.width), min(bottom + m, rgb.height))
+    rgba = unmix_gray(rgb, alpha, gray)
+    rgba.putalpha(alpha)
+    out = rgba.crop(crop)
+    notes = [
+        f"background gray {gray}, key {args.key_low}-{args.key_high}, feather {args.feather}",
+        f"cropped to {out.width}x{out.height} (subject box {right - left}x{bottom - top}, margin {m}px)",
+    ]
+    if left <= 1 or top <= 1 or right >= rgb.width - 1 or bottom >= rgb.height - 1:
+        notes.append("WARNING subject touches the source frame edge: it may be cut off, check or regenerate")
+    return out, notes
+
+
 def place(src: Image.Image, args: argparse.Namespace) -> tuple[Image.Image, list[str]]:
     rgb = src.convert("RGB")
     gray = corner_gray(rgb) if args.gray == "auto" else tuple(int(v) for v in args.gray.split(","))
+    if args.transparent:
+        return fit_transparent(rgb, gray, args)
     if args.cover:
         return fit_cover(rgb, args.width)
     if args.whole:
@@ -123,7 +186,17 @@ def main() -> None:
     parser.add_argument("--threshold", type=int, default=28)
     parser.add_argument("--whole", action="store_true", help="fit the whole image, no subject scaling")
     parser.add_argument("--cover", action="store_true", help="crop to fill 16:9, for full-bleed scenes")
+    parser.add_argument("--transparent", action="store_true",
+                        help="key out the gray, crop to the subject, save RGBA PNG (no canvas, no scaling)")
+    parser.add_argument("--key-low", type=int, default=10,
+                        help="--transparent: max channel delta at or below which a pixel is fully transparent")
+    parser.add_argument("--key-high", type=int, default=40,
+                        help="--transparent: max channel delta at or above which a pixel is fully opaque")
+    parser.add_argument("--feather", type=float, default=1.0, help="--transparent: edge blur radius in px")
+    parser.add_argument("--margin", type=int, default=0, help="--transparent: px kept around the subject box")
     args = parser.parse_args()
+    if args.transparent and not args.dst.lower().endswith(".png"):
+        parser.error("--transparent needs a .png output (alpha channel)")
     out, notes = place(Image.open(args.src), args)
     out.save(args.dst)
     print(f"{args.dst}: {out.size[0]}x{out.size[1]}")
