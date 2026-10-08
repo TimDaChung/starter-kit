@@ -220,6 +220,25 @@ def swap(api, page_id, proposal, sheets_dir, log=print):
 
 
 ADJUST_WORDS = ("調整紀錄", "調整記錄", "修改紀錄", "修改記錄")
+# The 人物設定 template page (Leo's layout + 百鬼夜宴 example); PMs duplicate it, fill must never run on it directly.
+TEMPLATE_PAGE_ID = "3ed87244fa40819bbbfdd0c04bd28277"
+EXAMPLE_MARKER = "範本示例內容"
+
+
+def clear_example(api, page_id, top, log=print):
+    """A page duplicated from the template still holds the example: delete from the 📌 marker callout up to
+    (not including) the 調整紀錄 heading. Returns the refreshed top-level list."""
+    start = next((i for i, b in enumerate(top) if b["type"] == "callout" and plain(b["callout"]["rich_text"]).startswith(EXAMPLE_MARKER)), None)
+    if start is None:
+        return top
+    end = next((i for i, b in enumerate(top) if i > start and b["type"].startswith("heading_")
+                and any(w in plain(b[b["type"]]["rich_text"]) for w in ADJUST_WORDS)), None)
+    if end is None:
+        raise SystemExit("[fill] template example found but no 調整紀錄 heading after it; not deleting anything, fix the page first")
+    for b in top[start:end]:
+        api.call("DELETE", f"/blocks/{b['id']}")
+    log(f"  cleared template example: {end - start} blocks")
+    return api.children(page_id)
 
 
 def fill(api, page_id, proposal, sheets_dir, log=print):
@@ -227,8 +246,11 @@ def fill(api, page_id, proposal, sheets_dir, log=print):
 
     Anchor = the first top-level heading whose text contains 調整紀錄/修改紀錄; content goes right before it,
     so the template's table of contents / 調整紀錄 skeleton stays intact. No anchor -> append at the end (warned).
+    A page duplicated from the template has its example content cleared first (see clear_example).
     """
-    top = api.children(page_id)
+    if page_id.replace("-", "") == TEMPLATE_PAGE_ID:
+        raise SystemExit("[fill] this is the template page itself; duplicate it in Notion and fill the copy")
+    top = clear_example(api, page_id, api.children(page_id), log=log)
     after = None
     anchor_found = False
     for i, b in enumerate(top):

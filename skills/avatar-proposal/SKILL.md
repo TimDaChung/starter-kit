@@ -116,7 +116,12 @@ python <skill-dir>/scripts/gen_sheets.py proposal.json --out _工作暫存/<期�
 
 ### 5. 填 Notion 頁
 
-**預設：請使用者用 Notion 範本建好頁、把網址貼來，skill 只填內容。** 理由：範本自帶的目錄與「新增調整紀錄」按鈕 API 建不出來，而且拿到網址就不用問 workspace 與父頁。**只有使用者口頭明說「你幫我建」才用 `new`。**
+**範本頁＝「大活動人物設定範本（示例：百鬼夜宴）」`3ed87244fa40819bbbfdd0c04bd28277`**（一部，Leo 2026-10-08 調過的版型＋更衣室，Tim 2026-10-08 指定為範本）。它同時是版型權威：版面有疑問以這頁為準。
+
+**預設：請使用者在 Notion 複製這頁、改好標題、把新頁網址貼來，skill 只填內容。** 理由：目錄與「新增調整紀錄」按鈕 API 建不出來，而且拿到網址就不用問 workspace 與父頁。**只有使用者口頭明說「你幫我建」才用 `new`。**
+
+- 複製頁還帶著百鬼夜宴示例：`fill` 看到 📌「範本示例內容」標記，會先刪掉標記到「調整紀錄」之間的示例再填（刪幾個 block 會印出來）；**對範本頁本身跑 `fill` 會直接拒絕**
+- 範本頁的版型改了（Leo 或 PM 在頁上調），`build_notion.py` 的產出要跟著改，兩邊不一致以範本頁為準
 
 ```bash
 # 預設：內容插在範本「調整紀錄」標題之前，示意圖直接上傳插入（寫入，先取得同意）
@@ -170,4 +175,4 @@ python <skill-dir>/scripts/build_notion.py new  proposal.json --parent <父頁 i
 
 定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
 
-- 示意圖只進**人物設定頁**（本 skill 的頁，範本待 Tim 建）；**不進**神娃大活動「圖示(男女共用)」或人物大活動「圖示」——那兩格放美術稿，美術完成後由 PM 用 plan-dept14-writer 貼圖模式補
+- 示意圖只進**人物設定頁**（本 skill 的頁，從上面第 5 步的範本頁複製）；**不進**神娃大活動「圖示(男女共用)」或人物大活動「圖示」——那兩格放美術稿，美術完成後由 PM 用 plan-dept14-writer 貼圖模式補
