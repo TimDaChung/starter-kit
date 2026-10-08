@@ -241,12 +241,19 @@ def clear_example(api, page_id, top, log=print):
     return api.children(page_id)
 
 
-def fill(api, page_id, proposal, sheets_dir, log=print):
+def set_title(api, page_id, title):
+    pg = api.call("GET", f"/pages/{page_id}")
+    key = next(k for k, v in pg["properties"].items() if v["type"] == "title")
+    api.call("PATCH", f"/pages/{page_id}", {"properties": {key: {"title": [{"type": "text", "text": {"content": title}}]}}})
+
+
+def fill(api, page_id, proposal, sheets_dir, log=print, title=None):
     """Insert the proposal content into an existing (template-made) page.
 
     Anchor = the first top-level heading whose text contains 調整紀錄/修改紀錄; content goes right before it,
     so the template's table of contents / 調整紀錄 skeleton stays intact. No anchor -> append at the end (warned).
     A page duplicated from the template has its example content cleared first (see clear_example).
+    title: rename the page too (the copy still carries the template's name).
     """
     if page_id.replace("-", "") == TEMPLATE_PAGE_ID:
         raise SystemExit("[fill] this is the template page itself; duplicate it in Notion and fill the copy")
@@ -266,6 +273,9 @@ def fill(api, page_id, proposal, sheets_dir, log=print):
         raise SystemExit("[fill] 調整紀錄 is the first block of the page; add any block above it in the template, then rerun")
     blocks = build(proposal, api=api, sheets_dir=sheets_dir, log=log)
     api.append(page_id, blocks, after=after, log=log)
+    if title:
+        set_title(api, page_id, title)
+        log(f"  title -> {title}")
     return len(blocks)
 
 
@@ -303,7 +313,7 @@ def main():
     if warns:
         print("LINT warnings above: fix proposal.json first, or tell the user why they are accepted.")
 
-    api = Notion(find_token("readwrite"))
+    api = Notion(find_token(dept="一部"))
     if a.mode == "new":
         if not a.parent:
             sys.exit("--parent <page_id> required")
@@ -314,7 +324,7 @@ def main():
     elif a.mode == "fill":
         if not a.page:
             sys.exit("--page <page_id> required")
-        n = fill(api, a.page, proposal, a.sheets)
+        n = fill(api, a.page, proposal, a.sheets, title=title)
         print("inserted blocks:", n, "| top-level now:", api.count_children(a.page))
     else:
         if not a.page:

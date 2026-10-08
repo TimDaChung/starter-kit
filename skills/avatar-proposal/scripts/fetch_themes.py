@@ -37,7 +37,7 @@ def main():
     ap.add_argument("--months", type=int, default=12)
     ap.add_argument("--json")
     a = ap.parse_args()
-    api = Notion(find_token("readonly"))
+    api = Notion(find_token(dept="一部"))
     db = api.call("GET", f"/databases/{THEME_DB}")
     props = db["properties"]
     opts = {k: [o["name"] for o in v["multi_select"]["options"]] for k, v in props.items() if v["type"] == "multi_select"}
