@@ -7,7 +7,8 @@ Rules baked in (see SKILL.md 前科表):
   * count=1 per group (Tim 2026-10-02).
   * reference = the Sept-2026 production sheet of the same tier, read from the art share.
   * the 人物更衣室 background is drawn too (key 07_dressing_room, Leo 2026-10-08: art needs a picture to confirm);
-    its reference is the last slide image of the Sept-2026 人物設定 pptx on the art share.
+    its reference is the Sept-2026 dressing room background 更衣室_all.jpg on the art share (Tim 2026-10-08:
+    that image is the standard; the Oct / Nov files are UI mockups, not references).
 Prompt template lives here (TEMPLATE / TIER_TEXT); prompt模板.md documents it, change both together.
 """
 import argparse
@@ -47,13 +48,17 @@ TIER_TEXT = {
     "BOSS": "STRENGTH TIER: BOSS (highest). Both characters are the most elaborate: ornate costume with gold trim and gems, a weapon AND glowing effects, large and showy.",
 }
 DRESSING_KEY = "07_dressing_room"
-DRESSING_PPTX = r"grp.product.art.check\●Avatar魔鬼營\202609_天魔混世記(大活動)\2609_大活動_人物設定.pptx"
+DRESSING_REF = r"grp.product.art.check\【神幣、鬥地主】\人物系統(人物、場景、禮包)\260901_九月大活動\更衣室_all.jpg"
 DRESSING_TEMPLATE = (
-    "Background art for the avatar dressing room screen of a mobile mahjong game. Follow the reference image for format and rendering: "
-    "one wide landscape scene (3:2), symmetrical one-point perspective, a raised round stage in the centre with a few steps in front "
-    "where the player's avatar will stand, an empty floor in the lower half, decorative scenery on both sides framing the stage, "
-    "clean cel-shaded vector-like game art with bold outlines and bright saturated colours. NO characters, NO people, NO creatures in the "
-    "foreground, no text, no logos, no watermark. Do NOT copy the reference's theme or colours; only its layout and style.\n"
+    "Background art for the avatar dressing room screen of a mobile mahjong game. Follow the reference image EXACTLY for layout and rendering: "
+    "one wide landscape image. The LEFT HALF is the scene: a raised round stage with a few wide steps in front, centred in the left half, "
+    "where the player's avatar will stand; one large architectural frame (an arch, gate or similar landmark of the theme) rising behind "
+    "the stage; open sky and a distant view behind it; a little scenery at the far left edge; a plain floor in front of the steps. "
+    "The RIGHT HALF is a single flat solid colour taken from the theme's palette, with no detail at all (the game UI covers it); "
+    "the scene fades softly into that colour around the vertical centre line. "
+    "Soft painterly anime background art, bright and airy, gentle light, no heavy black outlines. "
+    "NO characters, NO people, NO creatures, no text, no logos, no watermark. "
+    "Do NOT copy the reference's theme, buildings or colours; only its layout and rendering.\n"
     "Theme of this month: {theme_en}.\n"
     "Scene: {scene}\n"
     "Avoid (hard rules): {avoid}\n"
@@ -89,23 +94,17 @@ def dressing_prompt(p):
     return DRESSING_TEMPLATE.format(theme_en=p["theme_en"], scene=dr["prompt_en"], avoid=p.get("avoid_en", DEFAULT_AVOID))
 
 
-def dressing_ref(ref_dir, out_dir):
-    """Extract the Sept dressing-room image from the pptx (last slide, first picture) into out_dir."""
+def dressing_ref(ref_dir):
+    """The Sept dressing-room background on the art share (--ref-dir: dressing_room.jpg there instead)."""
     if ref_dir:
         cand = Path(ref_dir) / "dressing_room.jpg"
         return cand if cand.exists() else None
     for drive in ("X:", "Y:"):
-        src = Path(f"{drive}\\{DRESSING_PPTX}")
+        cand = Path(f"{drive}\\{DRESSING_REF}")
         try:
-            if not src.exists():
-                continue
-            from pptx import Presentation
-            slide = Presentation(str(src)).slides[-1]
-            pic = next(sh for sh in slide.shapes if sh.shape_type == 13)
-            dst = Path(out_dir) / f"_ref_dressing_room.{pic.image.ext}"
-            dst.write_bytes(pic.image.blob)
-            return dst
-        except (OSError, StopIteration, ImportError):
+            if cand.exists():
+                return cand
+        except OSError:
             pass
     return None
 
@@ -156,7 +155,7 @@ def main():
                          out / f"{g['key']}_{g['tier']}_{g['male']['persona']}+{g['female']['persona']}.png"))
     if p.get("dressing_room") and (not only or DRESSING_KEY in only):
         if p["dressing_room"].get("prompt_en"):
-            jobs.append((DRESSING_KEY, dressing_prompt(p), dressing_ref(a.ref_dir, out), out / f"{DRESSING_KEY}_人物更衣室.png"))
+            jobs.append((DRESSING_KEY, dressing_prompt(p), dressing_ref(a.ref_dir), out / f"{DRESSING_KEY}_人物更衣室.png"))
         else:
             print(f"WARNING: dressing_room has no prompt_en; {DRESSING_KEY} skipped")
     results = []

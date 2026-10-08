@@ -14,8 +14,8 @@
   ],
   "dressing_room": {
     "name": "【人物更衣室】",
-    "desc": "夏祭夜市街道：兩側攤位與紅燈籠，地面石板，夜空，參考完成品簡化",
-    "prompt_en": "a summer festival night street: rows of food stalls and red paper lanterns on both sides, stone-paved ground, starry night sky, a round wooden festival stage in the centre."
+    "desc": "夏祭夜：左半木造圓形祭典舞台，後方掛滿紅燈籠的木拱門，最左側少量攤位，星空遠處煙火；右半深靛藍純色",
+    "prompt_en": "the stage is a round wooden festival stage; behind it a tall wooden festival arch strung with red paper lanterns; a few food stalls at the far left edge; starry summer night sky with small distant fireworks. Right half colour: deep indigo."
   },
   "groups": [
     {
