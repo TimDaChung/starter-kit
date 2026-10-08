@@ -78,6 +78,7 @@ python <skill-dir>/scripts/fetch_themes.py --months 12
 | 組別 | 男 | 女 | 主色 男／女 | 前景（位置）／背景 |
 |---|---|---|---|---|
 
+- 一行：**人物更衣室**｜主題地標（站台後方的框，九月是拱門）｜天空遠景｜右半純色。版型固定（左半場景、右半純色留給 UI，見 `prompt模板.md`），提案只寫這三樣；地標不能和本期任一組的前景背景重複
 - 收尾給**一個**建議案與理由（不是三案平鋪）
 
 硬規則見 `設計法則.md`：避開前兩個月的主要類別與要素組合；近 12 個月出現 ≥3 次的類別要有理由才選；男女成對概念；十二個主色不重複，**而且色系要拉開**：同一個色系（黑白灰不算）最多出現在兩套，六套的第一個主色不能同色系，男裝尤其要注意（Leo 2026-10-08：2612 試跑男裝四套帶紅）；BOSS 等有特效的角色，提案表就要寫清楚特效是實體還是虛體；每組一前景一背景（新手兩前景無背景），**同系列前景背景不重複**；前景輪流放四角。
@@ -96,7 +97,7 @@ python <skill-dir>/scripts/fetch_themes.py --months 12
 - 每個角色 `requirements`（繁中，給美術看）與 `prompt_en`（英文，給生圖）都要寫；前景背景也是
 - 前景 `corner` 用 左上／右上／左下／右下；背景 `owner` 預設 female
 - **特效一律標實體／虛體**：requirements 寫「特效（實體）：…」或「特效（虛體）：…」，`prompt_en` 用對應寫法（虛體鳳凰＝*phoenix-shaped burst of flame*，實體鳳凰＝*a real phoenix creature*）
-- `dressing_room` 要有 `name`、`desc`、`prompt_en`（更衣室要出圖）
+- `dressing_room` 要有 `name`、`desc`、`prompt_en`（更衣室要出圖）：`desc` 照提案那行寫給美術看；`prompt_en` 只寫站台材質、後方地標、天空遠景、`Right half colour: …`，**不要寫版型或「兩側」「正中」這類位置**（版型在模板裡，寫了會打架）。範例見 `proposal.example.json`
 - 寫完先跑 `python scripts/sheet_assets.py lint proposal.json`（配色重疊、特效沒標實體虛體、色詞不認得），清到沒警告；真的要保留要跟使用者講理由
 - 再跑 `python scripts/build_notion.py preview proposal.json --sheets <sheets dir>` 看自動勾選的部件表對不對（✅／—／❌ 的意思見 `設計法則.md` 第二節）
 
@@ -133,7 +134,7 @@ python <skill-dir>/scripts/build_notion.py new  proposal.json --parent <父頁 i
 
 ### 6. 交付
 
-- Notion 連結；桌面資料夾（六張示意圖＋proposal.json）照 `feedback_work_habits` 慣例開給使用者
+- Notion 連結；桌面資料夾（六張示意圖＋更衣室一張＋proposal.json）照 `feedback_work_habits` 慣例開給使用者
 - 提醒後續 SOP：主題庫那列要填活動名稱／類別／要素（人工填）；企劃原檔放美術網芳 `●Avatar魔鬼營\YYYYMM_M月大活動(大活動)`；對稿群 `4p_好麻對稿群`
 
 ---
