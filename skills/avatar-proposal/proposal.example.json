@@ -5,114 +5,283 @@
   "theme": "百鬼夜宴",
   "theme_desc": "日本夏夜妖怪祭典：祭典攤販、狐面、妖怪與月宮，走可愛明亮的夜祭調性，不走陰森",
   "theme_en": "Japanese summer night yokai festival (百鬼夜宴), cheerful and cute, bright colors, nothing grim or creepy",
-  "category": ["日本"],
-  "elements": ["奇幻", "古代"],
-  "dressing_room": {"name": "【人物更衣室】", "desc": "夏祭夜市街道：兩側攤位與紅燈籠，地面石板，夜空，參考完成品簡化"},
+  "category": [
+    "日本"
+  ],
+  "elements": [
+    "奇幻",
+    "古代"
+  ],
+  "dressing_room": {
+    "name": "【人物更衣室】",
+    "desc": "夏祭夜市街道：兩側攤位與紅燈籠，地面石板，夜空，參考完成品簡化",
+    "prompt_en": "a summer festival night street: rows of food stalls and red paper lanterns on both sides, stone-paved ground, starry night sky, a round wooden festival stage in the centre."
+  },
   "groups": [
     {
-      "key": "01_newbie", "tier": "新手",
+      "key": "01_newbie",
+      "tier": "新手",
       "male": {
-        "persona": "祭典小販", "main_color": "藏青", "main_color_en": "navy blue",
-        "requirements": ["服飾：藏青法被搭配白領、深色短褲、草鞋，無花紋", "髮飾：白色綁額頭巾（hachimaki）", "整體簡樸，無武器無特效"],
+        "persona": "祭典小販",
+        "main_color": "藏青",
+        "main_color_en": "navy blue",
+        "requirements": [
+          "服飾：藏青法被搭配白領、深色短褲、草鞋，無花紋",
+          "髮飾：白色綁額頭巾（hachimaki）",
+          "整體簡樸，無武器無特效"
+        ],
         "prompt_en": "festival stall vendor. Navy blue happi coat with a plain white collar, white headband (hachimaki) tied on the forehead, dark shorts, straw sandals, friendly smile."
       },
       "female": {
-        "persona": "浴衣少女", "main_color": "粉", "main_color_en": "pink",
-        "requirements": ["服飾：粉色浴衣，小碎花即可，紅色腰帶", "髮飾：小金魚髮飾", "鞋：木屐；整體簡樸，無武器無特效"],
+        "persona": "浴衣少女",
+        "main_color": "粉",
+        "main_color_en": "pink",
+        "requirements": [
+          "服飾：粉色浴衣，小碎花即可，紅色腰帶",
+          "髮飾：小金魚髮飾",
+          "鞋：木屐；整體簡樸，無武器無特效"
+        ],
         "prompt_en": "yukata girl. Soft pink yukata with a simple small floral pattern, red obi sash, a small goldfish hair ornament, wooden geta sandals, shy smile."
       },
       "foregrounds": [
-        {"owner": "male", "name": "【前景1】撈金魚", "corner": "左下", "desc": "撈金魚的水盆，盆裡兩尾金魚，旁邊一支紙網（poi）", "prompt_en": "a goldfish-scooping bowl with two small goldfish and a paper scoop (poi)."},
-        {"owner": "female", "name": "【前景2】狐面", "corner": "右上", "desc": "白底紅紋的狐狸面具，附紅繩與小鈴", "prompt_en": "a white kitsune fox mask with red markings and a red cord."}
+        {
+          "owner": "male",
+          "name": "【前景1】撈金魚",
+          "corner": "左下",
+          "desc": "撈金魚的水盆，盆裡兩尾金魚，旁邊一支紙網（poi）",
+          "prompt_en": "a goldfish-scooping bowl with two small goldfish and a paper scoop (poi)."
+        },
+        {
+          "owner": "female",
+          "name": "【前景2】狐面",
+          "corner": "右上",
+          "desc": "白底紅紋的狐狸面具，附紅繩與小鈴",
+          "prompt_en": "a white kitsune fox mask with red markings and a red cord."
+        }
       ],
       "background": null
     },
     {
-      "key": "02_normal1", "tier": "一般 1",
+      "key": "02_normal1",
+      "tier": "一般 1",
       "male": {
-        "persona": "狐面劍士", "main_color": "白 / 紅", "main_color_en": "white and red", "choice": "weapon",
-        "requirements": ["服飾：白底紅狐火紋羽織，內搭深色和服", "髮飾：半面狐面戴在側頭", "武器：一把太刀（擇武器，不做特效）"],
+        "persona": "狐面劍士",
+        "main_color": "白 / 紅",
+        "main_color_en": "white and red",
+        "choice": "weapon",
+        "requirements": [
+          "服飾：白底紅狐火紋羽織，內搭深色和服",
+          "髮飾：半面狐面戴在側頭",
+          "武器：一把太刀（擇武器，不做特效）"
+        ],
         "prompt_en": "fox-mask swordsman. White haori with red fox-flame patterns over a dark kimono, a half fox mask worn on the side of the head as a hair accessory, holding ONE katana (his weapon; no glowing effects)."
       },
       "female": {
-        "persona": "九尾狐娘", "main_color": "橙 / 白", "main_color_en": "orange and white", "choice": "effect",
-        "requirements": ["服飾：橙白振袖和服", "髮飾：狐耳", "特效：身旁漂浮藍白狐火（擇特效，不拿武器）", "武器(人物系統)：由美術配一把摺扇或鈴杖"],
+        "persona": "九尾狐娘",
+        "main_color": "橙 / 白",
+        "main_color_en": "orange and white",
+        "choice": "effect",
+        "requirements": [
+          "服飾：橙白振袖和服",
+          "髮飾：狐耳",
+          "特效（虛體）：身旁漂浮藍白狐火（擇特效，不拿武器）",
+          "武器(人物系統)：由美術配一把摺扇或鈴杖"
+        ],
         "prompt_en": "nine-tailed fox girl. Orange and white furisode kimono, fox ears hair accessory, fluffy fox tails behind her, surrounded by floating blue-white fox-fire wisps (her effect; she holds NO weapon)."
       },
       "foregrounds": [
-        {"owner": "male", "name": "【前景】祭典太鼓", "corner": "右下", "desc": "祭典用太鼓，附兩支鼓棒", "prompt_en": "a festival taiko drum with two drumsticks."}
+        {
+          "owner": "male",
+          "name": "【前景】祭典太鼓",
+          "corner": "右下",
+          "desc": "祭典用太鼓，附兩支鼓棒",
+          "prompt_en": "a festival taiko drum with two drumsticks."
+        }
       ],
-      "background": {"owner": "female", "name": "【背景】夜祭參道", "desc": "夜間祭典參道，兩側紅燈籠與攤位，暖色燈光；不要畫鳥居與石燈籠", "prompt_en": "a night festival approach path lined with red paper lanterns and food stalls, warm lantern glow, no torii gate, no stone lanterns."}
+      "background": {
+        "owner": "female",
+        "name": "【背景】夜祭參道",
+        "desc": "夜間祭典參道，兩側紅燈籠與攤位，暖色燈光；不要畫鳥居與石燈籠",
+        "prompt_en": "a night festival approach path lined with red paper lanterns and food stalls, warm lantern glow, no torii gate, no stone lanterns."
+      }
     },
     {
-      "key": "03_normal2", "tier": "一般 2",
+      "key": "03_normal2",
+      "tier": "一般 2",
       "male": {
-        "persona": "天狗少年", "main_color": "紅 / 黑", "main_color_en": "red and black", "choice": "weapon",
-        "requirements": ["服飾：紅黑裝束，黑羽毛領，不放任何宗教物件", "髮飾：小型紅色高鼻天狗面具戴在額頭", "武器：羽團扇（擇武器，不做特效）"],
+        "persona": "天狗少年",
+        "main_color": "紅 / 黑",
+        "main_color_en": "red and black",
+        "choice": "weapon",
+        "requirements": [
+          "服飾：紅黑裝束，黑羽毛領，不放任何宗教物件",
+          "髮飾：小型紅色高鼻天狗面具戴在額頭",
+          "武器：羽團扇（擇武器，不做特效）"
+        ],
         "prompt_en": "young tengu boy. Red and black outfit without any religious items, a small red long-nosed tengu mask worn on his forehead, black feathered collar, holding ONE large feather fan (hauchiwa, his weapon; no glowing effects)."
       },
       "female": {
-        "persona": "雪女", "main_color": "淺藍 / 白", "main_color_en": "pale blue and white", "choice": "effect",
-        "requirements": ["服飾：淺藍白雪花紋和服，可愛不陰森", "髮飾：雪花髮簪", "特效：身旁飄落冰晶與雪花（擇特效，不拿武器）", "武器(人物系統)：由美術配一把冰紋團扇"],
+        "persona": "雪女",
+        "main_color": "淺藍 / 白",
+        "main_color_en": "pale blue and white",
+        "choice": "effect",
+        "requirements": [
+          "服飾：淺藍白雪花紋和服，可愛不陰森",
+          "髮飾：雪花髮簪",
+          "特效（實體）：身旁飄落冰晶與雪花（擇特效，不拿武器）",
+          "武器(人物系統)：由美術配一把冰紋團扇"
+        ],
         "prompt_en": "snow woman (yuki-onna), cute and gentle, not scary. Pale ice-blue and white kimono with snowflake patterns, long pale hair, a snowflake hair pin, soft glowing ice crystals and snowflakes drifting around her (her effect; she holds NO weapon)."
       },
       "foregrounds": [
-        {"owner": "male", "name": "【前景】和傘", "corner": "左上", "desc": "紅色油紙傘，半開", "prompt_en": "a red oil-paper umbrella (wagasa), half open."}
+        {
+          "owner": "male",
+          "name": "【前景】和傘",
+          "corner": "左上",
+          "desc": "紅色油紙傘，半開",
+          "prompt_en": "a red oil-paper umbrella (wagasa), half open."
+        }
       ],
-      "background": {"owner": "female", "name": "【背景】雪夜竹林", "desc": "月夜下的雪竹林，藍白色調，細雪飄落；不要畫鳥居與石燈籠", "prompt_en": "a snowy bamboo grove at night under moonlight, blue-white tones, gentle falling snow, no torii gate, no stone lanterns."}
+      "background": {
+        "owner": "female",
+        "name": "【背景】雪夜竹林",
+        "desc": "月夜下的雪竹林，藍白色調，細雪飄落；不要畫鳥居與石燈籠",
+        "prompt_en": "a snowy bamboo grove at night under moonlight, blue-white tones, gentle falling snow, no torii gate, no stone lanterns."
+      }
     },
     {
-      "key": "04_topup", "tier": "儲值", "head_note": "(本次神娃不做儲值裝，僅人物系統)",
+      "key": "04_topup",
+      "tier": "儲值",
+      "head_note": "(本次神娃不做儲值裝，僅人物系統)",
       "male": {
-        "persona": "鬼武者", "main_color": "赤 / 金", "main_color_en": "crimson and gold",
-        "requirements": ["服飾：赤金色鬼武者鎧甲，肩甲帶鬼面裝飾", "髮飾：一對鬼角", "武器：金棒（鐵棒）", "翅膀：不放"],
+        "persona": "鬼武者",
+        "main_color": "赤 / 金",
+        "main_color_en": "crimson and gold",
+        "requirements": [
+          "服飾：赤金色鬼武者鎧甲，肩甲帶鬼面裝飾",
+          "髮飾：一對鬼角",
+          "武器：金棒（鐵棒）",
+          "翅膀：不放"
+        ],
         "prompt_en": "oni samurai. Crimson and gold ornate samurai armor with an oni-face shoulder guard, two short horns, holding a studded iron club (kanabo)."
       },
       "female": {
-        "persona": "鬼姬", "main_color": "紫 / 金", "main_color_en": "purple and gold",
-        "requirements": ["服飾：紫金華麗振袖，金色腰帶", "髮飾：一對小鬼角搭配金簪", "武器：金色薙刀", "翅膀：不放"],
+        "persona": "鬼姬",
+        "main_color": "紫 / 金",
+        "main_color_en": "purple and gold",
+        "requirements": [
+          "服飾：紫金華麗振袖，金色腰帶",
+          "髮飾：一對小鬼角搭配金簪",
+          "武器：金色薙刀",
+          "翅膀：不放"
+        ],
         "prompt_en": "oni princess. Luxurious purple and gold furisode with a gold obi, two small horns with golden hairpins, holding a golden naginata."
       },
       "foregrounds": [],
       "background": null
     },
     {
-      "key": "05_boss1", "tier": "BOSS 1",
+      "key": "05_boss1",
+      "tier": "BOSS 1",
       "male": {
-        "persona": "酒吞童子", "main_color": "黑 / 紅 / 金", "main_color_en": "black, red and gold",
-        "parts_new": {"翅膀": "美術設計"},
-        "requirements": ["服飾：黑紅金鬼王鎧甲，毛領", "髮飾：一對大彎角", "武器：巨型華麗大太刀，另一手漂浮金酒杯", "特效：紅金酒焰環繞，腰間赤色注連繩尾端飄舞", "翅膀(人物系統)：以飄舞的注連繩與藍色鬼火代替，造型由美術設計"],
+        "persona": "酒吞童子",
+        "main_color": "黑 / 紅 / 金",
+        "main_color_en": "black, red and gold",
+        "parts_new": {
+          "翅膀": "美術設計"
+        },
+        "requirements": [
+          "服飾：黑紅金鬼王鎧甲，毛領",
+          "髮飾：一對大彎角",
+          "武器：巨型華麗大太刀，另一手漂浮金酒杯",
+          "特效（虛體）：紅金酒焰環繞，腰間赤色注連繩尾端飄舞",
+          "翅膀(人物系統)：以飄舞的注連繩與藍色鬼火代替，造型由美術設計"
+        ],
         "prompt_en": "Shuten-doji oni king. Black, red and gold ornate oni armor, two large curved horns, wild hair, holding a huge ornate odachi sword in one hand and a floating golden sake cup in the other, surrounded by swirling red-gold sake flames; instead of wings, long crimson shimenawa rope ends and small blue oni-fire wisps flare out from his back."
       },
       "female": {
-        "persona": "玉藻前", "main_color": "金 / 白", "main_color_en": "gold and white",
-        "parts_new": {"翅膀": "美術設計"},
-        "requirements": ["服飾：金白華麗十二單，金色髮飾", "髮飾：金狐耳與花簪", "武器：大型金扇", "特效：九條金色狐尾如翼展開，金狐火環繞", "翅膀(人物系統)：以九尾代替，造型由美術設計"],
+        "persona": "玉藻前",
+        "main_color": "金 / 白",
+        "main_color_en": "gold and white",
+        "parts_new": {
+          "翅膀": "美術設計"
+        },
+        "requirements": [
+          "服飾：金白華麗十二單，金色髮飾",
+          "髮飾：金狐耳與花簪",
+          "武器：大型金扇",
+          "特效（實體）：九條金色狐尾如翼展開，金狐火環繞",
+          "翅膀(人物系統)：以九尾代替，造型由美術設計"
+        ],
         "prompt_en": "Tamamo-no-Mae nine-tailed fox queen. Luxurious gold and white layered junihitoe kimono with ornate gold hair ornaments, nine large golden fox tails fanned out behind her like wings, holding a large golden folding fan as her weapon, golden fox-fire orbs orbiting her."
       },
       "foregrounds": [
-        {"owner": "male", "name": "【前景】Q版狸貓", "corner": "右上", "desc": "Q 版狸貓，頭頂一片葉子，手提小燈籠", "prompt_en": "a chibi tanuki raccoon-dog with a leaf on its head holding a tiny lantern."}
+        {
+          "owner": "male",
+          "name": "【前景】Q版狸貓",
+          "corner": "右上",
+          "desc": "Q 版狸貓，頭頂一片葉子，手提小燈籠",
+          "prompt_en": "a chibi tanuki raccoon-dog with a leaf on its head holding a tiny lantern."
+        }
       ],
-      "background": {"owner": "female", "name": "【背景】鬼城天守(滿版)", "desc": "紅月下的鬼城天守閣，燈籠與飄散火星", "prompt_en": "a towering oni castle keep at night under a red moon, lanterns and drifting embers."}
+      "background": {
+        "owner": "female",
+        "name": "【背景】鬼城天守(滿版)",
+        "desc": "紅月下的鬼城天守閣，燈籠與飄散火星",
+        "prompt_en": "a towering oni castle keep at night under a red moon, lanterns and drifting embers."
+      }
     },
     {
-      "key": "06_boss2", "tier": "BOSS 2",
+      "key": "06_boss2",
+      "tier": "BOSS 2",
       "male": {
-        "persona": "龍神", "main_color": "青藍 / 金", "main_color_en": "teal blue and gold",
-        "parts_new": {"翅膀": "美術設計"},
-        "requirements": ["服飾：青藍鱗甲鑲金邊", "髮飾：一對龍角", "武器：華麗三叉戟", "特效：發光水流纏身，身旁一條小水龍", "翅膀(人物系統)：以背後兩道發光水弧代替，造型由美術設計"],
+        "persona": "龍神",
+        "main_color": "青藍 / 金",
+        "main_color_en": "teal blue and gold",
+        "parts_new": {
+          "翅膀": "美術設計"
+        },
+        "requirements": [
+          "服飾：青藍鱗甲鑲金邊",
+          "髮飾：一對龍角",
+          "武器：華麗三叉戟",
+          "特效（虛體）：發光水流纏身，身旁一條水流化成的小水龍",
+          "翅膀(人物系統)：以背後兩道發光水弧代替，造型由美術設計"
+        ],
         "prompt_en": "dragon god of the sea (ryujin). Teal-blue scaled armor with gold trim, two dragon horns, flowing dark-blue hair, holding an ornate trident, a spiraling stream of glowing water with a small water dragon coiling around his body; instead of wings, two arcs of luminous water rise from his back."
       },
       "female": {
-        "persona": "輝夜姬", "main_color": "月白 / 銀", "main_color_en": "moon white and silver",
-        "parts_new": {"翅膀": "美術設計"},
-        "requirements": ["服飾：月白銀十二單，淡紫點綴", "髮飾：新月髮冠", "武器：新月法杖", "特效：銀色月光粒子與發光竹葉飄落", "翅膀(人物系統)：以飄揚羽衣飄帶代替，造型由美術設計"],
+        "persona": "輝夜姬",
+        "main_color": "月白 / 銀",
+        "main_color_en": "moon white and silver",
+        "parts_new": {
+          "翅膀": "美術設計"
+        },
+        "requirements": [
+          "服飾：月白銀十二單，淡紫點綴",
+          "髮飾：新月髮冠",
+          "武器：新月法杖",
+          "特效（虛體）：銀色月光粒子與發光竹葉飄落",
+          "翅膀(人物系統)：以飄揚羽衣飄帶代替，造型由美術設計"
+        ],
         "prompt_en": "Princess Kaguya, moon princess. Moon-white and silver layered junihitoe kimono with pale lavender accents, a crescent-moon crown, long flowing celestial robe ribbons (hagoromo) floating behind her like wings, holding a crescent-moon staff as her weapon, soft silver moonlight sparkles and floating glowing bamboo leaves around her."
       },
       "foregrounds": [
-        {"owner": "male", "name": "【前景】月兔", "corner": "左下", "desc": "Q 版白色月兔，抱著小搗麻糬木槌", "prompt_en": "a chibi white moon rabbit holding a small mochi mallet."}
+        {
+          "owner": "male",
+          "name": "【前景】月兔",
+          "corner": "左下",
+          "desc": "Q 版白色月兔，抱著小搗麻糬木槌",
+          "prompt_en": "a chibi white moon rabbit holding a small mochi mallet."
+        }
       ],
-      "background": {"owner": "female", "name": "【背景】月宮(滿版)", "desc": "發光的月宮與竹林，深藍夜空一輪滿月", "prompt_en": "a luminous moon palace with glowing bamboo and a huge full moon in a deep indigo sky."}
+      "background": {
+        "owner": "female",
+        "name": "【背景】月宮(滿版)",
+        "desc": "發光的月宮與竹林，深藍夜空一輪滿月",
+        "prompt_en": "a luminous moon palace with glowing bamboo and a huge full moon in a deep indigo sky."
+      }
     }
-  ]
+  ],
+  "_lint_note": "2612 試跑原樣保留：男裝紅色系出現在 4 套，正是 Leo 2026-10-08 指出的配色重疊，sheet_assets.py lint 會報；正式提案要先拉開"
 }

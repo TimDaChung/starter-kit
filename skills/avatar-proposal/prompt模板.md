@@ -12,6 +12,11 @@
    - 儲值：華麗帶金邊、有武器、無特效、翅膀可有可無、兩框素底
    - BOSS：最華麗、武器＋特效全開
 4. **左男右女各一段**：`prompt_en`（外觀）＋主色；該側的前景（指定角落、小、不遮人物）；該側是否滿版背景，否則註明保持素底
+   - **特效要在 `prompt_en` 寫明實體或虛體**（Leo 2026-10-08）：虛體寫成「某元素化成某形狀」（*a phoenix-shaped burst of flame*、*a small dragon formed from flowing water*），實體寫成真的生物或物件（*a real phoenix creature perched on the shoulder*）。只寫 *phoenix* 模型會自己選，常常和需求不符
+
+## 人物更衣室（`DRESSING_TEMPLATE`，key `07_dressing_room`）
+
+Leo 2026-10-08：更衣室也要出圖給美術確認。一張 3:2 橫幅場景：對稱單點透視、中央圓形站台加台階（玩家人物站的位置）、下半部地板留空、兩側主題布景、**不畫任何人物或生物前景**。場景內容寫在 `dressing_room.prompt_en`。參考圖是九月人物設定 pptx（`●Avatar魔鬼營\202609_天魔混世記(大活動)\2609_大活動_人物設定.pptx`）最後一頁的圖，腳本自動抽到輸出資料夾的 `_ref_dressing_room.jpg`
 
 ## 參考圖
 

@@ -1,15 +1,17 @@
-"""Build the 神娃＋人物設定 Notion page (two-column layout) from proposal.json.
+"""Build the 神娃＋人物設定 Notion page (Leo's per-character layout, 2026-10-08) from proposal.json.
 
   python build_notion.py preview proposal.json                       # no API: print what would be built
   python build_notion.py fill    proposal.json --page <page_id>   [--sheets DIR]   # DEFAULT in the SOP
         # user made the page from the Notion template and gave us the URL; content is inserted right before
         # the template's 調整紀錄 heading (table of contents / adjustment-log skeleton untouched), sheets uploaded inline
   python build_notion.py swap    proposal.json --page <page_id>   [--sheets DIR]
-        # template already has placeholder images captioned "示意圖｜<tier>": replace the files in place
+        # sheets were redrawn: replace crops / dressing room in place, matched by uploaded file name
+        # (<month>_<key>_<male|female>.png) or by a template caption 示意圖｜<tier>｜<男|女> / 示意圖｜更衣室
   python build_notion.py new     proposal.json --parent <page_id> [--sheets DIR] [--title T]
         # only when the user explicitly asks us to create the page ourselves
 
-Sheets: one PNG per group, matched by group "key" prefix (e.g. 01_newbie*.png) inside --sheets.
+Sheets: one PNG per group, matched by group "key" prefix (e.g. 01_newbie*.png) inside --sheets; cut into male/female
+halves on upload. Dressing room: 07_dressing_room*.png.
 Credential: the 一部 (pm1) Notion proxy credential, see notion_api.find_token and
 plan-dept14-writer/references/notion-access.md. Writes still need the user's go-ahead first.
 """
@@ -21,31 +23,35 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from notion_api import (Notion, bullet, callout, column_list, divider, find_token, heading, image_block, para, plain, table)  # noqa: E402
+from sheet_assets import color_chip, crop_halves, lint  # noqa: E402
 
-OLD_PARTS = ["五官", "臉型", "服飾", "髮型", "髮飾", "眼鏡", "鬍子", "裝飾", "耳環", "武器", "特效"]
-NEW_PARTS = ["服飾", "髮型", "髮飾", "武器", "耳環", "翅膀"]
+DRESSING_KEY = "07_dressing_room"
+
 ALL_PARTS = ["五官", "臉型", "服飾", "髮型", "髮飾", "眼鏡", "鬍子", "裝飾", "耳環", "武器", "特效", "翅膀"]
-YES, NO, FREE = "✅", "—", "自由決定"
+# ✅ = make it; — = allowed, not this time; ❌ = never (the tier's spec forbids it, or the system has no such part)
+YES, NO, NEVER = "✅", "—", "❌"
+GENDER_KEY = {"男": "male", "女": "female"}
 
 
 def tier_base(tier):
-    """Return (old, new) default marks for a tier. Mirrors SOP 步驟一 部件需求表."""
+    """Return (old, new) default marks for a tier, as Leo laid them out on the 2612 page (2026-10-08)."""
     t = "BOSS" if tier.upper().startswith("BOSS") else ("一般" if tier.startswith("一般") else tier)
+    core = {p: YES for p in ["五官", "臉型", "服飾", "髮型", "髮飾"]}
     if t == "新手":
-        old = {p: YES for p in ["五官", "臉型", "服飾", "髮型", "髮飾"]}
-        old.update({p: NO for p in ["眼鏡", "鬍子", "裝飾", "耳環", "武器", "特效"]})
-        new = {"服飾": YES, "髮型": YES, "髮飾": YES, "武器": NO, "耳環": NO, "翅膀": NO}
+        old = {**core, "眼鏡": NO, "鬍子": NO, "裝飾": NO, "耳環": NEVER, "武器": NEVER, "特效": NEVER, "翅膀": NEVER}
+        new_var = {"耳環": NEVER, "武器": NEVER, "翅膀": NEVER}
     elif t == "一般":
-        old = {p: YES for p in ["五官", "臉型", "服飾", "髮型", "髮飾"]}
-        old.update({p: NO for p in ["眼鏡", "鬍子", "裝飾", "耳環", "武器", "特效"]})
-        new = {"服飾": YES, "髮型": YES, "髮飾": YES, "武器": YES, "耳環": NO, "翅膀": NO}
-    elif t == "儲值":
-        old = {p: NO for p in OLD_PARTS}
-        new = {"服飾": YES, "髮型": YES, "髮飾": YES, "武器": YES, "耳環": NO, "翅膀": NO}
+        old = {**core, "眼鏡": NO, "鬍子": NO, "裝飾": NO, "耳環": NO, "武器": NO, "特效": NO, "翅膀": NO}
+        new_var = {"耳環": NO, "武器": YES, "翅膀": NO}
+    elif t == "儲值":  # 神娃 儲值裝 removed 2026-05; 人物 still made
+        old = {p: NEVER for p in ALL_PARTS}
+        new_var = {"耳環": NO, "武器": YES, "翅膀": NO}
     else:  # BOSS
-        old = {p: YES for p in ["五官", "臉型", "服飾", "髮型", "髮飾", "武器", "特效"]}
-        old.update({p: NO for p in ["眼鏡", "鬍子", "裝飾", "耳環"]})
-        new = {"服飾": YES, "髮型": YES, "髮飾": YES, "武器": YES, "耳環": NO, "翅膀": YES}
+        old = {**core, "眼鏡": NO, "鬍子": NO, "裝飾": NO, "耳環": YES, "武器": YES, "特效": YES, "翅膀": NO}
+        new_var = {"耳環": YES, "武器": YES, "翅膀": YES}
+    # 人物 system has no 五官／臉型／眼鏡／裝飾／特效
+    new = {"五官": NEVER, "臉型": NEVER, "服飾": YES, "髮型": YES, "髮飾": YES, "眼鏡": NEVER, "鬍子": NO,
+           "裝飾": NEVER, "特效": NEVER, **new_var}
     return old, new
 
 
@@ -55,32 +61,37 @@ def parts_for(tier, gender, char):
     if tier.startswith("一般") and choice:
         old["武器" if choice == "weapon" else "特效"] = YES
     if gender == "女":
-        old["鬍子"] = NO
+        old["鬍子"] = new["鬍子"] = NEVER
     old.update(char.get("parts_old", {}))
     new.update(char.get("parts_new", {}))
     return old, new
 
 
 def mark_cell(v):
-    if v == YES:
-        return (YES, {})
+    if v in (YES, NEVER):
+        return (v, {})
     if v in (NO, ""):
         return (NO, {"color": "gray"})
     return (v, {"color": "orange"})
 
 
 def parts_table(tier, gender, char):
+    """Horizontal: header row = parts, one row each for 神娃 and 人物."""
     old, new = parts_for(tier, gender, char)
-    rows = [[("部件", {"bold": True}), ("神娃", {"bold": True}), ("人物", {"bold": True})]]
-    for p in ALL_PARTS:
-        if p not in old and p not in new:
-            continue
-        rows.append([p, mark_cell(old[p]) if p in old else ("", {}), mark_cell(new[p]) if p in new else ("", {})])
-    return table(rows)
+    rows = [[("部件", {"bold": True})] + [(p, {"bold": True}) for p in ALL_PARTS],
+            [("神娃", {"bold": True})] + [mark_cell(old[p]) for p in ALL_PARTS],
+            [("人物", {"bold": True})] + [mark_cell(new[p]) for p in ALL_PARTS]]
+    t = table(rows)
+    t["table"]["has_row_header"] = True
+    return t
 
 
-def sheet_caption(group):
-    return f"示意圖｜{group['tier']}"
+def sheet_caption(group, gender=None):
+    return f"示意圖｜{group['tier']}" + (f"｜{gender}" if gender else "")
+
+
+def upload_name(proposal, stem):
+    return f"{proposal['month']}_{stem}"
 
 
 def find_sheet(sheets_dir, group):
@@ -90,28 +101,48 @@ def find_sheet(sheets_dir, group):
     return hits[0] if hits else None
 
 
-def char_blocks(tier, gender, char, scenes):
-    out = [heading(2, f"{gender}｜{char['persona']}"), para(f"主色：{char['main_color']}", bold=True), parts_table(tier, gender, char)]
+def image_or_placeholder(api, blob, name, caption, log, label):
+    """Upload PNG bytes and return an image block; without api (preview) return a gray marker paragraph."""
+    if blob is None:
+        return callout(f"{caption}：尚未產出（gen_sheets.py 跑完後用 swap 模式換入）", emoji="🖼️")
+    if not api:
+        return para(f"[preview] {label} {name}.png", color="gray")
+    fid = api.upload_image(blob, "png", name)
+    log(f"  uploaded {name}.png")
+    return image_block(fid)
+
+
+def char_blocks(p, g, gender, char, scenes, crop, api, log):
+    """One character = heading, 主色 + swatch, horizontal parts table, then [crop | 重點需求] columns (Leo's layout)."""
+    key = GENDER_KEY[gender]
+    stem = f"{g['key']}_{key}"
+    out = [heading(2, f"{gender}｜{char['persona']}"),
+           para(f"主色：{char['main_color']}", bold=True),
+           image_or_placeholder(api, color_chip(char["main_color"]), upload_name(p, stem + "_color"), "", log, "chip"),
+           parts_table(g["tier"], gender, char)]
+    right = []
     reqs = char.get("requirements", [])
     if reqs:
-        out.append(para("重點需求", bold=True))
-        out += [bullet(r) for r in reqs]
+        right.append(para("重點需求", bold=True))
+        right += [bullet(r) for r in reqs]
     for sc in scenes:
         label = sc["name"] + (f"（{sc['corner']}）" if sc.get("corner") else "")
-        out.append(para(label, bold=True))
+        right.append(para(label, bold=True))
         if sc.get("desc"):
-            out.append(bullet(sc["desc"]))
+            right.append(bullet(sc["desc"]))
+    left = [image_or_placeholder(api, crop, upload_name(p, stem), sheet_caption(g, gender), log, "crop")]
+    out.append(column_list(left, right or [para("")]))
     return out
 
 
 def build(proposal, api=None, sheets_dir=None, log=print):
     p = proposal
     blocks = [heading(1, "活動總覽")]
-    blocks += [bullet(f"活動名稱 ｜ {p['event_name']}"),
-               bullet(f"地區 ｜ 中文　平台 ｜ Mobile ✔ PC ✔　上線時間 ｜ {p['period']}"),
-               bullet(f"主題 ｜ {p['theme']}　說明 ｜ {p.get('theme_desc', '')}"),
-               bullet(f"主要類別 ｜ {'、'.join(p.get('category', []))}　要素 ｜ {'、'.join(p.get('elements', []))}"),
-               bullet("角色清單 ｜ 各服飾主色分配，副色由美術搭配")]
+    blocks += [bullet(f"活動名稱：{p['event_name']}"),
+               bullet(f"上線時間：{p['period']}"),
+               bullet(f"主題：{p['theme']}"),
+               bullet(f"說明：{p.get('theme_desc', '')}"),
+               bullet("配色：")]
     cols = [g["tier"] for g in p["groups"]]
     rows = [[("主色", {"bold": True})] + [(c, {"bold": True}) for c in cols]]
     for gender, key in (("男", "male"), ("女", "female")):
@@ -128,61 +159,63 @@ def build(proposal, api=None, sheets_dir=None, log=print):
         female_scenes = [s for s in fg if s.get("owner") == "female"]
         if bg:
             (female_scenes if bg.get("owner", "female") == "female" else male_scenes).append(bg)
-        left = char_blocks(g["tier"], "男", g["male"], male_scenes) + char_blocks(g["tier"], "女", g["female"], female_scenes)
-        right = []
         sheet = find_sheet(sheets_dir, g)
-        if sheet and api:
-            fid = api.upload_file(sheet, name=f"{g['key']}_{p['month']}")
-            log(f"  uploaded {sheet.name}")
-            right.append(image_block(fid, sheet_caption(g)))
-        elif sheet:
-            right.append(para(f"[preview] image {sheet.name}", color="gray"))
-        else:
-            right.append(callout(f"{sheet_caption(g)}：尚未產出（gen_sheets.py 跑完後用 swap 模式換入）", emoji="🖼️"))
-        blocks.append(column_list(left, right))
+        crops = crop_halves(sheet) if sheet else (None, None)
+        blocks += char_blocks(p, g, "男", g["male"], male_scenes, crops[0], api, log)
+        blocks += char_blocks(p, g, "女", g["female"], female_scenes, crops[1], api, log)
 
     dr = p.get("dressing_room")
     if dr:
-        blocks.append(heading(1, "更衣室背景"))
-        left = [para(dr["name"], bold=True), bullet(dr["desc"])]
-        right = [callout("示意圖｜更衣室：由美術依描述製作，本企劃不出圖", emoji="🖼️")]
-        blocks.append(column_list(left, right))
+        blocks.append(heading(1, "人物更衣室"))
+        blocks.append(bullet(f"{dr['name']}：{dr['desc']}" if dr.get("name") else dr["desc"]))
+        shot = find_sheet(sheets_dir, {"key": DRESSING_KEY})
+        blob = shot.read_bytes() if shot and shot.suffix.lower() == ".png" else None
+        blocks.append(image_or_placeholder(api, blob, upload_name(p, DRESSING_KEY), "示意圖｜更衣室", log, "dressing room"))
 
     blocks.append(divider())
-    blocks.append(callout(f"本頁由 avatar-proposal skill 產出（{date.today().isoformat()}）。部件表依 SOP 步驟一規則自動勾選，橘字為人工覆寫；示意圖為 image-studio 概念稿，給美術看方向用。", emoji="🤖"))
+    blocks.append(callout(f"本頁由 avatar-proposal skill 產出（{date.today().isoformat()}）。部件表：✅ 要做｜— 這次沒有（可以有，本期不放）｜❌ 一定不會有（該等級規格不放，或該系統沒有這個部件）｜橘字為人工覆寫。特效一律標明實體或虛體。示意圖為 image-studio 概念稿，給美術看方向用。", emoji="🤖"))
     return blocks
 
 
+def swap_targets(proposal, sheets_dir):
+    """{upload name stem: (caption, png bytes)} for every crop and the dressing room that has a file on disk."""
+    out = {}
+    for g in proposal["groups"]:
+        sheet = find_sheet(sheets_dir, g)
+        if sheet:
+            for gender, blob in zip(("男", "女"), crop_halves(sheet)):
+                out[upload_name(proposal, f"{g['key']}_{GENDER_KEY[gender]}")] = (sheet_caption(g, gender), blob)
+    shot = find_sheet(sheets_dir, {"key": DRESSING_KEY})
+    if shot and shot.suffix.lower() == ".png":
+        out[upload_name(proposal, DRESSING_KEY)] = ("示意圖｜更衣室", shot.read_bytes())
+    return out
+
+
 def swap(api, page_id, proposal, sheets_dir, log=print):
-    want = {sheet_caption(g): g for g in proposal["groups"]}
+    """Replace images in place. An image is matched by its uploaded file name (<month>_<key>_<male|female>.png,
+    as fill/new upload it) or by a caption 示意圖｜<tier>｜<男|女> / 示意圖｜更衣室 on a template placeholder."""
+    targets = swap_targets(proposal, sheets_dir)
+    by_caption = {cap: stem for stem, (cap, _) in targets.items()}
     done = 0
     for _, b in api.walk(page_id):
-        if b["type"] != "image":
-            continue
-        cap = plain(b["image"].get("caption"))
-        for prefix, g in want.items():
-            if cap.startswith(prefix):
-                sheet = find_sheet(sheets_dir, g)
-                if not sheet:
-                    log(f"  skip {prefix}: no sheet file")
-                    continue
-                fid = api.upload_file(sheet, name=f"{g['key']}_{proposal['month']}")
-                api.replace_image(b["id"], fid, caption=prefix)
-                log(f"  swapped {prefix} <- {sheet.name}")
+        if b["type"] == "image":
+            im = b["image"]
+            fname = im.get(im["type"], {}).get("url", "").split("?")[0].rsplit("/", 1)[-1]
+            stem = fname[:-4] if fname.endswith(".png") else None
+            stem = stem if stem in targets else by_caption.get(plain(im.get("caption")))
+            if stem:
+                api.replace_image(b["id"], api.upload_image(targets[stem][1], "png", stem))
+                log(f"  swapped {stem}")
                 done += 1
-    # placeholders (callouts) that still need an image -> insert image after the callout
-    for _, b in api.walk(page_id):
-        if b["type"] == "callout":
+        elif b["type"] == "callout":
             txt = plain(b["callout"]["rich_text"])
-            for prefix, g in want.items():
-                if txt.startswith(prefix) and "尚未產出" in txt:
-                    sheet = find_sheet(sheets_dir, g)
-                    if sheet:
-                        fid = api.upload_file(sheet, name=f"{g['key']}_{proposal['month']}")
-                        api.append(b["parent"][b["parent"]["type"]], [image_block(fid, prefix)], after=b["id"])
-                        api.call("DELETE", f"/blocks/{b['id']}")
-                        log(f"  filled placeholder {prefix} <- {sheet.name}")
-                        done += 1
+            stem = next((s for cap, s in by_caption.items() if txt.startswith(cap + "：") and "尚未產出" in txt), None)
+            if stem:
+                fid = api.upload_image(targets[stem][1], "png", stem)
+                api.append(b["parent"][b["parent"]["type"]], [image_block(fid)], after=b["id"])
+                api.call("DELETE", f"/blocks/{b['id']}")
+                log(f"  filled placeholder {stem}")
+                done += 1
     return done
 
 
@@ -225,6 +258,10 @@ def main():
     a = ap.parse_args()
     proposal = json.loads(Path(a.proposal).read_text(encoding="utf-8"))
     title = a.title or f"{proposal['month']}_大活動_人物設定_{proposal['theme']}"
+    sys.stdout.reconfigure(encoding="utf-8")
+    warns = lint(proposal)
+    for w in warns:
+        print("LINT", w)
 
     if a.mode == "preview":
         blocks = build(proposal, api=None, sheets_dir=a.sheets)
@@ -232,11 +269,17 @@ def main():
         for b in blocks:
             kinds[b["type"]] = kinds.get(b["type"], 0) + 1
         print(f"title: {title}\ntop-level blocks: {len(blocks)} {kinds}")
+        print(f"  {'':16} {' '.join(ALL_PARTS)}")
         for g in proposal["groups"]:
             for gender, key in (("男", "male"), ("女", "female")):
                 old, new = parts_for(g["tier"], gender, g[key])
-                print(f"  {g['tier']} {gender} {g[key]['persona']:8} 神娃={''.join('1' if old[p]==YES else '0' for p in OLD_PARTS)} 人物={''.join('1' if new[p]==YES else '0' for p in NEW_PARTS)} sheet={find_sheet(a.sheets, g)}")
+                print(f"  {g['tier']} {gender} 神娃  {'   '.join(old[p][:1] for p in ALL_PARTS)}")
+                print(f"  {g['tier']} {gender} 人物  {'   '.join(new[p][:1] for p in ALL_PARTS)}")
+            print(f"    sheet={find_sheet(a.sheets, g)}")
+        print(f"  dressing room={find_sheet(a.sheets, {'key': DRESSING_KEY})}")
         return
+    if warns:
+        print("LINT warnings above: fix proposal.json first, or tell the user why they are accepted.")
 
     api = Notion(find_token("readwrite"))
     if a.mode == "new":

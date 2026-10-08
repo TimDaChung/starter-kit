@@ -1,9 +1,9 @@
 ---
 name: avatar-proposal
-version: 1.0.0
+version: 1.1.0
 description: |
   神幣「神娃＋人物」每月大活動的人物設定提案流程（SOP 步驟一）：讀歷屆主題庫查重 → 出 3 個主題提案（每案六組×男女小主題、主色、前景背景）
-  → 使用者拍板 → 寫 proposal.json → image-studio 算示意圖（每組男女一張、前景背景畫進圖裡）→ 建 Notion 分欄企劃頁（左文右圖、部件勾選表自動產）。
+  → 使用者拍板 → 寫 proposal.json → image-studio 算示意圖（每組男女一張、前景背景畫進圖裡，加人物更衣室一張）→ 填 Notion 企劃頁（Leo 版型：每角色一段，色塊＋橫式部件表 ✅／—／❌＋單人圖，自動產）。
   產出止於「完成企劃」，之後的對稿、神娃會議、發單照 SOP 人工走。
   適用於：「神娃提案」「人物設定提案」「神娃企劃」「這個月的神娃」「大活動人物設定」「avatar proposal」「把舊的人物設定 ppt 轉 Notion」。
 allowed-tools:
@@ -28,8 +28,9 @@ allowed-tools:
 - `參考素材索引.md` — 所有輸入來源的位置（SOP 頁、Q&A 分頁、主題庫、九月成品、美術網芳）、近三期完成品摘要
 - `proposal.example.json` — 資料檔範例（2612 百鬼夜宴試跑版）
 - `scripts/fetch_themes.py` — 讀 Notion「大活動歷屆主題」庫，印近 12 個月與類別／要素計數
-- `scripts/gen_sheets.py` — 從 proposal.json 組 prompt、**序列**呼叫 image-studio、每組一張
-- `scripts/build_notion.py` — proposal.json → Notion 分欄頁（`new` 建頁／`swap` 原地換圖／`preview` 不打 API）
+- `scripts/gen_sheets.py` — 從 proposal.json 組 prompt、**序列**呼叫 image-studio、每組一張＋更衣室一張
+- `scripts/build_notion.py` — proposal.json → Notion 頁（`fill` 填範本頁／`new` 建頁／`swap` 原地換圖／`preview` 不打 API）
+- `scripts/sheet_assets.py` — 色塊小圖、示意圖切男女單人圖、`lint`（配色重疊、特效沒標實體虛體）
 - `scripts/ppt2notion.py` — 舊的人物設定 pptx 整份轉 Notion（遷移用，自含）
 - `scripts/notion_api.py` — 共用 REST 封裝（部門憑證自動取、檔案上傳、原地換圖、分欄 block）
 
@@ -51,7 +52,7 @@ allowed-tools:
 | 示意圖（每組一張，前景背景畫在圖裡） | 正式美術稿 → 美術 |
 | 把內容填進使用者用範本建好的 Notion 頁（預設）；口頭要求才代建 | 主題庫回寫 → 目前人工 |
 
-一期的量：**六組**（新手／一般1／一般2／儲值／BOSS1／BOSS2）× 男女 ＝ 12 個角色、6 張示意圖、前景 7 個、背景 4 個、更衣室背景 1 個。**儲值裝神娃版已於 2026-05 移除，但人物系統仍做，示意圖照算**（測試時可略，正式不可）。
+一期的量：**六組**（新手／一般1／一般2／儲值／BOSS1／BOSS2）× 男女 ＝ 12 個角色、6 張示意圖、前景 7 個、背景 4 個、更衣室背景 1 個（也要出圖）。**儲值裝神娃版已於 2026-05 移除，但人物系統仍做，示意圖照算**（測試時可略，正式不可）。
 
 ---
 
@@ -79,7 +80,7 @@ python <skill-dir>/scripts/fetch_themes.py --months 12
 
 - 收尾給**一個**建議案與理由（不是三案平鋪）
 
-硬規則見 `設計法則.md`：避開前兩個月的主要類別與要素組合；近 12 個月出現 ≥3 次的類別要有理由才選；男女成對概念；十二個主色不重複；每組一前景一背景（新手兩前景無背景），**同系列前景背景不重複**；前景輪流放四角。
+硬規則見 `設計法則.md`：避開前兩個月的主要類別與要素組合；近 12 個月出現 ≥3 次的類別要有理由才選；男女成對概念；十二個主色不重複，**而且色系要拉開**：同一個色系（黑白灰不算）最多出現在兩套，六套的第一個主色不能同色系，男裝尤其要注意（Leo 2026-10-08：2612 試跑男裝四套帶紅）；BOSS 等有特效的角色，提案表就要寫清楚特效是實體還是虛體；每組一前景一背景（新手兩前景無背景），**同系列前景背景不重複**；前景輪流放四角。
 
 ### 2. 拍板
 
@@ -94,7 +95,10 @@ python <skill-dir>/scripts/fetch_themes.py --months 12
 - Boss 若沒有天然翅膀，用 `parts_new: {"翅膀": "美術設計"}` 並在 requirements 寫替代物
 - 每個角色 `requirements`（繁中，給美術看）與 `prompt_en`（英文，給生圖）都要寫；前景背景也是
 - 前景 `corner` 用 左上／右上／左下／右下；背景 `owner` 預設 female
-- 寫完跑 `python scripts/build_notion.py preview proposal.json --sheets <sheets dir>` 看自動勾選的部件表對不對
+- **特效一律標實體／虛體**：requirements 寫「特效（實體）：…」或「特效（虛體）：…」，`prompt_en` 用對應寫法（虛體鳳凰＝*phoenix-shaped burst of flame*，實體鳳凰＝*a real phoenix creature*）
+- `dressing_room` 要有 `name`、`desc`、`prompt_en`（更衣室要出圖）
+- 寫完先跑 `python scripts/sheet_assets.py lint proposal.json`（配色重疊、特效沒標實體虛體、色詞不認得），清到沒警告；真的要保留要跟使用者講理由
+- 再跑 `python scripts/build_notion.py preview proposal.json --sheets <sheets dir>` 看自動勾選的部件表對不對（✅／—／❌ 的意思見 `設計法則.md` 第二節）
 
 ### 4. 算示意圖
 
@@ -103,9 +107,11 @@ python <skill-dir>/scripts/gen_sheets.py proposal.json --out _工作暫存/<期�
 ```
 
 - 參考圖＝九月成品同強度那張，腳本自動到美術網芳抓（路徑在 `參考素材索引.md`），**不複製進 kit**
+- **人物更衣室也算一張**（key `07_dressing_room`，Leo 2026-10-08：美術要看圖確認），參考圖是九月人物設定 pptx 最後一頁，腳本自動抽
 - **一次一個 job、每組一張**，腳本已寫死；不要自己並行開多個
-- 跑完逐張看，對 `設計法則.md` 第四節的驗收清單；不過的那組單獨重跑（`--only 03_normal2`），不要整批重算
-- 這一步會吃 image-studio 配額（每小時 30 張全站共用），六組六張
+- 跑完逐張看，對 `設計法則.md` 第四節的驗收清單；不過的那組單獨重跑（`--only 03_normal2`、`--only 07_dressing_room`），不要整批重算
+- 這一步會吃 image-studio 配額（每小時 30 張全站共用），六組＋更衣室共七張
+- 單人圖和色塊不用另外生：填 Notion 時 `build_notion.py` 會把示意圖從中間切成男女兩張、色塊由主色文字畫出
 
 ### 5. 填 Notion 頁
 
@@ -114,7 +120,7 @@ python <skill-dir>/scripts/gen_sheets.py proposal.json --out _工作暫存/<期�
 ```bash
 # 預設：內容插在範本「調整紀錄」標題之前，示意圖直接上傳插入（寫入，先取得同意）
 python <skill-dir>/scripts/build_notion.py fill proposal.json --page <頁 id> --sheets _工作暫存/<期別>/sheets
-# 範本已放卡位圖（圖說「示意圖｜<組別>」）：原地換圖，不動其他內容
+# 重算過示意圖：原地換圖，不動其他內容（用上傳檔名認圖；範本卡位圖則認圖說「示意圖｜<組別>｜男/女」「示意圖｜更衣室」）
 python <skill-dir>/scripts/build_notion.py swap proposal.json --page <頁 id> --sheets _工作暫存/<期別>/sheets
 # 使用者明說要你建：在指定父頁下新建
 python <skill-dir>/scripts/build_notion.py new  proposal.json --parent <父頁 id> --sheets _工作暫存/<期別>/sheets
@@ -122,6 +128,7 @@ python <skill-dir>/scripts/build_notion.py new  proposal.json --parent <父頁 i
 
 - 頁 id 從網址取（32 碼），一部／四部用連結指紋判斷（`notion-access.md`）
 - `fill` 找不到「調整紀錄」標題會改附加到頁尾並警告，這時要回報使用者確認位置
+- 版面是 Leo 2026-10-08 調過的版型（每個角色一段：主色＋色塊、橫式部件表、左單人圖右重點需求；結構見 `設計法則.md` 第五節）
 - 跑完回讀 top-level block 數，開頁面給使用者看
 
 ### 6. 交付
@@ -139,6 +146,8 @@ python <skill-dir>/scripts/build_notion.py new  proposal.json --parent <父頁 i
 4. 主色與 proposal 一致；男女看得出是一對
 5. 禁忌：無鳥居、石燈籠、十字架、佛珠、太極、書、鐘、蛇、殘破布料、綠帽；女性無重甲大型武器、不露太多、不陰暗
 6. 畫風不要比九月成品精緻太多（線條粗、花紋大而少）
+7. 特效的實體／虛體和 requirements 寫的一致
+8. 更衣室：中央站台、地板留空、無人物、主題對
 
 ---
 
@@ -146,6 +155,9 @@ python <skill-dir>/scripts/build_notion.py new  proposal.json --parent <父頁 i
 
 | 日期 | 事 | 規則 |
 |---|---|---|
+| 2026-10-08 | 2612 試跑男裝六套有四套帶紅，Leo 對稿指出 | 同色系最多兩套、第一主色不同色系；lint 擋 |
+| 2026-10-08 | 部件表把「這次沒有」和「一定不會有」都畫成「—」 | 改三種標記 ✅／—／❌ |
+| 2026-10-08 | 更衣室只有一行描述，特效沒分實體虛體，美術無從確認 | 更衣室進 gen_sheets；特效必標實體／虛體 |
 | 2026-10-02 | 五組並行送 image-studio，十張只活一張，伺服器同秒切線 | 一次一個 job，腳本寫死 |
 | 2026-10-02 | 每組算兩張，Tim：準確率夠高不用 | 每組一張 |
 | 2026-10-02 | B 案初稿「狐面」當前景寫了兩次 | 同系列前景背景不重複 |
