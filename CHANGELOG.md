@@ -17,10 +17,18 @@
 ## v3.25.0 (2026-10-08)
 
 - **清掉舊制長期 Notion token，避免誤用**（組員回報）：有組員自己在 `~/.claude.json` 掛了 `notionApi` MCP、塞舊的 `ntn_` 長期 token，10/06 撤除後新舊電腦一起回 401，AI 還建議「重產 integration token」，等於把人帶回已經廢掉的舊制
-  - 新增 `references/scripts/notion_legacy_cleanup.py`：預設只列出不動手，`--apply` 才清。會移除的：`~/.claude.json` 裡帶 `ntn_`／`secret_` token 的 MCP server（user 與各專案 local scope，走 `claude mcp remove`，專案資料夾已不存在才直接改檔）、Claude Code 自動備份 `~/.claude/backups/.claude.json.backup*` 裡同樣的項目、`settings*.json` 的 `env`、Windows 使用者環境變數。CLAUDE.md／memory 裡的 token **只回報行號（遮蔽後）不自動改**。不帶舊 token 的 Notion MCP（例如 OAuth 版）只回報不動。全程不印 token 值，也不留 `.bak`（備份會把要清的 token 一起留下來）
+  - 新增 `references/scripts/notion_legacy_cleanup.py`：預設只列出不動手，`--apply` 才清。會移除的：`~/.claude.json` 裡帶 `ntn_`／`secret_` token 的 MCP server（user 與各專案 local scope，走 `claude mcp remove`，專案資料夾已不存在才直接改檔）、Claude Code 自動備份 `~/.claude/backups/.claude.json.backup*` 裡同樣的項目、`settings*.json` 的 `env`、Windows 使用者環境變數。文字檔與 token 檔副本見下方第二輪。不帶舊 token 的 Notion MCP（例如 OAuth 版）只回報不動。全程不印 token 值，也不留 `.bak`（備份會把要清的 token 一起留下來）
+  - **第二輪（同版）：連「舊路的說明」一起清**——只拔 token 不夠，CLAUDE.md、memory、自己寫的 skill 裡若還寫著「token 在網芳哪個檔」「用 NOTION_KEY」「用 notionApi MCP」，AI 讀到照樣走錯路。腳本加掃：
+    - 本機留存的網芳 token 檔副本（`*readonly_token*.txt`／`*readwrite_token*.txt`，家目錄、桌面、下載、文件、OneDrive）：`--apply` 刪除
+    - `~/.claude/CLAUDE.md`、所有專案的 memory、使用者自己的 skills／agents（kit 裝的跳過）：含 token 原值的行 `--apply` 直接刪；描述舊路的行（網芳 token、`readonly_token`、`NOTION_KEY`、`notionApi`、`notion-mcp-server`…）列為 `REVIEW`，由 AI 逐條判斷刪除或改寫成新制
+  - kit 本身的舊路字樣一併清掉：`paste_images.py` 不再傳 `"readonly"`／`"readwrite"` 給 `find_token()`（參數本來就被忽略，只是字面會誤導）、`image-slots.md` 來源說明拿掉「readonly token」
   - `notion-access.md` §5 加一列：Notion MCP 回 401 → 跑清理、改走 proxy，不要叫人重產 token
-  - 測試：在本機用假 token 加了 user／local scope、專案資料夾已刪除的 local scope 三種 MCP，dry run 列對、`--apply` 全清、重跑冪等、既有不帶 token 的 Notion MCP 沒被動；settings env、備份檔、CLAUDE.md 回報用暫存檔驗過
-- ⚙️ **升級動作**（動到設定檔、執行外部程式，在 auto mode 下要先請使用者切離）：跑 `py -3 references/scripts/notion_legacy_cleanup.py`（dry run）。有 `WOULD REMOVE` 就跟使用者講一句「這些是已撤除的舊 Notion token，要清掉」後跑 `--apply`，提醒重啟 Claude Code；有 `REPORT` 的文字檔行，問一句要不要幫他刪那幾行；沒有發現就略過。清完若使用者還沒裝部門憑證，接 `notion-access.md` §3
+  - 測試：在本機用假 token 加了 user／local scope、專案資料夾已刪除的 local scope 三種 MCP，dry run 列對、`--apply` 全清、重跑冪等、既有不帶 token 的 Notion MCP 沒被動；settings env、備份檔、token 檔副本（無關檔不動）、原值行刪除（前後行保留）、memory／自寫 skill 的 REVIEW 用暫存目錄驗過；維護者本機實跑，清掉兩份 memory 裡的舊制操作說明
+- ⚙️ **升級動作**（動到設定檔、刪檔、執行外部程式，在 auto mode 下要先請使用者切離）：
+  1. 跑 `py -3 references/scripts/notion_legacy_cleanup.py`（dry run），沒有任何發現就略過整段
+  2. 有 `WOULD REMOVE` → 講一句「這些是已撤除的舊 Notion token／token 檔，清掉以免誤用」，跑 `--apply`，有動到 MCP 或環境變數就提醒重啟 Claude Code
+  3. 有 `REVIEW` → 逐條讀上下文：**教 AI 走舊路的**（token 放哪、怎麼取、用 `NOTION_KEY`、用 token 版 Notion MCP）直接刪除或改寫成「走部門 proxy，見 `notion-access.md`」；整份 memory 都在講舊路就刪檔並移除 `MEMORY.md` 那行；自己寫的 skill／腳本還在讀網芳 token 檔的，改成 `notion_rest.find_token(dept=…)` 或回報請使用者找主任。**只是記錄「舊制已停用」的行保留**。做完列出改了哪些檔、各刪了什麼
+  4. 使用者還沒裝部門憑證 → 接 `notion-access.md` §3
 
 ## v3.24.0 (2026-10-08)
 

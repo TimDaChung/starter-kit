@@ -35,7 +35,7 @@ def reader(page_id):
     last = None
     for d in order:
         try:
-            api = Notion(find_token("readonly", dept=d))
+            api = Notion(find_token(dept=d))
             api.call("GET", f"/blocks/{page_id}")
             return api, d
         except CredentialExpired:
@@ -48,7 +48,7 @@ def reader(page_id):
 def writer(line):
     if not line:
         raise SystemExit("--line 神幣/娛樂城/鬥地主/魚樂園 is required for writing")
-    return Notion(find_token("readwrite", line=line))
+    return Notion(find_token(line=line))
 
 
 def text_of(b):

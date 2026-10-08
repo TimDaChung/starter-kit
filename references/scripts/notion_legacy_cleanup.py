@@ -12,8 +12,15 @@ What it looks at:
                               -> the same servers stripped from Claude Code's rotating backups
     ~/.claude/settings*.json  env entries carrying a legacy token: removed
     Windows user env vars     (HKCU\\Environment) carrying a legacy token: removed
-    ~/.claude/CLAUDE.md, ~/.claude/projects/*/memory/*.md
-                              -> lines with a legacy token: reported only (edit by hand / ask the AI)
+    Local copies of the old share-drive token files (*readonly_token*.txt / *readwrite_token*.txt)
+                              under home, Desktop, Downloads, Documents (OneDrive too): deleted
+    Text the AI reads: ~/.claude/CLAUDE.md, ~/.claude/projects/*/memory/*.md, and the user's own
+    skills / agents under ~/.claude (kit-installed ones are skipped)
+                              -> lines holding a raw legacy token: deleted
+                              -> lines describing the old route (token files on the share drive,
+                                 NOTION_KEY, a token-based Notion MCP...): listed as REVIEW for the
+                                 AI to delete or rewrite; a line that only says the old route is
+                                 retired can stay
 
 Notion MCP servers that do not carry a legacy token (e.g. OAuth to mcp.notion.com) are
 reported but left alone.
@@ -41,6 +48,14 @@ CLAUDE_DIR = HOME / ".claude"
 SETTINGS_FILES = (CLAUDE_DIR / "settings.json", CLAUDE_DIR / "settings.local.json")
 TOKEN_RE = re.compile(r"\b(?:ntn_[A-Za-z0-9]{20,}|secret_[A-Za-z0-9]{30,})")
 NOTION_HINT_RE = re.compile(r"notion", re.IGNORECASE)
+LEGACY_ROUTE_RE = re.compile(
+    r"readonly_token|readwrite_token|NOTION_KEY|NOTION_TOKEN|notionApi|API-post-search|API-retrieve"
+    r"|notion-mcp-server|OPENAPI_MCP_HEADERS|網芳.{0,20}(?:token|金鑰)|(?:token|金鑰).{0,20}網芳|(?:唯讀|讀寫) ?token",
+    re.IGNORECASE,
+)
+TOKEN_FILE_GLOBS = ("*readonly_token*.txt", "*readwrite_token*.txt")
+TEXT_SUFFIXES = {".md", ".py", ".json", ".txt", ".js", ".ps1", ".sh"}
+KIT_ROOT = Path(__file__).resolve().parents[2]
 
 
 @dataclass
@@ -49,6 +64,7 @@ class Finding:
     detail: str
     removable: bool
     done: bool = False
+    review: bool = False
 
 
 def has_token(value: Any) -> bool:
@@ -190,17 +206,87 @@ def scan_user_env(apply: bool) -> list[Finding]:
     return found
 
 
-def scan_text_files() -> list[Finding]:
+def is_kit_owned(path: Path) -> bool:
+    try:
+        return path.resolve().is_relative_to(KIT_ROOT)
+    except OSError:
+        return False
+
+
+def text_files() -> list[Path]:
     paths = [CLAUDE_DIR / "CLAUDE.md", *sorted((CLAUDE_DIR / "projects").glob("*/memory/*.md"))]
-    found: list[Finding] = []
-    for path in paths:
-        try:
-            lines = path.read_text(encoding="utf-8").splitlines()
-        except (FileNotFoundError, UnicodeDecodeError):
+    for sub in ("skills", "agents"):
+        root = CLAUDE_DIR / sub
+        if not root.is_dir():
             continue
-        for i, line in enumerate(lines, 1):
-            if TOKEN_RE.search(line):
-                found.append(Finding(f"{path}:{i}", "legacy token in text: " + mask(line.strip())[:80], removable=False))
+        for entry in sorted(root.iterdir()):
+            if is_kit_owned(entry):
+                continue
+            files = [entry] if entry.is_file() else sorted(p for p in entry.rglob("*") if p.is_file())
+            paths += [p for p in files if p.suffix.lower() in TEXT_SUFFIXES]
+    return [p for p in paths if p.is_file()]
+
+
+def scan_text(apply: bool) -> list[Finding]:
+    found: list[Finding] = []
+    for path in text_files():
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        lines = text.splitlines(keepends=True)
+        token_lines = [i for i, line in enumerate(lines) if TOKEN_RE.search(line)]
+        for i in token_lines:
+            found.append(Finding(f"{path}:{i + 1}", "raw legacy token: " + mask(lines[i].strip())[:80], removable=True, done=apply))
+        for i, line in enumerate(lines):
+            if i not in token_lines and LEGACY_ROUTE_RE.search(line):
+                found.append(Finding(f"{path}:{i + 1}", line.strip()[:100], removable=False, review=True))
+        if apply and token_lines:
+            path.write_text("".join(l for i, l in enumerate(lines) if i not in token_lines), encoding="utf-8")
+    return found
+
+
+def token_file_roots() -> list[tuple[Path, int]]:
+    roots = [(HOME, 1), (CLAUDE_DIR, 4)]
+    for base in [HOME, *sorted(HOME.glob("OneDrive*"))]:
+        roots += [(base / "Desktop", 3), (base / "Downloads", 2), (base / "Documents", 3)]
+    return [(r, d) for r, d in roots if r.is_dir()]
+
+
+def walk(root: Path, depth: int) -> list[Path]:
+    out: list[Path] = []
+    try:
+        entries = list(root.iterdir())
+    except OSError:
+        return out
+    for p in entries:
+        try:
+            if p.is_file() and any(p.match(g) for g in TOKEN_FILE_GLOBS):
+                out.append(p)
+            elif depth > 1 and p.is_dir() and not p.is_symlink() and not p.name.startswith("."):
+                out += walk(p, depth - 1)
+        except OSError:
+            continue
+    return out
+
+
+def scan_token_files(apply: bool) -> list[Finding]:
+    found: list[Finding] = []
+    seen: set[Path] = set()
+    for root, depth in token_file_roots():
+        for p in walk(root, depth):
+            rp = p.resolve()
+            if rp in seen:
+                continue
+            seen.add(rp)
+            f = Finding(str(p), "local copy of an old share-drive token file", removable=True)
+            if apply:
+                try:
+                    p.unlink()
+                    f.done = True
+                except OSError:
+                    pass
+            found.append(f)
     return found
 
 
@@ -209,23 +295,29 @@ def main() -> int:
     ap.add_argument("--apply", action="store_true", help="remove removable findings (default: dry run)")
     args = ap.parse_args()
 
-    findings = scan_mcp(args.apply) + scan_backups(args.apply) + scan_settings(args.apply) + scan_user_env(args.apply) + scan_text_files()
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # cp950 consoles choke on emoji in notes
+    a = args.apply
+    findings = (scan_mcp(a) + scan_backups(a) + scan_settings(a) + scan_user_env(a)
+                + scan_token_files(a) + scan_text(a))
     if not findings:
-        print("clean: no legacy Notion token found")
+        print("clean: no legacy Notion token or old-route note found")
         return 0
     for f in findings:
-        if not f.removable:
+        if f.review:
+            status = "REVIEW"
+        elif not f.removable:
             status = "REPORT"
-        elif not args.apply:
+        elif not a:
             status = "WOULD REMOVE"
         else:
             status = "REMOVED" if f.done else "FAILED"
         print(f"[{status}] {f.where} - {f.detail}")
     if any(f.removable for f in findings):
-        print("\nrestart Claude Code for MCP / env changes to take effect" if args.apply else "\nrun with --apply to remove")
-    if any(not f.removable and "text" in f.detail for f in findings):
-        print("text-file hits: delete those lines by hand (the tokens are revoked; nothing to migrate)")
-    return 1 if any(f.removable and args.apply and not f.done for f in findings) else 0
+        print("\nrestart Claude Code for MCP / env changes to take effect" if a else "\nrun with --apply to remove")
+    if any(f.review for f in findings):
+        print("REVIEW lines mention the old route: delete or rewrite any that tell the AI to use it "
+              "(token files, NOTION_KEY, a token-based Notion MCP); keep lines that only say it is retired")
+    return 1 if any(f.removable and a and not f.done for f in findings) else 0
 
 
 if __name__ == "__main__":
