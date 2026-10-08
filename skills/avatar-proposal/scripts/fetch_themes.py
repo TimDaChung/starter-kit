@@ -1,8 +1,10 @@
 """Read the 大活動歷屆主題 Notion database and summarize recent usage.
 
-  python fetch_themes.py [--months 12] [--json out.json]
+  python fetch_themes.py [--months 12] [--json out.json] [--recent-plans 3]
 
 Prints: option sets of 主要類別 / 要素, the last N months, and per-option counts in that window.
+--recent-plans N: also list the newest N pages per 活動類型 (人物設定 / 人物活動 / 神娃活動) in the 一部
+活動資料庫, with page ids, so past plans of the same type can be read (the template page is skipped).
 Uses the 一部 (pm1) Notion proxy credential (see plan-dept14-writer/references/notion-access.md).
 """
 import argparse
@@ -16,6 +18,9 @@ sys.path.insert(0, str(Path(__file__).parent))
 from notion_api import Notion, find_token  # noqa: E402
 
 THEME_DB = "dee87244fa40823b9d8301e80dadc59b"  # 大活動歷屆主題（一部 workspace, 2026-10-02）
+EVENT_DB = "1fa87244fa4081f48ae6cdb09a4059cb"  # 活動資料庫, select 活動類型 (Tim 2026-10-08)
+PLAN_TYPES = ("人物設定", "人物活動", "神娃活動")
+TEMPLATE_PAGE_ID = "3ed87244fa40819bbbfdd0c04bd28277"
 
 
 def val(prop):
@@ -36,6 +41,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--months", type=int, default=12)
     ap.add_argument("--json")
+    ap.add_argument("--recent-plans", type=int, default=0)
     a = ap.parse_args()
     api = Notion(find_token(dept="一部"))
     db = api.call("GET", f"/databases/{THEME_DB}")
@@ -77,6 +83,15 @@ def main():
     empty = [i["月份"][:7] for i in items if not i.get("活動名稱")]
     if empty:
         print("活動名稱空白的月份:", empty)
+    if a.recent_plans:
+        print(f"\n活動資料庫 最近 {a.recent_plans} 期同類型企劃（可用 notion_api 讀內容）:")
+        for typ in PLAN_TYPES:
+            r = api.call("POST", f"/databases/{EVENT_DB}/query", {
+                "page_size": a.recent_plans + 1, "filter": {"property": "活動類型", "select": {"equals": typ}},
+                "sorts": [{"timestamp": "created_time", "direction": "descending"}]})
+            pages = [pg for pg in r["results"] if pg["id"].replace("-", "") != TEMPLATE_PAGE_ID][:a.recent_plans]
+            names = [f"{val(pg['properties']['Name'])} ({pg['id'].replace('-', '')})" for pg in pages]
+            print(f"  {typ}: " + ("；".join(names) if names else "（尚無，只有範本頁）"))
     if a.json:
         Path(a.json).write_text(json.dumps({"options": opts, "recent": recent, "all": items}, ensure_ascii=False, indent=1), encoding="utf-8")
         print("written", a.json)

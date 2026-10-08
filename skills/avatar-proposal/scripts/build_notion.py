@@ -7,7 +7,8 @@
   python build_notion.py swap    proposal.json --page <page_id>   [--sheets DIR]
         # sheets were redrawn: replace crops / dressing room in place, matched by uploaded file name
         # (<month>_<key>_<male|female>.png) or by a template caption 示意圖｜<tier>｜<男|女> / 示意圖｜更衣室
-  python build_notion.py new     proposal.json --parent <page_id> [--sheets DIR] [--title T]
+  python build_notion.py new     proposal.json [--parent <page_id>] [--sheets DIR] [--title T]
+        # default parent: 活動資料庫 row with 活動類型=人物設定; title <month>人物設定-<theme>
         # only when the user explicitly asks us to create the page ourselves
 
 Sheets: one PNG per group, matched by group "key" prefix (e.g. 01_newbie*.png) inside --sheets; cut into male/female
@@ -223,6 +224,14 @@ ADJUST_WORDS = ("調整紀錄", "調整記錄", "修改紀錄", "修改記錄")
 # The 人物設定 template page (Leo's layout + 百鬼夜宴 example); PMs duplicate it, fill must never run on it directly.
 TEMPLATE_PAGE_ID = "3ed87244fa40819bbbfdd0c04bd28277"
 EXAMPLE_MARKER = "範本示例內容"
+# 一部 活動資料庫: the template lives here; same-type plans are found by 活動類型
+EVENT_DB_ID = "1fa87244fa4081f48ae6cdb09a4059cb"
+EVENT_TYPE_PROP, EVENT_TYPE = "活動類型", "人物設定"
+
+
+def page_title(proposal):
+    """Same convention as the DB's other rows (2611人物大活動-月城十二星): <month>人物設定-<theme>."""
+    return f"{proposal['month']}人物設定-{proposal['theme']}"
 
 
 def clear_example(api, page_id, top, log=print):
@@ -289,7 +298,7 @@ def main():
     ap.add_argument("--title")
     a = ap.parse_args()
     proposal = json.loads(Path(a.proposal).read_text(encoding="utf-8"))
-    title = a.title or f"{proposal['month']}_大活動_人物設定_{proposal['theme']}"
+    title = a.title or page_title(proposal)
     sys.stdout.reconfigure(encoding="utf-8")
     warns = lint(proposal)
     for w in warns:
@@ -315,10 +324,16 @@ def main():
 
     api = Notion(find_token(dept="一部"))
     if a.mode == "new":
-        if not a.parent:
-            sys.exit("--parent <page_id> required")
         blocks = build(proposal, api=api, sheets_dir=a.sheets)
-        page = api.create_page(a.parent, title, blocks, log=print, deep=True)
+        if a.parent:
+            page = api.create_page(a.parent, title, blocks, log=print, deep=True)
+        else:
+            # default: a row of 活動資料庫 typed 人物設定, like the template page
+            page = api.call("POST", "/pages", {"parent": {"database_id": EVENT_DB_ID}, "properties": {
+                "Name": {"title": [{"type": "text", "text": {"content": title}}]},
+                EVENT_TYPE_PROP: {"select": {"name": EVENT_TYPE}}}, "children": blocks[:1]})
+            print(f"page created {page['url']}")
+            api.append(page["id"], blocks[1:], log=print)
         print("verify top-level children:", api.count_children(page["id"]), "/", len(blocks))
         print("URL:", page["url"])
     elif a.mode == "fill":

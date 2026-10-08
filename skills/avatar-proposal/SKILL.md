@@ -61,10 +61,10 @@ allowed-tools:
 ### 0. 讀輸入（每期都要重讀，不靠記憶）
 
 ```bash
-python <skill-dir>/scripts/fetch_themes.py --months 12
+python <skill-dir>/scripts/fetch_themes.py --months 12 --recent-plans 3
 ```
 
-拿到：主要類別／要素選項全集、近 12 個月用過什麼、哪些選項近期沒碰、哪些月份活動名稱空白。
+拿到：主要類別／要素選項全集、近 12 個月用過什麼、哪些選項近期沒碰、哪些月份活動名稱空白；`--recent-plans` 另列一部「活動資料庫」依「活動類型」篩出的最近幾期**人物設定／人物活動／神娃活動**頁（含 page id）。人物活動頁讀最近三期的角色名，提案的小主題不要撞到；人物設定類有舊頁時讀最近一期對照寫法（目前只有範本頁）
 再讀 `設計法則.md` 全文（規則）與 `參考素材索引.md`（近三期做過的角色，避免小主題撞到）。SOP 頁與 Q&A 分頁若有改版，照索引的位置重讀。
 
 ### 1. 出三個提案（拍板前不算圖）
@@ -116,9 +116,9 @@ python <skill-dir>/scripts/gen_sheets.py proposal.json --out _工作暫存/<期�
 
 ### 5. 填 Notion 頁
 
-**範本頁＝「大活動人物設定範本（示例：百鬼夜宴）」`3ed87244fa40819bbbfdd0c04bd28277`**（一部，Leo 2026-10-08 調過的版型＋更衣室，Tim 2026-10-08 指定為範本）。它同時是版型權威：版面有疑問以這頁為準。
+**範本頁＝「人物設定範本（示例：百鬼夜宴）」`3ed87244fa40819bbbfdd0c04bd28277`**（一部「活動資料庫」`1fa87244fa4081f48ae6cdb09a4059cb`，活動類型＝人物設定；Leo 2026-10-08 調過的版型＋更衣室，Tim 2026-10-08 指定為範本）。它同時是版型權威：版面有疑問以這頁為準。
 
-**預設：請使用者在 Notion 複製這頁、把新頁網址貼來（標題不用改），skill 填內容並把標題改成 `<月份>_大活動_人物設定_<主題>`（同 `new`；要別的名字用 `--title`）。** 理由：目錄與「新增調整紀錄」按鈕 API 建不出來，而且拿到網址就不用問 workspace 與父頁。**只有使用者口頭明說「你幫我建」才用 `new`。**
+**預設：請使用者在 Notion 複製這頁、把新頁網址貼來（標題不用改），skill 填內容並把標題改成 `<月份>人物設定-<主題>`（例：`2612人物設定-百鬼夜宴`，對齊資料庫裡「2611人物大活動-月城十二星」的命名；同 `new`；要別的名字用 `--title`）。** 理由：目錄與「新增調整紀錄」按鈕 API 建不出來，而且拿到網址就不用問 workspace 與父頁。**只有使用者口頭明說「你幫我建」才用 `new`。**
 
 - 複製頁還帶著百鬼夜宴示例：`fill` 看到 📌「範本示例內容」標記，會先刪掉標記到「調整紀錄」之間的示例再填（刪幾個 block 會印出來）；**對範本頁本身跑 `fill` 會直接拒絕**
 - 範本頁的版型改了（Leo 或 PM 在頁上調），`build_notion.py` 的產出要跟著改，兩邊不一致以範本頁為準
@@ -128,8 +128,8 @@ python <skill-dir>/scripts/gen_sheets.py proposal.json --out _工作暫存/<期�
 python <skill-dir>/scripts/build_notion.py fill proposal.json --page <頁 id> --sheets _工作暫存/<期別>/sheets
 # 重算過示意圖：原地換圖，不動其他內容（用上傳檔名認圖；範本卡位圖則認圖說「示意圖｜<組別>｜男/女」「示意圖｜更衣室」）
 python <skill-dir>/scripts/build_notion.py swap proposal.json --page <頁 id> --sheets _工作暫存/<期別>/sheets
-# 使用者明說要你建：在指定父頁下新建
-python <skill-dir>/scripts/build_notion.py new  proposal.json --parent <父頁 id> --sheets _工作暫存/<期別>/sheets
+# 使用者明說要你建：預設建成活動資料庫的一列（活動類型＝人物設定）；--parent 才建在指定頁底下
+python <skill-dir>/scripts/build_notion.py new  proposal.json --sheets _工作暫存/<期別>/sheets
 ```
 
 - 頁 id 從網址取（32 碼），一部／四部用連結指紋判斷（`notion-access.md`）
