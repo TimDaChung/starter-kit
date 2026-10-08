@@ -208,7 +208,7 @@ classDef page     fill:#f1f3f5,stroke:#495057,stroke-width:2px,color:#1a1a1a
 
 ## 十一、貼圖模式（把圖放進 Notion 企劃）
 
-**權威參考：`references/image-slots.md`**（兩部鐵律、圖名寫法、卡位處理、synced_block、各生圖 skill 產出對哪一節）。腳本：`scripts/paste_images.py`（list／insert／replace／split）。
+**權威參考：`references/image-slots.md`**（兩部鐵律、圖名寫法、卡位處理、synced_block、各生圖 skill 產出對哪一節）。腳本：`scripts/paste_images.py`（list／insert／replace／split）；一部神娃／人物大活動、神裝禮包另有 `scripts/art_share_slots.py`（從美術網芳找圖，見第 9 條）。
 
 1. **拿到頁面網址**：預設請 PM 給目標頁網址，不自己找頁、不自己建頁。部別照連結指紋判（`notion-access.md`）；寫入用該部憑證（`--line 神幣/娛樂城/鬥地主/魚樂園` 對應部門），回寫護欄照舊：先列改動取得同意、寫完回讀
 2. **先列再貼**：`python <skill-dir>/scripts/paste_images.py list <網址>`，找出目標節的右欄 column id、卡位（`[PLACEHOLDER]`／佔位圖）、synced_block 原件。**對照 image-slots 第五節**決定每張圖的落點與圖名
@@ -221,6 +221,11 @@ classDef page     fill:#f1f3f5,stroke:#495057,stroke-width:2px,color:#1a1a1a
    - 分鏡（boss-demo、翅膀技能）→ 分鏡文字寫在同一個小標題的左欄，**整張一張貼右欄、不切圖**
    - 透明 PNG（漁場邊框等）→ 貼預覽合成圖
 5. **不准動**：PM 放的實圖、美術稿、參考圖（對位條、《wow現有廣宣》）只看不換；企劃裡沒有圖位的產出（套裝 ICON、道具 ICON）**就不出圖**，也不自己開節
-6. **AI 示意圖與美術稿分開**：大活動頁「（美術完成後補上）」的格子只放 PM 給的美術稿；AI 示意圖只進它所屬的設定頁或規格節（例：avatar-proposal → 人物設定頁）
+6. **AI 示意圖與美術稿分開**：大活動頁「（美術完成後補上）」的格子只放美術稿（第 9 條工具從網芳找、PM 核准）；AI 示意圖只進它所屬的設定頁或規格節（例：avatar-proposal → 人物設定頁）
 7. **寫完回讀**：腳本會驗新 block 在不在；再 `list` 一次確認位置，開頁面給使用者看；調整紀錄照第八節第 7 條註明實際操作人
 8. 貼圖不算改規則，**不加灰底綠底調整標記**；若是換掉已上線版本的舊圖，問 PM 要不要在調整紀錄記一筆
+9. **一部大活動美術稿（神娃大活動、人物大活動、神裝禮包）：工具找檔、PM 核准清單再貼**——其他頁照舊 PM 給檔才貼。規則與坑見 `image-slots.md` 第七節
+   - `python <skill-dir>/scripts/art_share_slots.py list <網址>`：只讀，自動找網芳月份資料夾、每格推檔、跟頁上已貼的圖比對，列「空格待貼／已貼且相同／已貼但網芳不同／網芳缺檔／需確認／需人工」；`--json` 另存給貼圖用
+   - 清單給 PM 核准後 `paste <網址> --confirm`（只貼空格）；「網芳不同」要 PM 同意才加 `--replace`（`--only <slot>` 限定格子）。不加 `--confirm` 是 dry run
+   - 腳本停下列候選（資料夾找不到、同前綴多個、名稱月份與前綴不符）→ 給 PM 選，用 `--avatar-dir`／`--headshot-dir`／`--char-dir` 指定重跑，不自己猜
+   - 吃碰特效（mp4）一律人工；腳本貼完自己回讀，被動到的格子都要回「已貼且相同」

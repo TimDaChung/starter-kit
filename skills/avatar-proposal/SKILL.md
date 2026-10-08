@@ -177,4 +177,4 @@ python <skill-dir>/scripts/build_notion.py new  proposal.json --sheets _工作�
 
 定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
 
-- 示意圖只進**人物設定頁**（本 skill 的頁，從上面第 5 步的範本頁複製）；**不進**神娃大活動「圖示(男女共用)」或人物大活動「圖示」——那兩格放美術稿，美術完成後由 PM 用 plan-dept14-writer 貼圖模式補
+- 示意圖只進**人物設定頁**（本 skill 的頁，從上面第 5 步的範本頁複製）；**不進**神娃大活動「圖示(男女共用)」或人物大活動「圖示」——那兩格放美術稿，美術完成後由 PM 用 plan-dept14-writer 貼圖模式補：`plan-dept14-writer/scripts/art_share_slots.py list <企劃網址>` 會自動從美術網芳找出每格該放的檔、列清單，PM 核准後 `paste --confirm`（貼圖模式第 9 條、image-slots 第七節）

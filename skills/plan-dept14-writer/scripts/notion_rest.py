@@ -185,7 +185,9 @@ class Notion:
                 if is_write and _is_timeout(e):
                     raise WriteTimeout(f"{method} {path} timed out after {TIMEOUT}s; it may have been applied. "
                                        f"Read the target back before retrying.") from None
-                if _is_timeout(e) and attempt < 3:
+                # reads are safe to resend after a timeout or a dropped connection (WinError 10053/10054)
+                if (_is_timeout(e) or not is_write) and attempt < 3:
+                    time.sleep(1 + attempt)
                     continue
                 raise RuntimeError(f"{method} {path} -> network error {e}") from None
             if isinstance(out, dict) and out.get("error") == "expired":
