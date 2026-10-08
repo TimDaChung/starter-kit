@@ -234,19 +234,35 @@ def page_title(proposal):
     return f"{proposal['month']}人物設定-{proposal['theme']}"
 
 
+def check_page_type(api, page_id):
+    """Stop when the PM copied the wrong kind of page (a 活動資料庫 row whose 活動類型 is not 人物設定)."""
+    pg = api.call("GET", f"/pages/{page_id}")
+    prop = pg.get("properties", {}).get(EVENT_TYPE_PROP)
+    typ = ((prop or {}).get("select") or {}).get("name")
+    if typ and typ != EVENT_TYPE:
+        raise SystemExit(f"[fill] page 活動類型 is {typ}, not {EVENT_TYPE}: the PM probably copied the wrong page; "
+                         f"ask them to copy the template or an old 人物設定 page")
+
+
 def clear_example(api, page_id, top, log=print):
-    """A page duplicated from the template still holds the example: delete from the 📌 marker callout up to
-    (not including) the 調整紀錄 heading. Returns the refreshed top-level list."""
+    """Clear old content before filling. Two cases, both deleting up to (not including) the 調整紀錄 heading:
+    - a copy of the template: from the 📌 example marker
+    - a copy of an older 人物設定 plan (Tim 2026-10-08: PMs often copy last month's page): from its 活動總覽 heading.
+    Returns the refreshed top-level list."""
     start = next((i for i, b in enumerate(top) if b["type"] == "callout" and plain(b["callout"]["rich_text"]).startswith(EXAMPLE_MARKER)), None)
+    if start is None:
+        start = next((i for i, b in enumerate(top) if b["type"] == "heading_1" and "活動總覽" in plain(b["heading_1"]["rich_text"])), None)
+        if start is not None:
+            log("  page is a copy of an older plan: replacing its content; its old 調整紀錄 entries are kept, tell the PM to clear them")
     if start is None:
         return top
     end = next((i for i, b in enumerate(top) if i > start and b["type"].startswith("heading_")
                 and any(w in plain(b[b["type"]]["rich_text"]) for w in ADJUST_WORDS)), None)
     if end is None:
-        raise SystemExit("[fill] template example found but no 調整紀錄 heading after it; not deleting anything, fix the page first")
+        raise SystemExit("[fill] old content found but no 調整紀錄 heading after it; not deleting anything, fix the page first")
     for b in top[start:end]:
         api.call("DELETE", f"/blocks/{b['id']}")
-    log(f"  cleared template example: {end - start} blocks")
+    log(f"  cleared old content: {end - start} blocks")
     return api.children(page_id)
 
 
@@ -266,6 +282,7 @@ def fill(api, page_id, proposal, sheets_dir, log=print, title=None):
     """
     if page_id.replace("-", "") == TEMPLATE_PAGE_ID:
         raise SystemExit("[fill] this is the template page itself; duplicate it in Notion and fill the copy")
+    check_page_type(api, page_id)
     top = clear_example(api, page_id, api.children(page_id), log=log)
     after = None
     anchor_found = False
