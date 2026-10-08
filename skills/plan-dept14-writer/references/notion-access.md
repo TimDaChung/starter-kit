@@ -177,3 +177,4 @@ PM 用部門範本「建立複本」→ 把頁面網址貼給 Claude → Claude 
 | `WriteTimeout` | 寫入可能已生效：先回讀該頁／block 確認，**不要直接重送** |
 | 頁面 404 | 先確認兩部都試過（§1 第 3 步）。都 404 ＝ 該頁沒連接 integration：請頁面擁有者在該頁 `⋯` → 連接 加上對應部別的 integration，或請 PM 貼出內容。不要重試 |
 | 403／Notion 權限錯誤 | **不是過期**，不要換憑證；回報錯誤訊息請使用者確認該部 integration 對這頁的權限 |
+| 某個 Notion MCP（如 `notionApi`）回 401 `API token is invalid` | 那是舊制長期 token（`ntn_`／`secret_`），2026-10-06 已全數撤除，**不要叫使用者重產 integration token**。跑 `py -3 references/scripts/notion_legacy_cleanup.py --apply` 清掉、重啟 Claude Code，改走本檔的 proxy（沒裝憑證照 §3） |

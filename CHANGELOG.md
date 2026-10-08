@@ -2,6 +2,14 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.25.0 (2026-10-08)
+
+- **清掉舊制長期 Notion token，避免誤用**（組員回報）：有組員自己在 `~/.claude.json` 掛了 `notionApi` MCP、塞舊的 `ntn_` 長期 token，10/06 撤除後新舊電腦一起回 401，AI 還建議「重產 integration token」，等於把人帶回已經廢掉的舊制
+  - 新增 `references/scripts/notion_legacy_cleanup.py`：預設只列出不動手，`--apply` 才清。會移除的：`~/.claude.json` 裡帶 `ntn_`／`secret_` token 的 MCP server（user 與各專案 local scope，走 `claude mcp remove`，專案資料夾已不存在才直接改檔）、Claude Code 自動備份 `~/.claude/backups/.claude.json.backup*` 裡同樣的項目、`settings*.json` 的 `env`、Windows 使用者環境變數。CLAUDE.md／memory 裡的 token **只回報行號（遮蔽後）不自動改**。不帶舊 token 的 Notion MCP（例如 OAuth 版）只回報不動。全程不印 token 值，也不留 `.bak`（備份會把要清的 token 一起留下來）
+  - `notion-access.md` §5 加一列：Notion MCP 回 401 → 跑清理、改走 proxy，不要叫人重產 token
+  - 測試：在本機用假 token 加了 user／local scope、專案資料夾已刪除的 local scope 三種 MCP，dry run 列對、`--apply` 全清、重跑冪等、既有不帶 token 的 Notion MCP 沒被動；settings env、備份檔、CLAUDE.md 回報用暫存檔驗過
+- ⚙️ **升級動作**（動到設定檔、執行外部程式，在 auto mode 下要先請使用者切離）：跑 `py -3 references/scripts/notion_legacy_cleanup.py`（dry run）。有 `WOULD REMOVE` 就跟使用者講一句「這些是已撤除的舊 Notion token，要清掉」後跑 `--apply`，提醒重啟 Claude Code；有 `REPORT` 的文字檔行，問一句要不要幫他刪那幾行；沒有發現就略過。清完若使用者還沒裝部門憑證，接 `notion-access.md` §3
+
 ## v3.24.0 (2026-10-08)
 
 - **plan-dept14-writer 交付收尾問要不要開美術需求表**（主任指示）：第八節加第 8 條、第十節檢查清單加第 13 條。四部機台企劃、一部神幣改版企劃交付後問一句，PM 說要就轉 `art-request-sheet`；魚樂園、廣宣單圖、四部娛樂城活動與鬥地主（art-request-sheet 無格式）不問；調整模式只在動到美術元件時問；只問一次不追問
