@@ -155,6 +155,7 @@ python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py --list bosses
 各獎級的高潮：
 翻盤：
 道具：（名稱、等級數 → 交 boss-props）
+待機／攻擊／受擊／被捕獲：（概念層級也照 boss-demo/動態描述規範.md 寫——點名部位、可見動作、階段差異；秒數留給 boss-demo）
 
 【第一階：〈階段名〉】
 臉部：
@@ -191,7 +192,7 @@ python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <page_id> _工作暫
 
 ### Step 2 — 解析企劃
 
-**先盤點包裝、表演、玩法**：企劃的玩法大綱、流程圖、「3.3 Boss 動態」、彩金表演段落寫到什麼程度。寫得完整就照企劃；有缺漏就列成「企劃缺漏建議」，照〈包裝、表演、玩法〉一節跟使用者討論——**不改企劃本身**。
+**先盤點包裝、表演、玩法**：企劃的玩法大綱、流程圖、「3.3 Boss 動態」、彩金表演段落寫到什麼程度。寫得完整就照企劃；有缺漏就列成「企劃缺漏建議」（「3.3 Boss 動態」完不完整，以 `boss-demo/動態描述規範.md` 第六節自查清單判斷），照〈包裝、表演、玩法〉一節跟使用者討論——**不改企劃本身**。
 
 再讀「3.2 Boss 靜態」的各階段造型（概念、配色、臉部、身體、姿勢、尺寸），並**實際 Read 企劃的外觀圖**：
 
@@ -257,7 +258,7 @@ python ~/.claude/skills/boss-design/scripts/fit_canvas.py <算出的圖> <輸出
 
 1. 外觀定案後，用 `boss-demo` 把捕獲／彩金表演做成可調的 demo
 2. 在 demo 裡調到定稿
-3. 從 demo 截關鍵格組成分鏡圖、寫回企劃（`boss-demo` 步驟 6）
+3. 從 demo 截關鍵格組成分鏡圖、寫回企劃（`boss-demo` 步驟 6）；動態與分鏡文字一律照 `boss-demo/動態描述規範.md`
 
 外觀全部定案後，在 Step 10 一起問。
 

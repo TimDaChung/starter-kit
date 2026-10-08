@@ -15,9 +15,12 @@ mean pixel difference from the previous kept frame is below --min-diff) gives a
 starting point only.
 
 Tags on the sheet carry what the frame shows (--captions), not seconds: the
-seconds live in the plan text and in the demo. The Markdown skeleton still
-lists each frame's seconds = total duration of the phases it stands for (from
-its phase up to the next kept frame's phase), which adds up to the demo total.
+seconds live in the plan text and in the demo. The Markdown skeleton follows
+動態描述規範.md (one numbered step per storyboard, seconds at the end of the
+line, 〔圖N〕 pointing at the sheet, then placeholders for the rules the spec
+asks for: stage variants, sync points, layers, collision/countdown). In ratios
+mode each step's seconds = total duration of the phases it stands for (from its
+phase up to the next kept frame's phase), which adds up to the demo total.
 
 The demo must expose the capture contract (see SKILL.md, 「分鏡擷取介面」):
     window.DEMO_API = { scenarios: [{id, name}], play(id) -> Promise, pause(), resume() }
@@ -113,6 +116,50 @@ def load_font(size: int) -> ImageFont.FreeTypeFont:
 
 def seconds_text(ms: float) -> str:
     return f"{ms / 1000:.2f}".rstrip("0").rstrip(".") + "秒"
+
+
+def figure_tag(numbers: list[int]) -> str:
+    """〔圖3〕, 〔圖3–5〕 for a contiguous run, 〔圖3、5〕 otherwise; empty when no figure."""
+    if not numbers:
+        return ""
+    if len(numbers) > 1 and numbers == list(range(numbers[0], numbers[-1] + 1)):
+        return f"〔圖{numbers[0]}–{numbers[-1]}〕"
+    return "〔圖" + "、".join(str(n) for n in numbers) + "〕"
+
+
+# Rules 動態描述規範.md asks every performance section to state; the PM fills them in.
+SPEC_PLACEHOLDERS = [
+    "階段差異：〔待補：各階段各一套／全階共用一套〕",
+    "同步點：〔待補：血條、彩金欄、獎圈、造型更換落在第幾個分鏡；沒有就刪〕",
+    "圖層：〔待補：有疊在 Boss 上的特效才寫，例：Boss本體<特效<飛入物件；沒有就刪〕",
+    "表演期間：〔待補：移除碰撞區／禁止發炮／禁用道具卡；倒數照常或暫停〕",
+    "機制與數值詳見〔4.x〕",
+]
+
+
+Step = tuple[str, float, list[int], list[str], str]
+
+
+def plan_section(name: str, total_ms: float, steps: list[Step], sheet_name: str) -> str:
+    """Render a 3.3.x section in the 動態描述規範 layout.
+
+    steps: (title, ms, figure numbers, sub-lines, note). A step with exactly one sub-line
+    is written on one line; more sub-lines become children sharing the step's seconds.
+    note, if any, goes on its own indented line (working info the PM deletes).
+    """
+    md = [f"### {name}（共 {seconds_text(total_ms)}）", "1. 觸發時機：〔待補〕", "2. 分鏡："]
+    for n, (title, ms, figures, subs, note) in enumerate(steps, 1):
+        head = f"分鏡{n}：{title}"
+        if len(subs) == 1:
+            head += f"——{subs[0]}"
+        md.append(f"    {n}. {head}，{seconds_text(ms)}{figure_tag(figures)}")
+        if len(subs) > 1:
+            md.extend(f"        {k}. {sub}" for k, sub in enumerate(subs, 1))
+        if note:
+            md.append(f"        {note}")
+    md.extend(f"{k}. {line}" for k, line in enumerate(SPEC_PLACEHOLDERS, 3))
+    md.append(f"\n[右欄：{sheet_name}，caption《{name}分鏡示意圖》]\n")
+    return "\n".join(md)
 
 
 # ---------- capture ----------
@@ -268,29 +315,23 @@ def cmd_compose(args: argparse.Namespace) -> None:
     sheet.save(sheet_path)
 
     total = sum(p["ms"] for p in phases) if beats else sum(s[2] for s in spans)
-    md = [f"### {data['name']}（共 {seconds_text(total)}）\n"]
+    steps: list[Step] = []
     if beats:
-        # plan style: one entry per demo phase with its seconds, then each key frame's offset in it
+        # one step per demo phase; every beat in it (picked or not) becomes a sub-line
         figure = {i: j + 1 for j, i in enumerate(picked)}
         for n, phase in enumerate(phases):
-            title = re.sub(r"^分鏡\d+\s*", "", phase["name"])
-            md.append(f"分鏡{n + 1}（{title}，{seconds_text(phase['ms'])}）")
-            for i, shot in enumerate(shots):
-                if shot["phase"] != n:
-                    continue
-                caption = captions[picked.index(i)] if i in figure else shot["caption"]
-                tag = f"〔圖{figure[i]}〕" if i in figure else ""
-                md.append(f"  {seconds_text(round(shot['offset_ms'], -2))}：{caption}{tag}")
-            md.append("")
+            title = re.sub(r"^分鏡\d+\s*", "", phase["name"]) or "畫面描述待補"
+            in_phase = [i for i, shot in enumerate(shots) if shot["phase"] == n]
+            subs = [captions[picked.index(i)] if i in figure else shots[i]["caption"] for i in in_phase]
+            steps.append((title, phase["ms"], [figure[i] for i in in_phase if i in figure], subs, ""))
     else:
+        # one step per kept frame; the demo phases it covers are noted for the PM to delete
         for j, (start, end, ms) in enumerate(spans, 1):
             names = "＋".join(p["name"] for p in phases[start:end])
             caption = captions[j - 1] if captions else "畫面描述待補"
-            md.append(f"分鏡{j}（{caption}，{seconds_text(ms)}）")
-            md.append(f"  涵蓋 demo 分段：{names}\n")
-    md.append(f"[分鏡圖：{sheet_path.name}]\n")
+            steps.append((caption, ms, [j], [], f"（demo 分段：{names}；貼企劃前刪）"))
     md_path = out_dir / f"分鏡_{data['name']}_企劃草稿.md"
-    md_path.write_text("\n".join(md), encoding="utf-8")
+    md_path.write_text(plan_section(data["name"], total, steps, sheet_path.name), encoding="utf-8")
     print(f"kept candidates {[i + 1 for i in picked]} of {len(shots)} -> {sheet_path.name} ({cols}x{rows}, total {seconds_text(total)})")
     if not args.pick and not beats:
         print(f"auto dedupe only: review {contact.name}, drop near-duplicates, rerun with --pick and --captions")
