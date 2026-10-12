@@ -11,7 +11,7 @@
 
 | 項目 | 規格 | 說明 |
 |---|---|---|
-| 頭身比 | 兩檔擇一：**Q 版 2.5–3 頭身**（預設）／**立繪 6–7 頭身** | Q 版用於故事書頁、小動物、場景中的角色；立繪用於角色設定與劇情 CG。同一系列只用一檔 |
+| 頭身比 | **依角色身分決定，不是依畫面**：人型角色與敵人＝**寫實比例 6–7 頭身**（預設），下限 5 頭身；**只有吉祥物**（小動物、魔物寵物、坐騎、小精靈）用 **Q 版 2–3 頭身** | 同一張圖可以兩種並存（人走寫實比例、旁邊的吉祥物走 Q 版），這正是本風格的味道；人型角色不准縮成 Q 版 |
 | 線條 | 鉛筆或褐色（sepia）沾水筆線，**看得到筆觸**：粗細變化、偶爾斷線、收筆帶飛白 | 線色深褐或暖灰，不用純黑；不能是乾淨均勻的數位線 |
 | 上色 | **透明水彩**：色塊內有水痕暈染、邊緣積色、留白透出紙色；可疊一層彩色鉛筆排線補陰影 | 不做厚塗、不做賽璐璐硬陰影、不做數位漸層 |
 | 配色 | **低彩度大地色**：赭、土黃、橄欖綠、灰藍、磚紅、羊皮紙米白；全圖 4–6 色 | 高彩度只留給一個焦點（魔法光、寶石、主角的一件衣服） |
@@ -40,16 +40,16 @@
 | 變體 | 構圖 | 額外規則 |
 |---|---|---|
 | **故事書頁** | 橫式或直式，角色＋場景，四邊淡出成紙白，一側留空給文字 | 預設 Q 版 |
-| **角色立繪** | 單一角色全身、站姿，背景只有淡淡的水彩暈染與紙紋 | 預設立繪 6–7 頭身；適合角色設定 |
+| **角色立繪** | 單一角色全身、站姿，背景只有淡淡的水彩暈染與紙紋 | 人型 6–7 頭身；適合角色設定 |
 | **場景插畫** | 模型箱般的小鎮／森林／室內，角色小、場景為主 | 遠景用淡色、少細節表現距離 |
 | **劇情 CG** | 2–3 個角色互動，中景，場景交代地點 | 表情含蓄，用姿勢與距離說故事 |
-| **小動物繪本** | Q 版動物在自然場景中（森林、田野、廚房），童書感 | 可配合豆豆眼；顏色比預設再柔一點 |
+| **小動物繪本** | Q 版吉祥物在自然場景中（森林、田野、廚房），童書感 | 主角是吉祥物才用；可配合豆豆眼；顏色比預設再柔一點 |
 
 ---
 
 ## 三、英文 prompt 區塊
 
-組 prompt 時照順序拼：`[SUBJECT]` → `[STYLE]` → `[VARIANT]` → `[EXCLUSION]`。風格區塊**一字不改直接貼**，只把 `{EYES}` 換成〈眼型與表情〉表裡選定的片段、`{PROPORTION}` 換成頭身檔（Q 版：`chibi proportion about 2.5 to 3 heads tall`；立繪：`elegant proportion about 6 to 7 heads tall`）。
+組 prompt 時照順序拼：`[SUBJECT]` → `[STYLE]` → `[VARIANT]` → `[EXCLUSION]`。風格區塊**一字不改直接貼**，只把 `{EYES}` 換成〈眼型與表情〉表裡選定的片段、`{PROPORTION}` 依畫面裡有哪些角色填（人型與敵人：`humans and enemies drawn with realistic proportions about 6 to 7 heads tall, never chibi`；吉祥物：`mascot creatures drawn in a chibi proportion about 2 to 3 heads tall`；兩種都有就兩句都放）。`[SUBJECT]` 裡每個角色也要標明是人型還是吉祥物。
 
 ```text
 [STYLE]
@@ -72,7 +72,7 @@ distance shown by paler colors and fewer details, edges of the image fading soft
 [EXCLUSION]
 no clean digital lineart, no uniform vector stroke, no cel shading, no hard shadows, no thick painterly oil brushwork, no 3D render,
 no glossy highlights, no saturated neon colors, no gradients that look digital, no depth of field blur, no cinematic lighting, no lens flare,
-no anime-style huge sparkling eyes, no text or letters
+no anime-style huge sparkling eyes, no chibi humans, no text or letters
 ```
 
 ---
@@ -82,7 +82,7 @@ no anime-style huge sparkling eyes, no text or letters
 1. **不仿冒既有 IP 與作者**：prompt 裡**一律不寫**作者名、遊戲名、作品名；只用第三節的中性描述詞。他人作品的參考圖只拿來理解風格，**不能當 `--reference` 餵給生圖引擎**（自己算出、已核准的圖可以）
 2. **手繪感是本風格的命**：GPT 引擎傾向乾淨數位線與平滑漸層，出現就退回；第一張核准後一定當同批 `--reference`，靠圖鎖質感比靠文字穩
 3. **低彩度、單一焦點色**：全圖彩度壓低，只留一個高彩度焦點；整張都鮮豔就退回
-4. **頭身一系列一檔**：Q 版與立繪不混用
+4. **頭身看角色身分**：人型與敵人一律寫實比例（6–7，下限 5），只有吉祥物 Q 版 2–3。AI 遇到「可愛」「繪本」會把人也縮成 Q 版，出現就退回（前科 2026-10-12：上班族穿越奇幻世界那張，主角與鎮民全畫成 3 頭身）
 5. **文字不交給 AI 畫**：書名、對白一律後製；prompt 永遠帶 `no text`
 
 ---
@@ -94,7 +94,7 @@ no anime-style huge sparkling eyes, no text or letters
 - [ ] 低彩度大地色為主，高彩度只在一個焦點
 - [ ] 柔和漫射光，沒有強逆光、光暈、景深模糊
 - [ ] 場景有手作感，遠處靠變淡表現距離
-- [ ] 頭身符合選定的檔位（Q 版 2.5–3／立繪 6–7）
+- [ ] 人型角色與敵人是寫實比例（6–7 頭身，至少 5）；只有吉祥物是 Q 版 2–3
 - [ ] 眼型與選定的一致，不是動漫大眼
 - [ ] 看得出紙紋，畫面邊緣有自然褪開（故事書頁變體）
 - [ ] 圖上沒有 AI 自己生出的文字
