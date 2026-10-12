@@ -1,5 +1,7 @@
 # 動物插圖風（animal-illustration）
 
+> 參考圖：網芳 `X:\grp.product.pm1\2. 產品改造\一四部企劃範本\kit-assets\imagen\styles\animal-illustration\`（X 讀不到換 Y:）；kit 內不放圖。調風格前先看這批圖
+
 > 舊名「繪本貓風（storybook-cat）」，v3.36.0 改名；手繪質感的繪本另見 `handdrawn-storybook.md`。
 
 > 用途：可愛動物插畫、卡牌／卡套／海報主視覺、角色扮演主題圖。主角預設是貓，其他小動物照同一套規則也能用。

@@ -1,5 +1,7 @@
 # 手繪奇幻風（handdrawn-fantasy）
 
+> 參考圖：尚未歸檔——有圖就放網芳 `X:\grp.product.pm1\2. 產品改造\一四部企劃範本\kit-assets\imagen\styles\handdrawn-fantasy\`（X 讀不到換 Y:），歸檔後改寫這行
+
 > 定位：日系奇幻戰略 RPG 的手繪插畫一路——寫實比例的角色、水彩暈染＋鉛筆／沾水筆線、低彩度大地色；場景像手工模型箱（diorama）般的手繪舞台。
 > 舊名「手繪繪本風（handdrawn-storybook）」，v3.37.0 拆成兩套：本套＝**全員寫實比例**；全員 Q 版的兒童繪本另見 `handdrawn-picturebook.md`。**兩套不混用比例**。
 > 與 `animal-illustration.md` 的分工：那套是乾淨平塗＋平面裝飾背景、不畫場景；本套是**手繪質感＋有場景**。
