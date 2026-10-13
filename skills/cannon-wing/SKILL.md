@@ -1,6 +1,5 @@
 ---
 name: cannon-wing
-version: 1.0.0
 description: |
   捕魚機「炮台＋翅膀」套裝示意圖產出流程：讀 Notion 道具之書的既有企劃、
   或從零發想並先產一份 mini 企劃拍板 → 組提示詞 → image-studio 算一張去背素材
@@ -33,6 +32,7 @@ allowed-tools:
 
 以及 kit 層級的共用參照：
 
+- **`kit 根目錄/references/生圖線共用流程.md`** — 魚線十支共用的工作流程：前置需求、讀企劃（`fetch_plan.py`）、全程規則、從零發想的提案與拍板、挑圖、檢視與交付、接續下游。本檔只寫炮台翅膀線獨有的差異
 - **`kit 根目錄/references/image-studio-共用須知.md`** — 算圖中斷的處置、憑證到期、平台偶發異常、模型固定偏誤、注意力零和。**遇到產圖層面（而非版型層面）的問題先查那份**
 
 ---
@@ -45,20 +45,15 @@ allowed-tools:
 
 ## 前置需求
 
-1. **image-studio 憑證**：`~/.config/image-studio/credentials.json`。401 時見 kit `references/image-studio-共用須知.md`〈憑證〉（Claude 照該節換季流程自己換，不提前換；本機沒裝過走〈首裝流程〉）。
-2. **Python 套件**：Pillow、numpy。
-3. **Notion 讀取權**：企劃在「道具之書」資料庫（四部）。用自己的四部（pm4）憑證，存在本機，腳本自動取、不要問使用者；沒有或過期照 `plan-dept14-writer/references/notion-access.md` §3 協助安裝／換新。
-   ⚠️ **Notion 一律走部門 proxy＋REST，不走 MCP**（MCP 已移除）。
+照 `kit 根目錄/references/生圖線共用流程.md` 第一節（image-studio 憑證與 401 處置、四部 pm4 憑證由腳本自動取、Notion 一律走 proxy＋REST、Pillow）。本 skill 的差異：Python 套件另需 **numpy**；Notion 讀取範圍：企劃在「**道具之書**」資料庫（四部）。
 
 ---
 
 ## 全程規則
 
 - **法則優先**：產圖前後都要對照 `炮台翅膀設計法則.md`，交付前逐條跑第七節驗收清單。
-- **每輪至少算 2 張**：平台會偶發異常（貼紙風、底色卡、加文字、產出與企劃不符），對策是重抽不是改提示詞。
+- 共用規則照 `生圖線共用流程.md` 第三節；本線要主動點出的企劃問題：缺造型描述、階段不全、用詞不一致、內部矛盾。
 - **下排永遠由程式合成**，不寫進提示詞。
-- **中間產物進 `_工作暫存/`**，不進使用者的下載資料夾；定稿才輸出到指定位置。
-- **主動點出企劃問題**：企劃缺造型描述、階段不全、用詞不一致、內部矛盾時直接講，不要自行補完後默默帶過。
 
 ---
 
@@ -75,9 +70,11 @@ allowed-tools:
 
 ## 模式 B：從零發想
 
+通則（提案與拍板不可跳過、B1 全部可選、B2 重撈清單、B3 2–3 案＋設計理由、B4 mini 企劃存檔與法則檢查、B5 重出整份）照 `生圖線共用流程.md` 第四節；本 skill 的差異如下。
+
 ### Step B1 — 收集方向
 
-問使用者三件事，全部可選，沒給就自由發揮：
+問使用者三件事：
 
 1. **主題傾向**（例：東方神獸、蒸汽龐克、深海、節慶）
 2. **稀有度**（預設傳說；菁英要降低裝飾量、且通常沒有 lv2）
@@ -85,19 +82,19 @@ allowed-tools:
 
 ### Step B2 — 避開既有題材
 
-**發想前先撈道具之書的現有清單**（29 座炮台、29 組翅膀），列出已經用掉的題材，避免撞題與撞名。
+清單用 `fetch_plan.py --list cannons`、`--list wings`（路徑見 Step 1），撈道具之書的現有**全部**炮台與翅膀。
 
 已用題材涵蓋：西方神聖（豎琴、女神戰車）、東方神獸（白虎、青鸞、靈狐、瑞鹿）、自然（春意、桃緣、翠晶）、天體（日月星輪、星穹、天機墨座）、武器（焰劍、雙劍、聖戟、海蒼之弓）、貓（喵公爵、廚神喵喵）、節慶（年獸）、海洋（雙鯨、寶船、深海魔靈）。
 
 ### Step B3 — 提案
 
-發想 **2–3 個差異明顯**的方向讓使用者挑，並**明講他可以完全不選、直接自己給主題**——不要把他框在提案裡。每案給：
+每案給：
 
 - **三段命名**：炮台名＋翅膀名＋套裝特效名（現行慣例，缺一不可；命名多為四字，如「靈狐神契＋浮世幻尾＝幻狐靈契」）
 - **一句核心意象**
 - **配色**（3–4 色）
 - **翅膀的形體**（不必是羽翼——現行有九尾、戰馬、鯨魚、蝶翼、藤蔓）
-- **設計理由**（2–3 句）：為什麼選這個題材（跟既有 29 組的區隔、跟捕魚主題的關係）、炮台與翅膀怎麼互相呼應、lv0 → lv2 的升級靠什麼元件長出來。**沒有理由的提案不交**——使用者要靠理由判斷，不是只看名字挑
+- **設計理由**（2–3 句）：除通則的題材區隔（跟既有**全部**套裝），要寫炮台與翅膀怎麼互相呼應、lv0 → lv2 的升級靠什麼元件長出來
 
 ### Step B4 — 產 mini 企劃
 
@@ -123,13 +120,11 @@ lv0 造型：
 lv2 造型變化：
 ```
 
-存成 `_工作暫存/企劃_<套裝名>_v1.md`，給使用者閱讀。**逐條對照 `炮台翅膀設計法則.md` 檢查**後才交出。
+檔名 `企劃_<套裝名>_v1.md`；交出前對照的是 `炮台翅膀設計法則.md`。
 
 ### Step B5 — 修訂迴圈
 
-使用者提調整 → **重出一整份完整企劃**（版本號 +1），不要只給差異片段。確認滿意才進 Step 3。
-
-產圖後若使用者又改了設計，記得把改動折回企劃檔，避免圖與企劃脫節。
+照通則；確認滿意才進 Step 3。
 
 ---
 
@@ -139,28 +134,19 @@ lv2 造型變化：
 
 問使用者要做哪一組（炮台名＋翅膀名）。沒指定就列出候選讓他挑。
 
-讀單一企劃頁（文字＋圖片）一律用共用腳本，不用傳任何 key：
+讀單一企劃頁用共用腳本（產出格式見 `生圖線共用流程.md` 第二節）：
 
 ```sh
-python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <page_id> _工作暫存/<套裝名>
+python ~/.claude/skills/art-request-sheet/scripts/fetch_plan.py <page_id> _工作暫存/<套裝名>
 ```
 
-要列道具之書候選（database query）時才用 PowerShell ＋ REST，憑證從本機檔讀（找不到 → 先 `py -3 %USERPROFILE%\starter-kit\references\scripts\notion_credentials.py --migrate`，還是沒有就照 notion-access.md §3）：
+要列道具之書候選時用同一支腳本（憑證自動取，找不到或過期照 `plan-dept14-writer/references/notion-access.md` §3）：
 
-```powershell
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$c = (Get-Content "$env:USERPROFILE\.config\notion-pm\credentials.json" -Raw -Encoding UTF8 | ConvertFrom-Json).pm4
-$h = @{ "Auth" = $c.auth; "Notion-Version" = "2022-06-28" }   # header name is Auth, not Authorization
-# 道具之書 database id: 217e22985ac9817d8a65c6a6ed6a135c
-# Invoke-RestMethod -Method Post "$($c.baseUrl)/v1/databases/<id>/query" -Headers $h -ContentType "application/json" -Body $bytes -TimeoutSec 75 -MaximumRedirection 0
+```sh
+python ~/.claude/skills/art-request-sheet/scripts/fetch_plan.py --list cannons   # 或 --list wings
 ```
 
-不要把 `$c.auth` 印出來。主機名 `dev-` 開頭的機器（不走環境 proxy）改用 Python 腳本，不用這段 PowerShell。過期判準：回應 JSON 的 `error` 是 `expired` 才算（一般 403 不算）。
-
-⚠️ **PowerShell 5.1 送含中文的 request body 會被轉成 `?` 而回 400**（`Could not find property with name or id: ????`）。
-解法：`-Body ([Text.Encoding]::UTF8.GetBytes($json))`，或乾脆不帶 filter 整批撈回本地再篩。
-
-自己遞迴撈 `GET /v1/blocks/{id}/children` 時（`fetch_plan.py` 已代勞）：表格內容在 `table_row.cells`（二維陣列），要另外處理才讀得到 WID 與關聯道具。
+每列：大類、稀有度、名稱、page id。要自己下別的 database query（例如加稀有度 filter）就用 `plan-dept14-writer/scripts/notion_rest.py`：`Notion(find_token(dept="四部")).call("POST", "/databases/217e22985ac9817d8a65c6a6ed6a135c/query", {...})`——**不要自己讀 credentials.json、不要用 PowerShell 打 REST**（5.1 的中文 body 會變 `?` 回 400，`dev-` 主機還要繞 proxy，腳本都處理掉了）。表格內容（WID、關聯道具）`fetch_plan.py` 已展開成一列一行。
 
 ### Step 2 — 解析企劃、判斷分支
 
@@ -177,7 +163,7 @@ $h = @{ "Auth" = $c.auth; "Notion-Version" = "2022-06-28" }   # header name is A
 
 **基礎階段的名稱不統一**：企劃可能寫「零星造型」或「一星造型」，兩者都對應 lv0。
 
-**改版型企劃**（如喵公爵）只列新增項目、造型寫「請見圖X」、動態寫「維持舊版設計」。這種必須下載企劃示意圖來讀，由讀圖反推造型描述。下載法：遞迴找 `image` block，`image.file.url` 用 `Invoke-WebRequest` 抓（S3 簽名 URL，有時效）。
+**改版型企劃**（如喵公爵）只列新增項目、造型寫「請見圖X」、動態寫「維持舊版設計」。這種必須讀企劃示意圖，由讀圖反推造型描述（圖檔已由 Step 1 的 `fetch_plan.py` 存成 `NN_<圖名>.png`，直接 Read）。
 
 ### Step 3 — 組提示詞
 
@@ -196,15 +182,7 @@ python3 ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 
 ### Step 5 — 挑圖
 
-**⚠️ 一定要看完所有候選圖，並從中挑最好的一張。** 只看第一張就評斷等於放棄了 `--count` 的意義；**兩張可能都符合規格，但有優劣**——「符合規格」與「畫得好」是兩件事，規格只是門檻。
-
-| 情況 | 處置 |
-|---|---|
-| 有一張以上正確 | **全部看完，挑最好的**，不要改提示詞 |
-| 兩張都錯在同一點 | 才是提示詞或規格的問題，回 Step 3 修 |
-| 兩張錯在不同點 | 隨機變異，重抽 |
-
-逐張 Read，對照 `炮台翅膀設計法則.md` 第七節。常見異常：
+挑圖通則（看完所有候選、三種情況的處置）照 `生圖線共用流程.md` 第五節；提示詞問題回 Step 3 修。逐張 Read，對照 `炮台翅膀設計法則.md` 第七節。常見異常：
 
 - 整格被加橢圓／圓形底色卡 → 去背後整塊被保留，**不可用**，重抽
 - 貼紙風（白描邊＋投影）、雜訊背景 → 重抽
@@ -249,13 +227,11 @@ python3 ~/.claude/skills/cannon-wing/scripts/compose.py <tiles> <輸出目錄> "
 
 ### Step 8 — 檢視與調整迴圈
 
-1. 用 `explorer.exe` 開輸出資料夾，讓使用者直接看。
-2. **自己先逐條跑一次驗收清單**，主動回報哪些過、哪些有瑕疵，不要等使用者挑。
-3. 使用者提調整 → 改提示詞回 Step 3，或改合成參數回 Step 7。
+照 `生圖線共用流程.md` 第六節 1–3（開輸出資料夾給使用者看、自己先跑驗收清單並回報、提調整回 Step 3；改合成參數則回 Step 7）。
 
 ### Step 9 — 交付
 
-定稿圖輸出到使用者指定位置。若這次產出暴露了新的規則或前科，回寫到 `炮台翅膀設計法則.md` 或 `prompt模板.md`。
+交付通則照 `生圖線共用流程.md` 第六節 4–5；前科回寫落點：`炮台翅膀設計法則.md` 或 `prompt模板.md`。
 
 ### Step 9.5 — 套裝 ICON（後製，不生圖）
 
@@ -281,7 +257,7 @@ python ~/.claude/skills/pet-parts/scripts/item_icon.py <總覽定稿.png> <輸�
 
 兩者的風格都衍生自這裡的定稿，所以**一定要等炮台翅膀確認滿意才做**——這就是三支 skill 分開的原因，不要在炮台翅膀還沒定案時先產下游。
 
-詢問時先讀企劃盤點：**有企劃的部分一次全部派出去產**，不要一件一件問；**只有企劃沒寫到的部分才逐項詢問**規格。
+詢問時先讀企劃盤點（有企劃的一次全部派出去產、沒寫到的才逐項問）照 `生圖線共用流程.md` 第六節第 6 條。
 
 > 下游取用參考圖時，`cannon-parts` 用上排的炮台 lv0 那格，`cannon-storyboard` 用**下排的套裝組合格**（它要的是炮台與翅膀組合起來的樣子）。
 
@@ -297,9 +273,8 @@ python ~/.claude/skills/pet-parts/scripts/item_icon.py <總覽定稿.png> <輸�
 
 ## 貼回企劃（2026-10-02 起）
 
-定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+怎麼貼（交給 `plan-dept14-writer` 貼圖模式、憑證、list→報清單→貼→回讀、圖名、卡位、不准動的圖、落點不確定先問）一律照 `plan-dept14-writer/references/image-slots.md`〈通用貼法〉，落點總表同檔第五節。本 skill 產出的落點：
 
 - 3×3 總覽 → 道具之書 炮台頁**與**翅膀頁 `2.2.C 四星造型變化` 右欄，接在四星單圖後，caption《三階示意圖》
 - 單格（lv0/2/4）→ 炮台頁、翅膀頁 `2.2.A/B/C` 右欄各一張《零星炮台示意圖》《二星特效示意圖》《四星炮台示意圖》
 - 套裝 ICON → 企劃有圖位才做；目前套裝頁沒有，就不出圖
-- 不要動 2.1.B 底下的「0/2/4 星遊戲內對位條」（美術產物）

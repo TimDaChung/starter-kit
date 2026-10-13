@@ -1,6 +1,6 @@
 ---
 name: product-planning
-description: 產品/遊戲企劃書工作流，三模式：A 從零寫企劃（訪談缺口→骨架產出）、B 從 prototype/demo 反寫企劃（讀實作反推機制數值）、C 審修現成企劃（錯字、邏輯檢查、補 Mermaid 流程圖）。觸發詞：「寫企劃」「產企劃」「企劃反寫」「審企劃」「企劃審查」「/product-planning」。輸出一律 Notion-ready Markdown。
+description: 產品/遊戲企劃書工作流，三模式：A 從零寫企劃（訪談缺口→骨架產出）、B 從 prototype/demo 反寫企劃（讀實作反推機制數值）、C 審修現成企劃（錯字、邏輯檢查、補 Mermaid 流程圖）。定位：跨部門、無範本、或從 demo 反寫的企劃；一＋四部格式的寫／審走 plan-dept14-writer／plan-doc-qa。觸發詞：「產企劃」「企劃反寫」「企劃審查」「/product-planning」。輸出一律 Notion-ready Markdown。
 ---
 
 # 產品企劃工作流

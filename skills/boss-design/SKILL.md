@@ -1,6 +1,5 @@
 ---
 name: boss-design
-version: 1.0.0
 description: |
   捕魚機 Boss「外觀設計圖」產出流程：讀 Notion 魚類之書的既有 Boss 企劃、讀使用者自備的規格／提案文件、或從零發想並先提案＋產 mini 企劃拍板
   → 組提示詞 → image-studio 算圖 → 補成 16:9 灰底 → 驗收。一張圖一個階段，Boss 大小以 16:9 畫面抓比例。
@@ -32,7 +31,7 @@ allowed-tools:
 
 共用的：
 
-- 讀企劃：`~/.claude/skills/pet-evolution/scripts/fetch_plan.py`（兩支 skill 共用）
+- **`kit 根目錄/references/生圖線共用流程.md`** — 魚線十支共用的工作流程：前置需求、讀企劃（`fetch_plan.py` 全 kit 唯一一份在 `art-request-sheet/scripts/`，`--list bosses` 列候選）、全程規則、從零發想的提案與拍板、挑圖、檢視與交付、接續下游。本檔只寫 Boss 線獨有的差異
 - **`kit 根目錄/references/image-studio-共用須知.md`** — 算圖中斷、憑證到期、平台偶發異常、注意力零和。**遇到產圖層面的問題先查那份**
 
 ---
@@ -54,19 +53,16 @@ allowed-tools:
 
 ## 前置需求
 
-1. **image-studio 憑證**：`~/.config/image-studio/credentials.json`。401 時見 kit `references/image-studio-共用須知.md`〈憑證〉（Claude 照該節換季流程自己換，不提前換；本機沒裝過走〈首裝流程〉）
-2. **Notion 讀取權**：魚類之書（四部）。自己的四部（pm4）憑證在本機，`fetch_plan.py` 自動取，不用傳任何 key、不要問使用者；沒有或過期照 `plan-dept14-writer/references/notion-access.md` §3 協助安裝／換新
-   ⚠️ **Notion 一律走部門 proxy＋REST，不走 MCP**。憑證值不印出、不寫進任何檔案
-3. **Python 套件**：Pillow
+照 `kit 根目錄/references/生圖線共用流程.md` 第一節（image-studio 憑證與 401 處置、四部 pm4 憑證由 `fetch_plan.py` 自動取、Notion 一律走 proxy＋REST、Pillow）。本 skill 的 Notion 讀取範圍：**魚類之書（四部）**。
 
 ---
 
 ## 全程規則
 
+共用規則照 `生圖線共用流程.md` 第三節。本 skill 另加：
+
 - **法則優先**：產圖前後都對照 `boss設計法則.md`，交付前逐條跑第六節驗收清單
-- **每輪至少算 2 張**：平台會偶發異常，對策是重抽不是改提示詞
-- **不修改任何既有企劃**：發現的錯字、矛盾、Spine 做不到的動作描述，列給使用者看即可
-- **中間產物進 `_工作暫存/`**（已 gitignore）；定稿才輸出到使用者指定位置。**未上線的設計圖不進 repo**（kit 是公開 repo）
+- 列給使用者看的企劃問題，含 **Spine 做不到的動作描述**（不改企劃）
 - **一張圖一個階段**，多階段依序做：前一階定稿後，拿它當下一階的參考圖
 
 ---
@@ -104,11 +100,11 @@ allowed-tools:
 
 ## 模式 B：從零發想
 
-⚠️ **提案與拍板不可跳過**，沒等使用者拍板不算圖。（A／C 以企劃或使用者文件為拍板依據，不走這段；只有 B 必須提案拍板）
+通則（提案與拍板不可跳過、B1 全部可選、B2 重撈清單、B3 2–3 案＋設計理由、B4 mini 企劃存檔與法則檢查、B5 重出整份）照 `生圖線共用流程.md` 第四節；A／C 以企劃或使用者文件為拍板依據，不走這段；只有 B 必須提案拍板。本 skill 的差異如下。
 
 ### Step B1 — 收集方向
 
-問使用者，全部可選，沒給就自由發揮：
+問使用者：
 
 1. **主題傾向**（例：神話神祇、東方神獸、深海霸主、節慶）
 2. **定位**：活動 Boss／場景 Boss
@@ -118,15 +114,11 @@ allowed-tools:
 
 ### Step B2 — 避開既有題材
 
-**發想前先重撈 Boss 清單**，對照 `參考素材索引.md` 的已用題材：
-
-```sh
-python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py --list bosses
-```
+清單用 `fetch_plan.py --list bosses`，已用題材對照 `參考素材索引.md`。
 
 ### Step B3 — 提案
 
-發想 **2–3 個差異明顯**的方向，並**明講可以都不選、直接自己給主題**。每案給：
+每案給：
 
 - **名稱**（四字為主，如「熾影幻狐」「滄溟晶龍」）
 - **一句核心意象**
@@ -136,19 +128,17 @@ python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py --list bosses
 - **包裝**：賣點與一句話宣傳、適合的檔期或定位
 - **表演**：被捕獲的反應、彩金表演的媒介與高潮
 - **玩法**：彩金玩法的機制、有沒有階段或翻盤、會用到哪些道具
-- **設計理由**（2–3 句）：為什麼選這個題材（跟既有 Boss 的區隔、跟捕魚主題的關係）、**外觀的招牌部位怎麼成為表演與玩法的動作來源**、在 Spine 限制下動不動得起來。**沒有理由的提案不交**
+- **設計理由**（2–3 句）：除通則的題材區隔，要寫**外觀的招牌部位怎麼成為表演與玩法的動作來源**、在 Spine 限制下動不動得起來
 
 ⚠️ 同一案的外觀、表演、玩法要互相扣住。玩法跟外觀無關（例：九尾狐配老虎機）的提案要重想。
 
 ### Step B4 — 產 mini 企劃
 
-照魚類之書的結構，寫**包裝、表演、玩法的概念**與**產圖需要的造型**：格式讀 `references/mini-plan-template.md`。
-
-存成 `_工作暫存/企劃_<Boss名>_v1.md`。**對照法則第三節檢查**後才交出。
+照魚類之書的結構，寫**包裝、表演、玩法的概念**與**產圖需要的造型**：格式讀 `references/mini-plan-template.md`。檔名 `企劃_<Boss名>_v1.md`；交出前對照的是**法則第三節**。
 
 ### Step B5 — 修訂迴圈
 
-使用者提調整 → **重出一整份完整企劃**（版本號 +1），不要只給差異。確認滿意才進 Step 3。
+照通則；確認滿意才進 Step 3。
 
 ---
 
@@ -167,10 +157,10 @@ python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py --list bosses
 問使用者要做哪一隻；沒指定就跑 `fetch_plan.py --list bosses` 列候選。
 
 ```sh
-python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <page_id> _工作暫存/<Boss名>
+python ~/.claude/skills/art-request-sheet/scripts/fetch_plan.py <page_id> _工作暫存/<Boss名>
 ```
 
-產出 `plan.md`（企劃全文）與 `img_NN.png`（企劃圖）。
+產出格式（`plan.md`＋`NN_<圖名>.png`）見 `生圖線共用流程.md` 第二節。
 
 ### Step 2 — 解析企劃
 
@@ -212,15 +202,7 @@ python ~/.claude/skills/boss-design/scripts/fit_canvas.py <算出的圖> <輸出
 
 ### Step 6 — 挑圖
 
-**⚠️ 看完所有候選圖，挑最好的一張。**
-
-| 情況 | 處置 |
-|---|---|
-| 有一張以上正確 | 全部看完，挑最好的，不改提示詞 |
-| 兩張錯在同一點 | 提示詞或規格的問題，回 Step 3 修 |
-| 兩張錯在不同點 | 隨機變異，重抽 |
-
-逐張對照法則第六節。本 skill 常見的失敗：
+挑圖通則（看完所有候選、三種情況的處置）照 `生圖線共用流程.md` 第五節；提示詞問題回 Step 3 修。逐張對照法則第六節。本 skill 常見的失敗：
 
 - Boss 太大，翅膀或尾巴被邊緣切到 → 重抽；兩張都切到就把比例調低
 - 畫了地面、漸層、場景 → 平台異常，重抽
@@ -232,9 +214,7 @@ python ~/.claude/skills/boss-design/scripts/fit_canvas.py <算出的圖> <輸出
 
 ### Step 8 — 檢視與確認外觀
 
-1. 把候選圖複製到使用者看得到的資料夾，用 `explorer.exe` 開給他看
-2. **自己先逐條跑驗收清單**，主動回報哪張好、好在哪、還差什麼
-3. 使用者提調整 → 改企劃或提示詞回 Step 3
+照 `生圖線共用流程.md` 第六節 1–3（開資料夾給使用者看、自己先跑驗收清單並回報、提調整回 Step 3）。
 
 ### Step 9 — 表演交給 boss-demo
 
@@ -252,8 +232,7 @@ python ~/.claude/skills/boss-design/scripts/fit_canvas.py <算出的圖> <輸出
 
 ### Step 10 — 交付與銜接
 
-- 定稿圖輸出到使用者指定位置，附最終提示詞
-- 這次暴露了新規則或前科 → 回寫 `boss設計法則.md` 第七節或 `prompt模板.md`
+- 交付通則照 `生圖線共用流程.md` 第六節 4–5；前科回寫落點：`boss設計法則.md` 第七節或 `prompt模板.md`
 
 #### 提案簡報（使用者要做 Boss 提案簡報時）
 
@@ -267,10 +246,8 @@ python ~/.claude/skills/boss-design/scripts/fit_canvas.py <算出的圖> <輸出
 | 1 | 表演道具 | 道具等級系列（罐子、幻石…） | `boss-props` |
 | 2 | 表演 demo | 捕獲／彩金表演，定稿後截分鏡、寫回企劃 | `boss-demo` |
 
-- **全部以這裡的外觀定稿為參考圖延伸**，不重新發想造型與配色——所以一定要等定稿才做
+- 接續通則（全部以定稿為參考圖延伸、等定稿才做、企劃有寫的一次全部派出去產、從零發想的依 mini 企劃列清單拍板後派出）照 `生圖線共用流程.md` 第六節第 6 條；Boss 線的 mini 企劃看〈表演與玩法〉段落
 - 背景與道具彼此獨立，可以同時派；**demo 排在後面**，因為它要用到定稿的 Boss、背景與道具（沒有的先用佔位，事後換）
-- 先讀企劃盤點：**企劃有寫的一次全部派出去產**；只有企劃沒寫到的才逐項詢問
-- 從零發想的 Boss：依 mini 企劃〈表演與玩法〉段落列出下游清單，使用者拍板後派出
 
 ---
 
@@ -283,4 +260,4 @@ python ~/.claude/skills/boss-design/scripts/fit_canvas.py <算出的圖> <輸出
 
 ## 貼回企劃（2026-10-02 起）
 
-定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**：流程與本 skill 產出的落點讀 `references/notion-paste.md`。
+怎麼貼一律照 `plan-dept14-writer/references/image-slots.md`〈通用貼法〉；本 skill 產出的落點讀 `references/notion-paste.md`。

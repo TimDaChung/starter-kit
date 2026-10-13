@@ -1,6 +1,5 @@
 ---
 name: imagen-banner
-version: 1.0.0
 description: |
   廣宣 / banner 生圖與驗收（機台宣傳、節慶促銷、改版活動三類）。以 20 條廣宣鐵則產 prompt、出圖、驗收。
   觸發：「廣宣圖」「宣傳圖」「banner」「活動圖」「促銷圖」「機台宣傳」「節慶宣傳」「驗收 banner」「這張 banner 幫我看」「照這份企劃做圖」。
@@ -295,7 +294,7 @@ im.crop((l, t, l + tw, t + th)).save(out, quality=92)   # .jpg 依企劃指定
 
 ## 貼回企劃（2026-10-02 起）
 
-定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+怎麼貼（交給 `plan-dept14-writer` 貼圖模式、憑證、list→報清單→貼→回讀、圖名、卡位、不准動的圖、落點不確定先問）一律照 `plan-dept14-writer/references/image-slots.md`〈通用貼法〉，落點總表同檔第五節。本 skill 產出的落點：
 
 - 一部：新聞牆 800×500 → 登入／換皮／功能活動頁「呈現 > 廣宣(請網頁協助製作) > 新聞牆BANNER」右欄，圖上方《1.banner示意參考》、caption 空；一部另有活動列表入口 760×100、信件頂端 1500×350 兩個版位
 - **不進**大活動、神裝禮包的「📌廣宣」段（只放常態 PDF，banner 由網頁部門做）

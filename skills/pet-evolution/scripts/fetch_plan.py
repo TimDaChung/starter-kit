@@ -1,118 +1,40 @@
-"""Fetch a plan page from the fishing-game Notion books: dump text and download images.
+"""Deprecated shim: the kit's single plan fetcher is art-request-sheet/scripts/fetch_plan.py.
 
-Shared by pet-evolution and boss-design.
+Kept so older notes that call this path keep working. Same CLI:
+    python fetch_plan.py <page_id or url> <out_dir>
+    python fetch_plan.py --list pets|bosses|cannons|wings|weapons
 
-Usage:
-    python fetch_plan.py <page_id> <out_dir>
-    python fetch_plan.py --list pets
-    python fetch_plan.py --list bosses
-
-The 四部 credential is picked up by plan-dept14-writer/scripts/notion_rest.py
-(see plan-dept14-writer/references/notion-access.md); nothing to pass on the command line.
-
-Writes <out_dir>/plan.md (block text in reading order, image placeholders inline)
-and <out_dir>/img_NN.png for every image block. Image URLs are signed and expire
-in ~5 minutes, so images are downloaded immediately during the walk.
+Differences from the old copy here: plan.md keeps red / gray-green background /
+strikethrough marks and a title line, videos and files are downloaded too, and
+media are named NN_<caption>.<ext> instead of img_NN.png.
 """
-import pathlib
+import importlib.util
 import sys
-import urllib.request
+from pathlib import Path
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "plan-dept14-writer" / "scripts"))
-from notion_rest import Notion, find_token, open_page, page_id_from  # noqa: E402
-
-# kind -> (database id, select property, option values to keep; empty = keep all)
-LISTS = {
-    "pets": ("217e22985ac9817d8a65c6a6ed6a135c", "道具大類", ["8. 寵物"]),
-    "bosses": ("21de22985ac98032a2eef46efabab95b", "類別", ["活動Boss", "場景Boss", "特殊魚"]),
-}
+CANONICAL = Path(__file__).resolve().parents[2] / "art-request-sheet" / "scripts" / "fetch_plan.py"
 
 
-_api: Notion | None = None
+def _load_canonical():
+    """Import the canonical script under its own module name (this file shares the basename)."""
+    spec = importlib.util.spec_from_file_location("art_request_sheet_fetch_plan", CANONICAL)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
 
 
-def request(path: str, body: dict | None = None) -> dict:
-    """GET, or POST when a body is given (database queries are read-only POSTs)."""
-    assert _api is not None
-    return _api.call("POST" if body is not None else "GET", path, body)
+_canonical = _load_canonical()
+LISTS = _canonical.LISTS
+list_rows = _canonical.list_rows
+_main = _canonical.main
 
-
-def rich_text(items: list) -> str:
-    return "".join(t.get("plain_text", "") for t in items)
-
-
-def block_text(block: dict) -> str:
-    kind = block["type"]
-    payload = block.get(kind, {})
-    if kind == "table_row":
-        return " | ".join(rich_text(cell) for cell in payload.get("cells", []))
-    return rich_text(payload.get("rich_text", []))
-
-
-def walk(block_id: str, out: pathlib.Path, lines: list[str], depth: int, counter: list[int]) -> None:
-    cursor = None
-    while True:
-        query = "?page_size=100" + (f"&start_cursor={cursor}" if cursor else "")
-        data = request(f"/blocks/{block_id}/children{query}")
-        for block in data["results"]:
-            indent = "  " * depth
-            if block["type"] == "image":
-                image = block["image"]
-                src = image.get("file", {}).get("url") or image.get("external", {}).get("url")
-                caption = rich_text(image.get("caption", []))
-                name = f"img_{counter[0]:02d}.png"
-                urllib.request.urlretrieve(src, out / name)
-                counter[0] += 1
-                lines.append(f"{indent}[image {name}] {caption}")
-            else:
-                text = block_text(block)
-                if text:
-                    prefix = "#" * int(block["type"][-1]) + " " if block["type"].startswith("heading_") else ""
-                    lines.append(f"{indent}{prefix}{text}")
-            if block.get("has_children"):
-                walk(block["id"], out, lines, depth + 1, counter)
-        if not data.get("has_more"):
-            break
-        cursor = data["next_cursor"]
-
-
-def list_rows(kind: str) -> None:
-    db_id, prop, keep = LISTS[kind]
-    rows: list[dict] = []
-    cursor = None
-    while True:
-        body: dict = {"page_size": 100}
-        if cursor:
-            body["start_cursor"] = cursor
-        data = request(f"/databases/{db_id}/query", body)
-        rows += data["results"]
-        if not data.get("has_more"):
-            break
-        cursor = data["next_cursor"]
-    for row in rows:
-        props = row["properties"]
-        category = (props.get(prop, {}).get("select") or {}).get("name")
-        if keep and category not in keep:
-            continue
-        rarity = (props.get("稀有度", {}).get("select") or {}).get("name") or ""
-        title = next(v["title"] for v in props.values() if v["type"] == "title")
-        print(f"{category}\t{rarity}\t{rich_text(title)}\t{row['id'].replace('-', '')}")
+DEPRECATION = f"[fetch_plan] pet-evolution/scripts/fetch_plan.py is a shim; call {CANONICAL} directly."
 
 
 def main() -> None:
-    global _api
-    sys.stdout.reconfigure(encoding="utf-8")
-    if sys.argv[1] == "--list":
-        _api = Notion(find_token(dept="四部"))
-        list_rows(sys.argv[2])
-        return
-    page_id, out_dir = page_id_from(sys.argv[1]), pathlib.Path(sys.argv[2])
-    _api, _ = open_page(page_id)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    lines: list[str] = []
-    walk(page_id, out_dir, lines, 0, [0])
-    (out_dir / "plan.md").write_text("\n".join(lines), encoding="utf-8")
-    print(f"wrote {out_dir / 'plan.md'} ({len(lines)} lines)")
+    print(DEPRECATION, file=sys.stderr)
+    _main()
 
 
 if __name__ == "__main__":

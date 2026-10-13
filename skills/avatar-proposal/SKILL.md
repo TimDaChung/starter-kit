@@ -1,6 +1,5 @@
 ---
 name: avatar-proposal
-version: 1.1.0
 description: |
   神幣「神娃＋人物」每月大活動的人物設定提案流程（SOP 步驟一）：讀歷屆主題庫查重 → 出 3 個主題提案（每案六組×男女小主題、主色、前景背景）
   → 使用者拍板 → 寫 proposal.json → image-studio 算示意圖（每組男女一張、前景背景畫進圖裡，加人物更衣室一張）→ 填 Notion 企劃頁（Leo 版型：每角色一段，色塊＋橫式部件表 ✅／—／❌＋單人圖，自動產）。
@@ -32,7 +31,7 @@ allowed-tools:
 - `scripts/build_notion.py` — proposal.json → Notion 頁（`fill` 填範本頁／`new` 建頁／`swap` 原地換圖／`preview` 不打 API）
 - `scripts/sheet_assets.py` — 色塊小圖、示意圖切男女單人圖、`lint`（配色重疊、特效沒標實體虛體）
 - `scripts/ppt2notion.py` — 舊的人物設定 pptx 整份轉 Notion（遷移用，自含）
-- `scripts/notion_api.py` — 共用 REST 封裝（部門憑證自動取、檔案上傳、原地換圖、分欄 block）
+- `scripts/notion_api.py` — 只是轉接 `plan-dept14-writer/scripts/notion_rest.py`（憑證、檔案上傳、原地換圖、分欄 block 都在那邊，改功能改那邊）
 
 共用的：
 
@@ -175,6 +174,7 @@ python <skill-dir>/scripts/build_notion.py new  proposal.json --sheets _工作�
 
 ## 貼回企劃（2026-10-02 起）
 
-定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+怎麼貼（交給 `plan-dept14-writer` 貼圖模式、憑證、list→報清單→貼→回讀、圖名、卡位、不准動的圖、落點不確定先問）一律照 `plan-dept14-writer/references/image-slots.md`〈通用貼法〉，落點總表同檔第五節。本 skill 產出的落點：
 
-- 示意圖只進**人物設定頁**（本 skill 的頁，從上面第 5 步的範本頁複製）；**不進**神娃大活動「圖示(男女共用)」或人物大活動「圖示」——那兩格放美術稿，美術完成後由 PM 用 plan-dept14-writer 貼圖模式補：`plan-dept14-writer/scripts/art_share_slots.py list <企劃網址>` 會自動從美術網芳找出每格該放的檔、列清單，PM 核准後 `paste --confirm`（貼圖模式第 9 條、image-slots 第七節）
+- 示意圖只進**人物設定頁**（第 5 步的範本複本），由 `scripts/build_notion.py fill`／`swap` 直接寫入（每角色一段，圖在分欄**左欄**，caption「示意圖｜<組別>｜男／女」「示意圖｜更衣室」），**不走 `paste_images.py`**
+- **不進**神娃大活動「圖示(男女共用)」或人物大活動「圖示」——那兩格放美術稿，美術完成後由 PM 用 `art_share_slots.py` 找檔、核准後貼（image-slots 第七節）

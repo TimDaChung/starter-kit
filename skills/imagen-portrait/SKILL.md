@@ -1,6 +1,5 @@
 ---
 name: imagen-portrait
-version: 1.0.0
 description: |
   生成 RPG 手遊角色立繪。預設米哈遊（原神 / 崩鐵 / 絕區零）/ 明日方舟 / NIKKE / 碧藍航線等高營收手遊風格 — 內建 6 風格庫 + 英文 boilerplate。
   觸發：「立繪」「角色立繪」「角色卡」「半身像」「米哈遊風」「方舟風」「gacha 立繪」。

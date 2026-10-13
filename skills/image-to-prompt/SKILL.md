@@ -1,6 +1,5 @@
 ---
 name: image-to-prompt
-version: 1.0.0
 description: |
   逆向拆解一張圖 → 產出「中性化、可換角色」的生圖 prompt，用來還原這張圖的風格與排版。
   使用者給圖（檔案路徑或貼圖）→ Read 看圖 → 拆解風格/構圖/光影/配色/排版，

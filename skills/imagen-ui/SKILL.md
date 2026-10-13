@@ -1,9 +1,8 @@
 ---
 name: imagen-ui
-version: 1.0.0
 description: |
-  生成 RPG 手遊 UI 素材（button / icon / frame / banner / popup / rarity_glow 等 15 種元件）。預設米哈遊 / 方舟 / NIKKE 等高營收手遊風格 — 6 風格庫 + 英文 boilerplate。
-  觸發：「UI 素材」「icon」「卡框」「頭像框」「banner」「技能 icon」「稀有度光效」「米哈遊 UI」「方舟 UI」。
+  生成 RPG 手遊 UI 素材（button / UI icon / frame / popup / rarity_glow 等 15 種元件）。預設米哈遊 / 方舟 / NIKKE 等高營收手遊風格 — 6 風格庫 + 英文 boilerplate。
+  觸發：「UI 素材」「UI icon」「技能 icon」「卡框」「頭像框」「稀有度光效」「米哈遊 UI」「方舟 UI」。
 allowed-tools:
   - Bash
   - Read

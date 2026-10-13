@@ -1,6 +1,5 @@
 ---
 name: weapon-parts
-version: 1.0.0
 description: |
   魚樂園陣營戰「武具」登場動畫分鏡產出流程，weapon-design 的下游：
   登場動畫分鏡（一張 16:9 灰底 2×2 四格，格序固定：中間出現 → 招牌動作 A → 招牌動作 B → 統一發光）、3 星以上金色閃點版分鏡、追擊提示格（選做）。
@@ -30,20 +29,20 @@ allowed-tools:
 
 - `配件規格.md` — 各批規格、驗收清單（硬規範）
 - `prompt模板.md` — 各產出的提示詞模板
-- 共用：道具 ICON 後製 `~/.claude/skills/pet-parts/scripts/item_icon.py`（三條生圖線共用）；分鏡加標籤 `~/.claude/skills/pet-parts/scripts/label_frames.py`；讀企劃 `~/.claude/skills/pet-evolution/scripts/fetch_plan.py`；補 16:9（追擊提示格用）`~/.claude/skills/boss-design/scripts/fit_canvas.py`
+- 共用：道具 ICON 後製 `~/.claude/skills/pet-parts/scripts/item_icon.py`（三條生圖線共用）；分鏡加標籤 `~/.claude/skills/pet-parts/scripts/label_frames.py`；讀企劃 `~/.claude/skills/art-request-sheet/scripts/fetch_plan.py`；補 16:9（追擊提示格用）`~/.claude/skills/boss-design/scripts/fit_canvas.py`
+- **`kit 根目錄/references/生圖線共用流程.md`** — 魚線十支共用的工作流程；本檔只寫武具配件線獨有的差異
 - **`kit 根目錄/references/image-studio-共用須知.md`** — 產圖層面的問題先查那份
 
 ---
 
 ## 全程規則
 
+共用規則照 `生圖線共用流程.md` 第三節。本 skill 另加：
+
 - **等定稿**：三個生圖產出（一個選做）全部以 `weapon-design` 的定稿為 `--reference`，不重新發想造型；道具 ICON 不生圖、直接裁定稿。沒有定稿就先走上游
-- **有企劃的一次全部盤點、分批派出去產**，不要一件一件問；企劃沒寫到的才詢問。追擊提示格是選做，**使用者要才做**
-- **每輪至少算 2 張**，全部看完挑最好的
+- 盤點後**分批**派出去產；追擊提示格是選做，**使用者要才做**
 - **分鏡格序固定**：中間出現 → 招牌動作 A → 招牌動作 B → 統一發光（企劃 §2.9 PM 註記：統一「從中間出現，再做一些動作，最後統一發光」，避免花式進場）。動作 A／B 照企劃 §2.9 該把的原文拆，不增不減
 - **文字不交給模型畫**：分鏡標籤、追擊提示的「追擊效果觸發」字樣都由程式或後製加
-- **不修改既有企劃**；文字與圖不一致時列出來問
-- 中間產物進 `_工作暫存/`（已 gitignore）；**未上線的設計圖不進 repo**
 
 ---
 
@@ -54,7 +53,7 @@ allowed-tools:
 確認定稿圖在手（沒有就先走 `weapon-design`）。讀企劃：
 
 ```sh
-python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py 25ee22985ac9803aa831d54f90bb1910 _工作暫存/武具系統
+python ~/.claude/skills/art-request-sheet/scripts/fetch_plan.py 25ee22985ac9803aa831d54f90bb1910 _工作暫存/武具系統
 ```
 
 從 `plan.md` 盤點（位置見 `配件規格.md` 第一節）：§2.9 該把的登場動畫四步、§2.9 第 3 點金閃、§2.7〈追擊動畫〉。把**分鏡四格的拆法**列給使用者確認後**一次派出**。從零發想的武具沒有企劃 → 依 mini 企劃的「登場動畫概念」拆四格，一樣先確認。
@@ -89,10 +88,9 @@ python3 ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 
 ### Step 4 — 挑圖與交付
 
-1. 複製到使用者看得到的資料夾，`explorer.exe` 開給他看
-2. **自己先逐條跑 `配件規格.md` 第六節**，主動回報哪張好、好在哪；分鏡一定要對四格是否同一把、位置一致，金閃版要對姿勢與批 1 一致；道具 ICON 看 64px 欄，要認得出類型與主色
-3. 定稿輸出到使用者指定位置，附最終提示詞
-4. 暴露了新規則或前科 → 回寫 `配件規格.md` 第七節或 `prompt模板.md`
+1. 挑圖、開資料夾、自己先跑驗收清單並回報、定稿輸出到指定位置附最終提示詞，照 `生圖線共用流程.md` 第五、六節；驗收清單＝`配件規格.md` 第六節
+2. 分鏡一定要對四格是否同一把、位置一致，金閃版要對姿勢與批 1 一致；道具 ICON 看 64px 欄，要認得出類型與主色
+3. 前科回寫落點：`配件規格.md` 第七節或 `prompt模板.md`
 
 ---
 
@@ -105,7 +103,7 @@ python3 ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 
 ## 貼回企劃（2026-10-02 起）
 
-定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+怎麼貼（交給 `plan-dept14-writer` 貼圖模式、憑證、list→報清單→貼→回讀、圖名、卡位、不准動的圖、落點不確定先問）一律照 `plan-dept14-writer/references/image-slots.md`〈通用貼法〉，落點總表同檔第五節。本 skill 產出的落點：
 
 - 登場動畫（含 3 星金閃版）→ 現況暫放在功能之書〈武具系統〉`2.9` 底下該武具的 H4 toggle，toggle 內清單後直接接 image、不分欄《登場動畫分鏡》《登場動畫分鏡（3星金閃）》；武具道具頁目前沒有這節
 - 追擊提示格 → 武具系統 `2.7 動畫︰武具追擊動畫` 右欄《追擊動畫分鏡圖》

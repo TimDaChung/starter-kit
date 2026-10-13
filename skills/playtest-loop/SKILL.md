@@ -1,6 +1,6 @@
 ---
 name: playtest-loop
-description: 遊戲 demo 試玩迭代迴圈。Use when 使用者說「重開 server」「我要試玩」「開遊戲」「幫我開一下」「收筆記」「harvest」「我有回報幾個開發者表示」「學習回收」，或任何單檔 HTML 遊戲 demo 進入「玩 → 回饋 → 修 → 再玩」循環時。
+description: 遊戲 demo 試玩迭代迴圈。Use when 使用者說「重開 server」「我要試玩」「開遊戲」「收筆記」「harvest」「我有回報幾個開發者表示」「學習回收」，或任何單檔 HTML 遊戲 demo 進入「玩 → 回饋 → 修 → 再玩」循環時。
 ---
 
 # playtest-loop

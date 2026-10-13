@@ -1,6 +1,5 @@
 ---
 name: boss-scene
-version: 1.0.0
 description: |
   捕魚機 Boss 的「專屬背景」產出流程，boss-design 的配套：兩種背景——
   A 漁場邊框（Boss 事件期間疊在漁場底圖上的四邊主題裝飾，中央留給魚群，輸出透明 PNG 疊層）、
@@ -29,7 +28,7 @@ allowed-tools:
 
 共用的：
 
-- 讀企劃：`~/.claude/skills/pet-evolution/scripts/fetch_plan.py`（`--list bosses`）
+- **`kit 根目錄/references/生圖線共用流程.md`** — 魚線十支共用的工作流程：前置需求、讀企劃（`fetch_plan.py`，`--list bosses`）、全程規則、從零發想的提案與拍板、挑圖、檢視與交付
 - 補 16:9：`~/.claude/skills/boss-design/scripts/fit_canvas.py --cover`
 - Boss 清單與已知企劃問題：`~/.claude/skills/boss-design/參考素材索引.md`
 - **`kit 根目錄/references/image-studio-共用須知.md`** — 算圖中斷、憑證到期、平台偶發異常。**遇到產圖層面的問題先查那份**
@@ -53,18 +52,14 @@ allowed-tools:
 
 ## 前置需求
 
-1. **image-studio 憑證**：`~/.config/image-studio/credentials.json`。401 時見 kit `references/image-studio-共用須知.md`〈憑證〉（Claude 照該節換季流程自己換，不提前換；本機沒裝過走〈首裝流程〉）
-2. **Notion 讀取權**：魚類之書（四部）。自己的四部（pm4）憑證在本機，`fetch_plan.py` 自動取，不用傳任何 key、不要問使用者；沒有或過期照 `plan-dept14-writer/references/notion-access.md` §3 協助安裝／換新
-3. **Python 套件**：Pillow
+照 `kit 根目錄/references/生圖線共用流程.md` 第一節（image-studio 憑證與 401 處置、四部 pm4 憑證由 `fetch_plan.py` 自動取、Pillow）。本 skill 的 Notion 讀取範圍：**魚類之書（四部）**。
 
 ---
 
 ## 全程規則
 
 - **法則優先**：產圖前後都對照 `背景設計法則.md`，交付前逐條跑第六節驗收清單
-- **每輪至少算 2 張**，對策是重抽不是改提示詞
-- **不修改任何既有企劃**：背景段落的錯字、矛盾，列給使用者看即可
-- **中間產物進 `_工作暫存/`**（已 gitignore）；定稿才輸出到使用者指定位置。**未上線的設計圖不進 repo**
+- 共用規則照 `生圖線共用流程.md` 第三節；本線不修改既有企劃的範圍含背景段落的錯字、矛盾，列給使用者看即可
 
 ---
 
@@ -75,19 +70,21 @@ allowed-tools:
 **模式 A（既有企劃）**：讀企劃
 
 ```sh
-python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <page_id> _工作暫存/<Boss名>
+python ~/.claude/skills/art-request-sheet/scripts/fetch_plan.py <page_id> _工作暫存/<Boss名>
 ```
 
 在 `plan.md` 裡找所有背景段落（搜「背景」「場景」），**列成清單給使用者確認要做哪幾張**：
 
 | 背景 | 種類 | 企劃段落 | 階段 |
 |---|---|---|---|
-| 例：第一階段漁場背景 | A 漁場邊框 | 3.2.D | 一階 |
-| 例：第二階段小遊戲背景 | B 表演背景 | 3.2.F | 二階 |
+| 例：第一階段漁場背景 | A 漁場邊框 | 3.2.B 場景圖 | 一階 |
+| 例：第二階段彩金表演背景 | B 表演背景 | 3.3.F 彩金表演 | 二階 |
+
+（節號照範本實例劍魔頁 2026-10 現況：`3.2 Boss靜態` 下 A 靜態造型／B 場景圖／C 前哨階段與通緝令／D 血條與段數介面／E 老虎機／F 獎圈，`3.3 Boss動態` 下 F 彩金表演。其他 Boss 頁以 `plan.md` 實際讀到的節名為準。）
 
 企劃背景段落常附**參考圖**（例：墨海的沉船甲板、晶龍的輻射晶礦），要實際 Read；參考圖若混著 UI mockup，只當構圖參考，不直接當 `--reference`。
 
-**模式 B（從零發想）**：通常是接在 `boss-design` 的從零發想之後。依 Boss 的 mini 企劃，**提 2–3 個背景方向**（每案：場景名、核心意象、配色、設計理由），**使用者拍板才算圖**。
+**模式 B（從零發想）**：通常是接在 `boss-design` 的從零發想之後。提案通則（2–3 案、設計理由、使用者拍板才算圖）照 `生圖線共用流程.md` 第四節；依 Boss 的 mini 企劃提**背景方向**，每案：場景名、核心意象、配色、設計理由。
 
 ### Step 2 — 組提示詞
 
@@ -131,15 +128,7 @@ python ~/.claude/skills/boss-design/scripts/fit_canvas.py <背景.png> <輸出.p
 
 ### Step 5 — 挑圖
 
-**⚠️ 看完所有候選圖，挑最好的一張。**
-
-| 情況 | 處置 |
-|---|---|
-| 有一張以上正確 | 全部看完，挑最好的，不改提示詞 |
-| 兩張錯在同一點 | 提示詞或規格的問題，回 Step 2 修 |
-| 兩張錯在不同點 | 隨機變異，重抽 |
-
-常見的失敗：
+挑圖通則（看完所有候選、三種情況的處置）照 `生圖線共用流程.md` 第五節；提示詞問題回 Step 2 修。常見的失敗：
 
 - 邊框畫成側面仰看（晶柱朝中央刺出）→ 重抽
 - 邊框裝飾侵入中央（腳本警告）→ 重抽
@@ -148,11 +137,9 @@ python ~/.claude/skills/boss-design/scripts/fit_canvas.py <背景.png> <輸出.p
 
 ### Step 6 — 檢視與交付
 
-1. 把候選圖複製到使用者看得到的資料夾，用 `explorer.exe` 開給他看。**漁場邊框交預覽圖**（有底圖時）比交透明疊層好判斷
-2. **自己先逐條跑驗收清單**，主動回報哪張好、好在哪、還差什麼
-3. 定稿輸出到使用者指定位置：A 交透明疊層＋灰底原圖（＋預覽）；B 交滿版圖。附最終提示詞
-4. 暴露了新規則或前科 → 回寫 `背景設計法則.md` 第七節或 `prompt模板.md`
-5. **主動問下一步**：背景定稿後，還沒做道具就提 `boss-props`；道具也好了就提 `boss-demo`（定稿的 Boss、背景、道具直接當 demo 素材）
+1. 開資料夾給使用者看、自己先跑驗收清單並回報、定稿輸出到指定位置附最終提示詞，照 `生圖線共用流程.md` 第六節 1–4。本 skill 的差異：**漁場邊框交預覽圖**（有底圖時）比交透明疊層好判斷；定稿 A 交透明疊層＋灰底原圖（＋預覽）、B 交滿版圖
+2. 前科回寫落點：`背景設計法則.md` 第七節或 `prompt模板.md`
+3. **主動問下一步**：背景定稿後，還沒做道具就提 `boss-props`；道具也好了就提 `boss-demo`（定稿的 Boss、背景、道具直接當 demo 素材）
 
 ---
 
@@ -165,8 +152,8 @@ python ~/.claude/skills/boss-design/scripts/fit_canvas.py <背景.png> <輸出.p
 
 ## 貼回企劃（2026-10-02 起）
 
-定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+怎麼貼（交給 `plan-dept14-writer` 貼圖模式、憑證、list→報清單→貼→回讀、圖名、卡位、不准動的圖、落點不確定先問）一律照 `plan-dept14-writer/references/image-slots.md`〈通用貼法〉，落點總表同檔第五節。本 skill 產出的落點：
 
-- A 漁場邊框 → Boss 頁 `3.2.B 漁場背景`（多階段 `3.2.x X階段漁場背景`）右欄，**貼預覽合成圖**（透明 PNG 在 Notion 白底看不出），caption《漁場背景示意》
-- B 表演背景 → `3.2.C 彩金表演背景`／捕獲表演背景右欄，caption《彩金表演背景示意》
-- 注意：Step 1 舉例的節號 3.2.D 與現行實頁不符，以 `list` 實際看到的節名為準
+- A 漁場邊框 → Boss 頁 `3.2 Boss靜態 > 3.2.B 場景圖` 右欄（多階段各階一張，或依頁 `3.2.x X階段漁場背景`），**貼預覽合成圖**，caption《漁場背景示意》
+- B 表演背景 → `3.3 Boss動態 > 3.3.F 彩金表演` 右欄（捕獲表演背景放該表演那節），caption《彩金表演背景示意》
+- 節號照劍魔頁 2026-10 現況，各 Boss 頁不一定相同，以 `list` 實際看到的節名為準

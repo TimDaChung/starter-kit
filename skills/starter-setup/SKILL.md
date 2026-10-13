@@ -63,7 +63,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 | plan-dept14-writer | plan-doc-qa | 產出後的一致性複查 |
 | plan-doc-qa | plan-dept14-writer | `references/notion-access.md`（Notion 憑證取用、首裝／換新與紀律，兩支共用） |
 | cannon-parts、cannon-storyboard | cannon-wing | 定稿圖當參考；cannon-parts 另用 `scripts/recolor.py` |
-| boss-design、boss-props、boss-scene、pet-parts、weapon-design、weapon-parts | pet-evolution | `scripts/fetch_plan.py`（讀 Notion 企劃） |
+| boss-design、boss-props、boss-scene、cannon-wing、cannon-parts、cannon-storyboard、pet-evolution、pet-parts、weapon-design、weapon-parts | art-request-sheet | `scripts/fetch_plan.py`（讀 Notion 企劃＋`--list` 列候選；`pet-evolution/scripts/fetch_plan.py` 只是轉接） |
 | pet-evolution、art-request-sheet、avatar-proposal、plan-doc-qa（所有讀寫 Notion 的 skill） | plan-dept14-writer | `scripts/notion_rest.py`（Notion proxy 共用模組）；它再吃 kit 根目錄 `references/scripts/notion_credentials.py`（本機憑證管理，不是 skill、不用裝，在 clone 裡即可） |
 | boss-scene、pet-parts、weapon-design、weapon-parts | boss-design | `scripts/fit_canvas.py`（`--cover` 背景裁 16:9；weapon 線用 `--height`／`--whole` 補灰底） |
 | weapon-parts | weapon-design、pet-parts | 定稿圖當參考；pet-parts 的 `scripts/label_frames.py`（分鏡標籤） |

@@ -20,6 +20,12 @@ Writes into <out_dir>:
 
 Usage:
   python fetch_plan.py <notion url or page id> <out_dir>
+  python fetch_plan.py --list <kind>        kind: pets / bosses / cannons / wings / weapons
+
+--list prints one row per page of the 魚樂園 書 databases (category, rarity, title,
+page id, tab-separated) so the design skills can pick a page without the MCP.
+This is the single fetch script for the kit; pet-evolution/scripts/fetch_plan.py is
+only a shim that forwards here.
 """
 import re
 import sys
@@ -29,9 +35,19 @@ import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "plan-dept14-writer" / "scripts"))
-from notion_rest import Notion, open_page, page_id_from  # noqa: E402
+from notion_rest import Notion, find_token, open_page, page_id_from  # noqa: E402
 
 MEDIA = ("image", "video", "file", "pdf")
+ITEM_BOOK = "217e22985ac9817d8a65c6a6ed6a135c"  # 魚樂園 道具之書 (parent of cannon/wing/pet/weapon pages)
+FISH_BOOK = "21de22985ac98032a2eef46efabab95b"  # 魚樂園 魚類之書
+# --list kind -> (database id, select property, option values to keep; empty = keep all)
+LISTS = {
+    "pets": (ITEM_BOOK, "道具大類", ["8. 寵物"]),
+    "cannons": (ITEM_BOOK, "道具大類", ["1. 炮台"]),
+    "wings": (ITEM_BOOK, "道具大類", ["2. 翅膀"]),
+    "weapons": (ITEM_BOOK, "道具大類", ["33. 武具"]),
+    "bosses": (FISH_BOOK, "類別", ["活動Boss", "場景Boss", "特殊魚"]),
+}
 KEEP_COLORS = ("red", "gray_background", "green_background", "red_background", "yellow_background")
 BAD_NAME = re.compile(r'[\\/:*?"<>|\r\n]+')
 
@@ -133,8 +149,49 @@ class Walker:
                 self.walk(b["id"], inner)
 
 
+def query_all(api: Notion, db_id: str, body: dict | None = None) -> list[dict]:
+    """Every row of a database query (read-only POST), following the cursor."""
+    rows: list[dict] = []
+    cursor = None
+    while True:
+        payload: dict = {"page_size": 100, **(body or {})}
+        if cursor:
+            payload["start_cursor"] = cursor
+        data = api.call("POST", f"/databases/{db_id}/query", payload)
+        rows += data["results"]
+        if not data.get("has_more"):
+            return rows
+        cursor = data["next_cursor"]
+
+
+def list_lines(rows: list[dict], prop: str, keep: list[str]) -> list[str]:
+    """One tab-separated line per kept row: category, rarity, title, page id (no dashes)."""
+    out = []
+    for row in rows:
+        props = row["properties"]
+        category = (props.get(prop, {}).get("select") or {}).get("name")
+        if keep and category not in keep:
+            continue
+        rarity = (props.get("稀有度", {}).get("select") or {}).get("name") or ""
+        title = next((plain(v["title"]) for v in props.values() if v["type"] == "title"), "")
+        out.append(f"{category}\t{rarity}\t{title}\t{row['id'].replace('-', '')}")
+    return out
+
+
+def list_rows(kind: str, api: Notion | None = None) -> None:
+    if kind not in LISTS:
+        sys.exit(f"unknown list kind {kind!r}; choose from {', '.join(LISTS)}")
+    db_id, prop, keep = LISTS[kind]
+    api = api or Notion(find_token(dept="四部"))
+    for line in list_lines(query_all(api, db_id), prop, keep):
+        print(line)
+
+
 def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8")
+    if len(sys.argv) == 3 and sys.argv[1] == "--list":
+        list_rows(sys.argv[2])
+        return
     if len(sys.argv) != 3:
         sys.exit(__doc__)
     page_id, out = page_id_from(sys.argv[1]), Path(sys.argv[2])

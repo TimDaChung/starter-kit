@@ -1,6 +1,5 @@
 ---
 name: game-develop
-version: 1.0.0
 description: |
   將原型升級為發行級單檔 HTML 遊戲：AI 生圖、平衡 polish、對白、QA。
   目標：高完成度 demo（itch.io 等級，不含金流帳號）。
@@ -138,7 +137,7 @@ allowed-tools:
 ### 標準執行順序（同類別所有張數一次跑完）
 
 1. **第 1 張當 baseline**：序列跑 1 張、Read 看圖、自我驗證風格 OK（user 已授權審美決策時）
-2. **剩餘張數並行跑**：寫好所有 prompt.txt → 全部 `run_in_background=true` 同時送 → 等通知收齊
+2. **剩餘張數分批跑**：寫好所有 prompt.txt → 每批 `run_in_background=true` 同時送 **2–3 個請求**（上限見 kit `references/image-studio-共用須知.md` 第零節）→ 等通知收齊再送下一批；送出前先算總張數，小素材合併成素材表
 3. **逐張 Read 驗證 + 更新 TODO**：每張寫路徑 + 版本，標 ✅；明顯失敗的當場 retake
 4. **同類別全完才接下一類**（立繪→sprite→賽道→UI 順序可調）
 5. **跑驗證 step（必做）→ 通過才接 Phase 4**
@@ -179,11 +178,11 @@ for p in sys.argv[1:]:
 
 生圖指令本身不寫在這支 skill——**一律走 sub-skill 的既有流程**（portrait → imagen-portrait、UI → imagen-ui、sprite → generate2dsprite、map → generate2dmap、其他 → imagen），引擎與呼叫格式以 `~/.claude/skills/imagen/references/draw-engines.md` §1 / §3 為準（唯一引擎＝image-studio 的 GPT 線）。
 
-作法：prompt 先照各 sub-skill 的規範備好（例：`prompts/hero_a.txt`、`prompts/hero_b.txt`），同類別的每張各派一個 **background bash**（`run_in_background=true`）同時發，一張一次呼叫、不自動重試；後製（去背 / 切格 / 組圖）才用各 sub-skill 的 `scripts/`，參數以 `--help` 為準。完成通知收齊後一次 Read 所有張數驗證。
+作法：prompt 先照各 sub-skill 的規範備好（例：`prompts/hero_a.txt`、`prompts/hero_b.txt`），每張各派一個 **background bash**（`run_in_background=true`），**同時在跑的請求不超過 2–3 個**，收齊一批才發下一批；一張一次呼叫、不自動重試；後製（去背 / 切格 / 組圖）才用各 sub-skill 的 `scripts/`，參數以 `--help` 為準。每批完成通知收齊後 Read 驗證。
 
 引擎缺席（image-studio 未裝或憑證過期）→ 依 draw-engines.md §1 **停止生圖**並回報，Phase 3 不另尋替代路徑；Phase 4 之後可用既有素材續跑。
 
-一張約 60–90 秒，並行 5 張 ≈ 串行 1 張的時間。**不要序列跑同類別**。
+一張約 60–90 秒。並行上限與配額規則**只照 kit `references/image-studio-共用須知.md` 第零節**，不另寫一套：同時請求 ≤2–3 個，一口氣送十幾個會整批 `IncompleteRead`、配額照扣一張都拿不到（每人每小時 30 張）；同風格小素材（頭像、道具、icon）合併成一張素材表再用 `sheet_cut.py` 切，張數省最多。
 
 ---
 

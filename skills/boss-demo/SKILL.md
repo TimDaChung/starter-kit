@@ -170,4 +170,4 @@ description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃
 
 ## 貼回企劃（2026-10-02 起）
 
-定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**：流程與本 skill 產出的落點讀 `references/storyboard-capture.md` 末節〈貼回企劃〉。
+怎麼貼一律照 `plan-dept14-writer/references/image-slots.md`〈通用貼法〉；本 skill 產出的落點讀 `references/storyboard-capture.md` 末節〈貼回企劃〉。

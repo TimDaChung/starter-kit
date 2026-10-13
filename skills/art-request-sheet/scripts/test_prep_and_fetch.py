@@ -130,13 +130,42 @@ def test_prep_cli_dept4_without_spec_warns(tmp_path: Path) -> None:
 
 # ---------- fetch_plan ----------
 
-def test_table_cell_keeps_row_on_one_line() -> None:
-    fetch_plan = pytest.importorskip('fetch_plan')
+@pytest.fixture(scope='module')
+def fetch_plan():
+    """Load the script next to this file by path: pet-evolution/scripts has a same-named shim."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('art_request_sheet_fetch_plan', SCRIPTS / 'fetch_plan.py')
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_table_cell_keeps_row_on_one_line(fetch_plan) -> None:
     cell = [{'plain_text': '第一行\n第二行', 'annotations': {'color': 'red'}},
             {'plain_text': '\r\nA|B', 'annotations': {}}]
     text = fetch_plan.table_cell(cell)
     assert text == '<span color="red">第一行<br>第二行</span><br>A\\|B'
     assert '\n' not in text and '\r' not in text
+
+
+def test_list_lines_filters_by_category_and_strips_dashes(fetch_plan) -> None:
+    rows = [
+        {'id': 'aaaa-bbbb', 'properties': {
+            '道具大類': {'type': 'select', 'select': {'name': '1. 炮台'}},
+            '稀有度': {'type': 'select', 'select': {'name': '4. 傳說'}},
+            '名稱': {'type': 'title', 'title': [{'plain_text': '甲'}]}}},
+        {'id': 'cccc', 'properties': {
+            '道具大類': {'type': 'select', 'select': {'name': '2. 翅膀'}},
+            '名稱': {'type': 'title', 'title': [{'plain_text': '乙'}]}}},
+        {'id': 'dddd', 'properties': {
+            '道具大類': {'type': 'select', 'select': None},
+            '名稱': {'type': 'title', 'title': [{'plain_text': '丙'}]}}},
+    ]
+    assert fetch_plan.list_lines(rows, '道具大類', ['1. 炮台']) == ['1. 炮台\t4. 傳說\t甲\taaaabbbb']
+    assert fetch_plan.list_lines(rows, '道具大類', ['2. 翅膀']) == ['2. 翅膀\t\t乙\tcccc']
+    assert len(fetch_plan.list_lines(rows, '道具大類', [])) == 3   # empty keep = everything
+    assert {'pets', 'bosses', 'cannons', 'wings', 'weapons'} <= set(fetch_plan.LISTS)
 
 
 # ---------- reference docs (rules found by the 2026-10-07 E2E run) ----------

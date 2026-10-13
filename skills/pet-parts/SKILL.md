@@ -1,6 +1,5 @@
 ---
 name: pet-parts
-version: 1.0.0
 description: |
   魚樂園寵物「配件」產出流程，pet-evolution 的下游：動畫分鏡（一般／上陣／虛弱各一張 3–4 格，一階二階各一套，動作照企劃原文）、
   技能 ICON（含 64px 可讀性檢查）、專屬背景（16:9 滿版）、滿星貼圖（有才做）、道具 ICON（後製不生圖，一階／二階各一）。
@@ -30,17 +29,17 @@ allowed-tools:
 - `scripts/label_frames.py` — 動畫分鏡加標籤、檢查格數
 - `scripts/icon_check.py` — 切技能 ICON、產 256／128／64px 尺寸預覽
 - `scripts/item_icon.py` — **道具 ICON 後製**（從定稿裁主體、去灰底、疊深色圓角底板，出 512 主圖＋256／128／64 預覽；`--badge` 出碎片版）。三條生圖線共用，只吃 Pillow
-- 共用：讀企劃 `~/.claude/skills/pet-evolution/scripts/fetch_plan.py`；背景裁切 `~/.claude/skills/boss-design/scripts/fit_canvas.py --cover`
+- 共用：讀企劃 `~/.claude/skills/art-request-sheet/scripts/fetch_plan.py`；背景裁切 `~/.claude/skills/boss-design/scripts/fit_canvas.py --cover`
+- **`kit 根目錄/references/生圖線共用流程.md`** — 魚線十支共用的工作流程；本檔只寫寵物配件線獨有的差異
 - **`kit 根目錄/references/image-studio-共用須知.md`** — 產圖層面的問題先查那份
 
 ---
 
 ## 全程規則
 
-- **有企劃的一次全部盤點、分批派出去產**，不要一件一件問；企劃沒寫到的才詢問
-- **每輪至少算 2 張**，全部看完挑最好的
-- **不修改既有企劃**；文字與圖不一致時列出來問
-- 中間產物進 `_工作暫存/`（已 gitignore）；**未上線的設計圖不進 repo**
+共用規則照 `生圖線共用流程.md` 第三節。本 skill 另加：
+
+- 盤點後**分批**派出去產（三批彼此獨立，見 Step 2）
 
 ---
 
@@ -51,7 +50,7 @@ allowed-tools:
 確認兩階定稿圖在手（沒有就先走 `pet-evolution`）。讀企劃：
 
 ```sh
-python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <page_id> _工作暫存/<寵物名>
+python ~/.claude/skills/art-request-sheet/scripts/fetch_plan.py <page_id> _工作暫存/<寵物名>
 ```
 
 從 `plan.md` 盤點（位置見 `配件規格.md` 第一節）：零星／三星動態、技能 ICON 描述、專屬背景、有沒有滿星貼圖；道具 ICON（本體縮圖＋碎片版）不用盤企劃，定稿一到就後製。列成清單給使用者確認後**一次派出**。
@@ -88,10 +87,9 @@ python3 ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 
 ### Step 4 — 挑圖與交付
 
-1. 複製到使用者看得到的資料夾，`explorer.exe` 開給他看
-2. **自己先逐條跑 `配件規格.md` 第七節**，主動回報哪張好、好在哪；技能 ICON 與道具 ICON 都要看 64px 欄（道具 ICON 64px 要看得出是這隻寵物）
-3. 定稿輸出到使用者指定位置，附最終提示詞
-4. 暴露了新規則或前科 → 回寫 `配件規格.md` 第八節或 `prompt模板.md`
+1. 挑圖、開資料夾、自己先跑驗收清單並回報、定稿輸出到指定位置附最終提示詞，照 `生圖線共用流程.md` 第五、六節；驗收清單＝`配件規格.md` 第七節
+2. 技能 ICON 與道具 ICON 都要看 64px 欄（道具 ICON 64px 要看得出是這隻寵物）
+3. 前科回寫落點：`配件規格.md` 第八節或 `prompt模板.md`
 
 ---
 
@@ -104,7 +102,7 @@ python3 ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
 
 ## 貼回企劃（2026-10-02 起）
 
-定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+怎麼貼（交給 `plan-dept14-writer` 貼圖模式、憑證、list→報清單→貼→回讀、圖名、卡位、不准動的圖、落點不確定先問）一律照 `plan-dept14-writer/references/image-slots.md`〈通用貼法〉，落點總表同檔第五節。本 skill 產出的落點：
 
 - 動畫分鏡 → `2.2.B 零星動態`／`2.2.D 三星動態` 右欄，順序一般→上陣→虛弱
 - 技能 ICON → `2.3 技能`「技能描述」清單底下、技能表上方，**多顆拼成一張橫排長條**巢在清單裡

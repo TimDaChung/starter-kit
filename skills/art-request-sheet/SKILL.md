@@ -1,6 +1,5 @@
 ---
 name: art-request-sheet
-version: 2.0.0
 description: |
   把 Notion 企劃轉成 Google Sheets「美術需求表」（發給美術的需求單）。分兩套格式：
   一部（神幣活動）＝單分頁、淺綠表頭、O/X 下拉；四部機台＝靜態／動態（＋動態命名表、說明頁）多分頁、

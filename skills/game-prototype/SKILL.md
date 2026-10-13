@@ -1,6 +1,5 @@
 ---
 name: game-prototype
-version: 1.0.0
 description: |
   快速建立可玩單檔 HTML 遊戲原型，emoji 代替美術，速度優先。
   目的：驗證玩法 / 互動 / state machine。

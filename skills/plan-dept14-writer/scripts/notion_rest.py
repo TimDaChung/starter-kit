@@ -95,9 +95,10 @@ def page_id_from(url_or_id: str) -> str:
 
 
 def find_token(kind: str = "readonly", dept: str = "一部", line: str | None = None) -> Credential:
-    """Return the department credential (one rw credential per dept; there is no read-only one).
+    """kind is obsolete and ignored: there is one department credential per dept, always read-write.
 
-    kind is ignored (kept for older callers). A product line (神幣/娛樂城/鬥地主/魚樂園) maps to
+    Call it as find_token(dept="一部"/"四部") or find_token(line="神幣"/...); the positional kind
+    ("readonly"/"readwrite") is kept only so older callers do not break. A product line (神幣/娛樂城/鬥地主/魚樂園) maps to
     its dept and wins over dept; otherwise dept (一部/四部) is used as given. Write guard rails
     (only the PM's own copy, list the changes and get consent, read back) still apply.
     Env NOTION_PM_AUTH + NOTION_PM_BASE override the stored credential.

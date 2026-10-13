@@ -18,7 +18,7 @@ Shared engine rules for the six image-generation skills in this kit: `imagen`, `
 
 Usable only when that skill directory exists AND `~/.config/image-studio/credentials.json` is present with `expiresAt` in the future.
 
-**There is no fallback line.** If the GPT line is missing or its credentials expired, image generation **stops**: tell the user that the six image skills cannot run until the installer and credentials are obtained from the team lead, and do not attempt any other generation route. Everything else in the host skill (prompt writing, postprocess scripts, QC, style bible) still works on images the user already has.
+**There is no fallback line.** If the GPT line is missing or its credentials expired, image generation **stops**: tell the user that the six image skills cannot run until it is set up (never installed → first-install flow; credentials expired → Claude renews them itself; both in the kit's `references/image-studio-共用須知.md` §二), and do not attempt any other generation route. Everything else in the host skill (prompt writing, postprocess scripts, QC, style bible) still works on images the user already has.
 
 ## 2. Generation rules
 
@@ -48,7 +48,7 @@ python ~/.claude/skills/image-studio/scripts/image-studio-client.py draw \
   |---|---|
   | Content filter / copyright / prompt problem (policy rejection, filtered results, named IP or real person in the prompt) | Say which prompt element likely triggered it and propose a revised prompt; ask before regenerating |
   | Quota / usage exhausted (e.g. HTTP 429 or a quota message) | Report that the quota is out and generation must wait or the team lead must raise it — do not look for another generator |
-  | HTTP 401 | Quarterly credentials expired → ask the team lead for the new setup; generation is blocked until then |
+  | HTTP 401 | Quarterly credentials expired → Claude renews them itself, following the kit's `references/image-studio-共用須知.md` §二 (open the credential page in Chrome, save the setup prompt as a download, `refresh_credentials.py --from-downloads`); do not ask the team lead unless that file's fallback table says so. Retry the blocked batch once the new credential is in |
   | Unknown / other (timeout, 5xx, connection loss) | Ask whether to retry once on the GPT line. For connection loss, first check the user's Image Studio web tabs before any resubmit — accepted work may still be running and a repeated POST creates a duplicate job |
 
 ## 5. Why there is no second engine

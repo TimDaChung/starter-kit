@@ -2,6 +2,19 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.41.0 (2026-10-13)
+
+健檢動刀（Tim 指示「自己排完動工」）：三批修正，規則一條不少（拆檔同 v3.40.0 作法：存基準檔、逐行比對「找不到的行＝0」），只統一重複實作、修矛盾與死引用、單一來源化。
+
+- **fetch_plan 統一成一份**：`art-request-sheet/scripts/fetch_plan.py` 是 kit 唯一的企劃抓取器，補上 `--list pets|bosses|cannons|wings|weapons`（炮台／翅膀／武具同在道具之書，只差「道具大類」）；`pet-evolution/scripts/fetch_plan.py` 改成薄轉接（印一行 deprecation 後呼叫正本，舊指令照跑）。實測同一頁兩版差異不在正文（舊版對 synced block 也讀得到），而是**舊版丟掉紅字／刪除線標記、圖只存 `img_NN.png` 沒圖名、影片不抓**——美術需求表要的紅字訊息會漏，所以統一到新版。10 支 SKILL.md 與 starter-setup 依賴表改指正本；新增 `pet-evolution/scripts/test_fetch_plan.py`
+- **401 與並行說法對齊共用須知**：`imagen/references/draw-engines.md` 與 generate2dsprite／generate2dmap 的「找主任拿 installer」改成「Claude 照共用須知 §二自己換季、沒裝走首裝」；`game-develop` 並行段改「同時 ≤2–3 個請求、收齊一批再發」，刪「並行 5 張≈串行 1 張」
+- **小修一批**：`功能說明.md` 補 avatar-proposal、data-report-builder、starter-setup；boss-design「fetch_plan 兩支共用」改實際 8 支；boss-scene 範例節號改劍魔頁現行（3.2.B 場景圖／3.3.F 彩金表演）；cannon-wing 刪寫死「29 座」、Step 1 直讀 `credentials.json` 打 REST 的 PowerShell 段改走 `fetch_plan.py --list`／`notion_rest.py`，明寫不自己讀憑證檔；avatar-proposal 對 `notion_api.py` 的描述改「轉接 notion_rest 的 shim」；`notion_rest.find_token` 的 `kind` 參數 docstring 標明已廢（全 kit 無呼叫端再傳）；19 支 SKILL.md 移除從未更新的 `version:` frontmatter（starter-setup 不讀它）
+- **「貼回企劃」改成單一來源**：14 支生圖 skill 的貼回段前言原本逐字重複一句，現在 `plan-dept14-writer/references/image-slots.md` 新增〈通用貼法〉9 條（交給貼圖模式、憑證走部門 proxy、PM 給網址→list→報清單→貼→回讀、圖名／卡位／synced、落點不確定先問、不准動的圖、AI 示意圖與美術稿分開、分鏡整張貼不切、不加調整標記），各 SKILL.md 只留一行指向＋自己的落點表。順手修兩處落點：boss-scene 改劍魔頁現行節名；avatar-proposal 列改成實際流程（範本頁 fill 產出、圖在左欄、caption 格式）
+- **觸發詞收斂**（健檢抓到五組碰撞）：product-planning 讓出「寫企劃／審企劃」並加定位句；imagen-ui「icon」→「UI icon」、讓出「banner」；cannon-storyboard 刪泛詞「分鏡圖」；playtest-loop 刪「幫我開一下」；webapp-testing「截圖」→「Playwright 截圖」。全 kit description 複查每個詞最多一支
+- **plan-dept14-writer 三段外抽**：本體 35,041 → 26,984 bytes（−23%）。搬出 `references/flowchart.md`（第七節流程圖慣例）、`revision-marks.md`（第四節調整標記與調整紀錄；plan-doc-qa 的「調整標記格式」檢查項改指同一份，審查端獨有兩句保留）、`paste-mode.md`（第十一節貼圖操作步驟；落點與通用貼法仍在 `image-slots.md`，不重複）。節號不動
+- **魚線 10 支共用段落抽成 kit `references/生圖線共用流程.md`**（與 `image-studio-共用須知.md` 同層；共用須知管產圖層面問題，這份管工作流程）：六節——前置需求、讀企劃、全程規則、從零發想 B1–B5 骨架、挑圖、檢視／交付／接續下游。10 支 SKILL.md 各留一行指向＋自己獨有的差異（讀哪本之書、法則檔、mini 企劃模板、前科、下游表等），合計 −5,872 bytes；≤3 支相同的段落不抽（道具 ICON 角標、fit_canvas 警告、各支前置鏈）
+- ⚙️ **升級動作**：`git pull` 即生效；舊筆記若呼叫 `pet-evolution/scripts/fetch_plan.py` 仍可用，但輸出檔名變 `NN_<圖名>.png`
+
 ## v3.40.0 (2026-10-13)
 
 - **boss-demo／boss-design 拆檔**（主任指示：v3.32.0 收建議後本體過胖）。規則一條不少——拆前存基準檔，拆後逐行比對「找不到的行＝0」；本體只留主流程，少用段落搬到各自 `references/`，在動作發生的那一步留一行「做 X 時讀哪份」

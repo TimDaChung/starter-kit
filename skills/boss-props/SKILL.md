@@ -1,6 +1,5 @@
 ---
 name: boss-props
-version: 1.0.0
 description: |
   捕魚機 Boss「表演道具與等級系列」產出流程，boss-design 的配套：捕獲／彩金表演裡玩法用到的道具
   （幻石、罐子、老虎機、轉盤、爆竹…）。一個系列畫在同一張 16:9 灰底圖，等級差異用「累加法」
@@ -31,18 +30,17 @@ allowed-tools:
 
 共用的：
 
-- 讀企劃：`~/.claude/skills/pet-evolution/scripts/fetch_plan.py`（`--list bosses`）
+- **`kit 根目錄/references/生圖線共用流程.md`** — 魚線十支共用的工作流程（讀企劃用 `fetch_plan.py --list bosses`）
 - **`kit 根目錄/references/image-studio-共用須知.md`** — 產圖層面的問題先查那份
 
 ---
 
 ## 全程規則
 
+共用規則照 `生圖線共用流程.md` 第三節。本 skill 另加：
+
 - **一個系列畫在同一張圖**，不要一件一件生
-- **每輪至少算 2 張**，全部看完挑最好的
-- **有企劃的一次全部盤點出來**，不要一件一件問；只有企劃沒寫到的等級差異才跟使用者討論
-- **不修改任何既有企劃**
-- 中間產物進 `_工作暫存/`（已 gitignore）；**未上線的設計圖不進 repo**
+- 企劃沒寫到的**等級差異**才跟使用者討論
 
 ---
 
@@ -53,7 +51,7 @@ allowed-tools:
 **模式 A（既有企劃）**：讀企劃
 
 ```sh
-python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py <page_id> _工作暫存/<Boss名>
+python ~/.claude/skills/art-request-sheet/scripts/fetch_plan.py <page_id> _工作暫存/<Boss名>
 ```
 
 在彩金表演、玩法、機制段落找出所有道具，列成清單給使用者確認：
@@ -94,11 +92,10 @@ python ~/.claude/skills/boss-props/scripts/lineup.py <原圖.png> <輸出.png> \
 
 ### Step 5 — 挑圖與交付
 
-1. 兩張都整理後複製到使用者看得到的資料夾，`explorer.exe` 開給他看
-2. **自己先逐條跑 `道具規格.md` 第五節驗收清單**，主動回報哪張好、好在哪
-3. 定稿交整理後的圖＋原圖＋最終提示詞
-4. 暴露了新規則或前科 → 回寫 `道具規格.md` 第六節或 `prompt模板.md`
-5. **主動問下一步**：道具定稿後，還沒做背景就提 `boss-scene`；背景也好了就提 `boss-demo`（定稿的 Boss、背景、道具直接當 demo 素材，取代 emoji 佔位）
+1. 挑圖、開資料夾、自己先跑驗收清單並回報，照 `生圖線共用流程.md` 第五、六節；**兩張都整理後**再開給他看，驗收清單＝`道具規格.md` 第五節
+2. 定稿交**整理後的圖＋原圖**＋最終提示詞
+3. 前科回寫落點：`道具規格.md` 第六節或 `prompt模板.md`
+4. **主動問下一步**：道具定稿後，還沒做背景就提 `boss-scene`；背景也好了就提 `boss-demo`（定稿的 Boss、背景、道具直接當 demo 素材，取代 emoji 佔位）
 
 ---
 
@@ -110,7 +107,7 @@ python ~/.claude/skills/boss-props/scripts/lineup.py <原圖.png> <輸出.png> \
 
 ## 貼回企劃（2026-10-02 起）
 
-定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+怎麼貼（交給 `plan-dept14-writer` 貼圖模式、憑證、list→報清單→貼→回讀、圖名、卡位、不准動的圖、落點不確定先問）一律照 `plan-dept14-writer/references/image-slots.md`〈通用貼法〉，落點總表同檔第五節。本 skill 產出的落點：
 
 - 道具等級系列 → Boss 頁 `3.2` 底下對應玩法那節右欄（例：賽特 3.2.C、劍魔 3.2.E），caption《<道具>等級&特效示意》
 - 範本沒有這節；實頁沒有對應節時先問 PM 開哪節

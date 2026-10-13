@@ -1,6 +1,5 @@
 ---
 name: imagen
-version: 1.0.0
 description: |
   通用生圖（image-studio GPT 線）。
   對話確認需求 + prompt 後生圖，支援參考圖。
@@ -193,6 +192,6 @@ allowed-tools:
 
 ## 貼回企劃（2026-10-02 起）
 
-定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
+怎麼貼（交給 `plan-dept14-writer` 貼圖模式、憑證、list→報清單→貼→回讀、圖名、卡位、不准動的圖、落點不確定先問）一律照 `plan-dept14-writer/references/image-slots.md`〈通用貼法〉，落點總表同檔第五節。本 skill 產出的落點：
 
 - 介面示意／wireframe → 功能頁「呈現 > 介面 > <畫面>」右欄，換掉卡位（一部「圖片放置區」→ 圖上方《n.xxx示意》；四部「窩是示意圖」佔位圖 → caption《<畫面名>》）；版本頁不直接貼
