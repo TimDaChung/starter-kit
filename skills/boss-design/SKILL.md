@@ -142,37 +142,7 @@ python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py --list bosses
 
 ### Step B4 — 產 mini 企劃
 
-照魚類之書的結構，寫**包裝、表演、玩法的概念**與**產圖需要的造型**：
-
-```
-【〈Boss名〉】
-主概念：
-配色：
-
-【包裝】
-賣點／一句話宣傳：
-檔期／定位：
-
-【表演與玩法（概念層級，數值與秒數交 boss-demo）】
-被捕獲反應：
-彩金玩法：（機制、輪數、玩家操作）
-各獎級的高潮：
-翻盤：
-道具：（名稱、等級數 → 交 boss-props）
-待機／攻擊／受擊／被捕獲：（概念層級也照 boss-demo/動態描述規範.md 寫——點名部位、可見動作、階段差異；秒數留給 boss-demo）
-
-【第一階：〈階段名〉】
-臉部：
-身體：
-（其他部位：尾巴／翅膀／持有物…）
-姿勢：（含朝向）
-尺寸：身體高度約佔 16:9 畫面高的 55%
-
-【第二階：〈階段名〉】（多階段時）
-配色：（相對上一階的變化）
-（逐部位寫變化；臉型與姿勢沿用上一階）
-尺寸：比上一階大一點（約 60%）
-```
+照魚類之書的結構，寫**包裝、表演、玩法的概念**與**產圖需要的造型**：格式讀 `references/mini-plan-template.md`。
 
 存成 `_工作暫存/企劃_<Boss名>_v1.md`。**對照法則第三節檢查**後才交出。
 
@@ -186,24 +156,7 @@ python ~/.claude/skills/pet-evolution/scripts/fetch_plan.py --list bosses
 
 使用者手上已有自己寫的主題、造型、玩法文件時，**把文件當 mini 企劃**，不再發想。
 
-### Step C1 — 讀文件、抽造型條目
-
-Read 使用者給的文件（簡報、docx 先轉文字；附圖一併 Read），照 Step B4 mini 企劃的欄位抽出：
-
-- **各階段**：階段數、階段名
-- **招牌部位**：在漁場一眼認出牠的部位，以及它在表演、玩法裡當什麼動作來源
-- **配色**：主色 2–3 色＋點綴
-- 臉部、身體、其他部位、姿勢（含朝向）——文件沒寫的欄位標〔文件未寫，預設：…〕，不要默默補
-- 包裝、表演、玩法：文件有寫就照抄；沒寫的照〈包裝、表演、玩法〉一節列成建議，**不擋算圖**
-
-順手對照 `參考素材索引.md` 做撞題檢查、對照法則第三節與第四節（Spine 限制），有問題列出來，不改使用者的設定。
-
-### Step C2 — 確認一次
-
-把抽出的造型條目整理成 Step B4 的格式，存 `_工作暫存/企劃_<Boss名>_v1.md`，**列給使用者確認一次**：「這是我從你的文件讀到的造型，有沒有讀錯或要補的？」使用者確認（或修正後確認）就進 Step 3。
-
-- 只確認「讀得對不對」，不出 2–3 案、不重談題材
-- 使用者在這步改了設定 → 照 Step B5 重出完整一份（版本號 +1）
+走模式 C 時讀 `references/mode-c.md`（Step C1 讀文件抽造型條目、Step C2 確認一次），確認後接 Step 3。
 
 ---
 
@@ -250,15 +203,7 @@ python ~/.claude/skills/boss-design/scripts/fit_canvas.py <算出的圖> <輸出
 
 **模型不照比例畫**（同一份提示詞實測一張 95%、一張 65%），所以大小交給腳本：偵測主體外框 → 縮放到指定的畫面高度佔比（寬度上限 50%）→ 羽化合成到精準 1920×1080 灰底。多階段時每階把 `--height` 加 0.03–0.05。
 
-**要透明 PNG 時**（demo、簡報、cut-in 疊圖要單獨的 Boss）：同一張灰底定稿再跑一次 `--transparent`，交付時灰底版與透明版都給：
-
-```sh
-python ~/.claude/skills/boss-design/scripts/fit_canvas.py <定稿.png> <輸出_透明.png> --transparent [--margin 16]
-```
-
-- 取四角平均灰 → 色差轉 alpha（`--key-low` 以下全透明、`--key-high` 以上全不透明，預設 10／40）→ 內縮 1px＋輕微模糊（`--feather`，預設 1）→ 邊緣去灰 → 裁到主體外框（`--margin` 留邊距）。不縮放、不補 16:9
-- **疊在深色與淺色底上各看一次再交**：主體有接近底灰的顏色（灰甲、灰白煙霧）會被挖空，中性灰的落地陰影會留成一塊灰。挖空時把 `--key-low` 調低；灰邊太多時把 `--key-high` 調低或 `--feather` 調小
-- 這是「灰底轉透明」，跟 boss-demo 步驟 2 的 magenta 去背是兩條管線：已經有灰底定稿就用這支，不必為了去背重算一張 magenta 底
+**要透明 PNG 時**（demo、簡報、cut-in 疊圖要單獨的 Boss）：讀 `references/transparent-png.md`（`--transparent` 用法、參數與限制），交付時灰底版與透明版都給。
 
 腳本出現兩種警告要處理：
 
@@ -303,23 +248,7 @@ python ~/.claude/skills/boss-design/scripts/fit_canvas.py <定稿.png> <輸出_�
 
 ### Step 9.5 — 絕招／技能 cut-in 特寫（選做）
 
-企劃或提案簡報需要「放絕招時的角色特寫」才做；沒要就跳過。**外觀定稿後才做**，每招一張。
-
-1. 照 `prompt模板.md` 第三節組提示詞：**共用前言一段＋每招一段描述**，每招存一個檔 `_工作暫存/prompt_<Boss名>_cutin_<招名>.txt`
-2. 算圖：外觀定稿當 `--reference`，每招 `--count 2`，**不加 `--remove-background`**
-
-   ```sh
-   python3 ~/.claude/skills/image-studio/scripts/image-studio-client.py draw      --count 2 --prompt-file <prompt_cutin_招名.txt> --output <_工作暫存/Boss名/cutin> --reference <外觀定稿.png>
-   ```
-
-   招數多時先照 kit `references/image-studio-共用須知.md` 第零節算總張數（4 招 × 2 張＝8 張）
-3. 規則：
-   - **16:9，角色佔畫面左側約六成，右側留白給標題字**
-   - **圖上不畫任何文字**：招式名、標題一律在簡報或引擎裡疊字。AI 寫中文常錯字、缺筆，畫進圖裡就整張重來
-   - 造型與配色以定稿為準，只改表情、姿勢、特效；畫風一致
-4. 挑圖：右側有沒有留白、有沒有冒出文字或假字、造型有沒有跑掉（多了或少了部件）——有字或右側被佔滿就重抽
-
-> 未實測：組員回報 4 招各算 2 張，都一次成功（2026-10）。第一次正式用時把結果回寫 `boss設計法則.md` 第七節。
+企劃或提案簡報需要「放絕招時的角色特寫」才做；沒要就跳過。要做時讀 `references/cutin.md`（提示詞、算圖、構圖規則、挑圖）。
 
 ### Step 10 — 交付與銜接
 
@@ -328,21 +257,7 @@ python ~/.claude/skills/boss-design/scripts/fit_canvas.py <定稿.png> <輸出_�
 
 #### 提案簡報（使用者要做 Boss 提案簡報時）
 
-簡報固定 10 頁架構，素材從規格（企劃／mini 企劃）與定稿圖來：
-
-1. 封面（Boss 名、定稿主視覺）
-2. 簡介＋特色（一句話宣傳、賣點）
-3. 造型（各階段定稿，透明版用 `fit_canvas.py --transparent`）
-4. 核心機制
-5. 流程圖
-6. 畫面配置
-7. 技能（Step 9.5 的 cut-in，招式名在簡報裡疊字）
-8. 關卡主題（背景，`boss-scene`）
-9. 結算
-10. 附錄
-
-- 目前**沒有自動產 pptx 的腳本**，架構照上面手做或交給 pptx skill；自動產的腳本待組員提供去識別化版本後評估
-- ⚠️ 用 pptxgenjs 產時：**菱形（diamond）不能帶 `rectRadius`**——schema 驗證會過，PowerPoint 卻打不開整份檔。圓角只給矩形用（組員回報，2026-10）
+讀 `references/proposal-deck.md`（固定 10 頁架構、素材來源、pptx 注意事項）。
 
 **使用者確認外觀（所有階段）都定稿後，主動問要不要接著做：**
 
@@ -368,7 +283,4 @@ python ~/.claude/skills/boss-design/scripts/fit_canvas.py <定稿.png> <輸出_�
 
 ## 貼回企劃（2026-10-02 起）
 
-定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
-
-- 外觀定稿 → 魚類之書 Boss 頁 `3.2 靜態 > 3.2.A Boss造型` 右欄，一階一張由上往下，caption《一階造型》《二階造型》（單階《boss外觀示意》）；16:9 對位圖接在後面《對位示意》
-- 魚樂園物件頁內容包在 synced_block 原件裡，貼進原件那一欄，不貼版本頁
+定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**：流程與本 skill 產出的落點讀 `references/notion-paste.md`。

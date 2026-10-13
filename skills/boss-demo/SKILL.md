@@ -30,26 +30,13 @@ description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃
 
 ### 0. 從零設計（僅無企劃模式）
 
-1. **問 2–3 個定位問題**（AskUserQuestion）：boss 主題/世界觀、最大賠率與 EV 目標（或指定參考某隻既有 boss 的數值骨架，如戰神賽特 max 1200 / EV ~415）、表演媒介偏好（打罐子/開寶箱/轉盤等）。其餘自行補專業判斷，不逐項追問
-2. **產 mini 企劃 md**（存進 demo 專案資料夾，章節照噬魂劍魔企劃骨架，見 `plan-dept14-writer/references/notion-templates.md` Boss 列；分鏡圖仍整張一張）：
-   - 基本資訊（名稱、最大賠率、計算用賠率）
-   - Boss 造型概念（配色、輪廓、持有物、姿勢——之後直接當生圖 prompt 素材）
-   - 玩法大綱與表演流程（捕獲→轉場→彩金表演→結算）
-   - 小/中/大獎表演分鏡（每分鏡含秒數，總長標題與分鏡加總**必須一致**）；被捕獲、待機等動態一併寫。**寫法照 `動態描述規範.md`**（每步「主體＋動作＋特效＋位置，N秒」、階段差異、表演期間碰撞／倒數）
-   - 賠率權重表（定 EV → 拆 tier 分布 → 配權重 → **驗證每檔賠率可依演出規則分解**）＋翻盤機制
-   - 數值拿不準時派 `game-balance-auditor` 模擬驗 EV/變異數
-3. **使用者拍板 mini 企劃後**才進入步驟 1——機制取捨是使用者的決定權，不跳過
-4. 之後流程與有企劃模式完全相同（mini 企劃就是企劃）；demo 調完參數用「變更區段 Markdown 匯出」回寫 mini 企劃，形成設計→體驗→修數值→回寫的閉環
+無企劃時讀 `references/zero-design.md`（問 2–3 個定位問題 → 產 mini 企劃 → **使用者拍板後才進步驟 1**；之後流程與有企劃模式完全相同，demo 調完參數用「變更區段 Markdown 匯出」回寫 mini 企劃）。
 
 ### 1. 讀企劃、抽表演結構
 
 **先判斷模式**：企劃的權重表是「獎級 → 權重」就是獎級權重型；是「最終倍數 → 權重」，再加上「倍數落在哪個區間演到第幾關」或「每關倍數範圍」就是最終倍數拆解型。兩種都像（例：獎級表又寫每關累加）→ 問使用者 server 實際抽的是什麼，**以 server 抽的東西為準**。
 
-**最終倍數拆解型**抽三張表：
-
-- **最終倍數權重表**：每個最終倍數與權重
-- **結局判定表**：倍數區間 → 演到第幾關（例：10–59 演到第一關、60–199 演到第二關）
-- **各段倍數的允許區間**：每一關（段）可以拿的倍數範圍與跳階（例：第二擊 10–80、每 5 一階）；各段的 phases 照下面的分段規則拆
+判定為**最終倍數拆解型**時，讀 `references/split-mode.md` 第一節（要抽的三張表：最終倍數權重表、結局判定表、各段倍數允許區間）。
 
 **獎級權重型**從企劃抽出每個獎級的：`name`（繁中）、`weight`、`multiplier`、表演描述。每級表演拆成 **phases 分段**（各段獨立秒數），標準分段：
 
@@ -67,11 +54,7 @@ description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃
 - 每檔賠率是否能依演出規則分解出合法組合（如罐子 2+2+4、第三擊 ≥ 前兩擊）
 - 分鏡編號/名稱筆誤
 
-**最終倍數拆解型多查：**
-
-- 結局判定表的區間**有沒有斷層或重疊**：所有最終倍數都要剛好落進一個結局（例：59 跟 60 之間沒有洞、60 不能同時屬於兩關）
-- 權重表的每個最終倍數，**用該結局會演的各段區間組不組得出**：各段最小值加總 ≤ 最終倍數 ≤ 各段最大值加總，且跳階對得上。組不出的列名單
-- 期望值：Σ 最終倍數 × 機率，對照企劃寫的 EV／計算用賠率
+**最終倍數拆解型**做預檢時多查的項目（區間斷層／重疊、每個最終倍數組不組得出、期望值）：讀 `references/split-mode.md` 第二節。
 
 矛盾**不擋工**：demo 照分鏡逐段值忠實還原，**舞台下方狀態列**註記矛盾點，讓使用者拿去跟企劃 PM 對。
 
@@ -110,54 +93,17 @@ description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃
   // tiers mode
   const CONFIG = { mode: 'tiers', tiers: [ { id, name, weight, multiplier,
     phases: [ { name, duration_ms } ] } ] };
-  // split mode
-  const CONFIG = { mode: 'split',
-    finals:  [ { mult: 30, weight: 40 }, { mult: 120, weight: 8 } ],      // final multiplier weight table
-    endings: [ { id: 'e1', name: '第一關結束', min: 10, max: 59,  stages: ['s1'] },
-               { id: 'e2', name: '第二關結束', min: 60, max: 199, stages: ['s1', 's2'] } ], // range -> how far it plays
-    stages:  { s1: { name: '第一擊', min: 2,  max: 20, step: 1, phases: [ { name, duration_ms } ] },
-               s2: { name: '第二擊', min: 10, max: 80, step: 5, phases: [ /* ... */ ] } } }; // allowed range per stage
+  // split mode: see references/split-mode.md section 3
   ```
 - **捕獲按鈕**：獎級權重型 → weighted roll 獎級 → 播該級表演；最終倍數拆解型 → weighted roll 最終倍數 → 查結局判定表 → 拆成各段倍數 → 依序演。表演中鎖按鈕
-- **最終倍數拆解（拆解型）**：各段**由大到小**分配（允許上限大的段先拿），每段在「自己的區間 ∩ 剩下的段還補得起的範圍」內**有限隨機**，最小的段吸收剩餘；重試幾次仍組不出時，各段取最小值、**末項吸收差值**，倍數加總仍精準等於最終倍數，並在狀態列警示「組不出：末項超出區間」、計入模擬報告。最小範例：
-  ```js
-  // stages: this ending's stages in play order, each { min, max, step }
-  function splitMultiplier(total, stages, rng = Math.random, tries = 30) {
-    const order = stages.map((s, i) => i).sort((a, b) => stages[b].max - stages[a].max);
-    for (let t = 0; t < tries; t++) {
-      const parts = new Array(stages.length);
-      let left = total, ok = true;
-      for (let k = 0; k < order.length - 1; k++) {
-        const s = stages[order[k]], rest = order.slice(k + 1).map(i => stages[i]);
-        const restMin = rest.reduce((a, r) => a + r.min, 0);
-        const restMax = rest.reduce((a, r) => a + r.max, 0);
-        const step = s.step || 1;
-        const lo = Math.ceil(Math.max(s.min, left - restMax) / step) * step;
-        const hi = Math.floor(Math.min(s.max, left - restMin) / step) * step;
-        if (lo > hi) { ok = false; break; }
-        parts[order[k]] = lo + step * Math.floor(rng() * ((hi - lo) / step + 1)); // bounded random
-        left -= parts[order[k]];
-      }
-      const last = stages[order[order.length - 1]];
-      if (ok && left >= last.min && left <= last.max && left % (last.step || 1) === 0) {
-        parts[order[order.length - 1]] = left;
-        return { parts, ok: true };
-      }
-    }
-    // cannot be composed: every stage takes its min, the smallest stage absorbs the rest
-    const parts = stages.map(s => s.min), absorb = order[order.length - 1];
-    parts[absorb] = total - parts.reduce((a, v, i) => (i === absorb ? a : a + v), 0);
-    return { parts, ok: false }; // caller warns in the status bar and counts it in the simulation
-  }
-  ```
-  （kit 以 node 跑 1 萬次驗過：加總恆等於最終倍數、組得出時各段都在區間與跳階內）
+- **最終倍數拆解（拆解型）**：寫拆解邏輯時讀 `references/split-mode.md` 第四節（分配規則、組不出時的處置、`splitMultiplier` 範例）
 - **Debug 面板（常駐右側）**：
   - 賠率表可調欄位：**賠率值、權重、獎級**（即時生效）；機率為權重換算的**純顯示值**（帶兩位小數、欄寬要放得下）。賠率改到無法依演出規則組出合法組合（如罐子 2+2+4）→ 標紅警示，表演用最接近組合近似、**倍數欄數字仍精準落在賠率值**（末擊吸收差值）
   - 每級每 phase 的秒數輸入（即時生效）：**以「秒」為單位**，最多兩位小數、尾零不顯示（2、1.5、2.25）；內部一律存 ms，僅顯示層換算
   - 每級「強制播」按鈕（跳過 roll，直接播該級——調表演不用靠運氣）
-  - **拆解型另有**：最終倍數權重表、結局判定表、各段區間都可調；每個結局一顆「強制播」；**「指定最終倍數播放」**輸入框＋按鈕——可輸入表外的值，專門測區間邊界（59／60、各段最小值加總、組不出的值）
+  - **拆解型另有**的面板項（可調表、每結局強制播、指定最終倍數播放）：做拆解型面板時讀 `references/split-mode.md` 第五節
 - **統計區**：實際 roll 分布 vs 理論機率對照表；「模擬 ×1000」按鈕（純 RNG 不播動畫，驗證權重實作沒偏）；歸零按鈕
-  - **拆解型的模擬報告多兩項**：**組不出率**（總計＋各最終倍數，> 0 就標紅並列出是哪幾個值）、**各結局表演長度最短／最長**（同一結局各段倍數不同時，跳數、噴金幣量等隨倍數變動的分段秒數也會變，報最短與最長讓企劃看節奏上下限）
+  - **拆解型的模擬報告**多的項目（組不出率、各結局表演長度最短／最長）：讀 `references/split-mode.md` 第六節
 - **時長總覽**：各演出類型「表演段／完整流程」總秒數即時重算，附企劃基準對照
 - **變更管理**：改過的欄位橘框＋顯示原值；「全部改回企劃預設」；「產出變更區段 Markdown」——依企劃原格式只輸出有改動的區段，每段標示【貼到企劃 X.X.X】方便人手貼回
 - **參數保存**（試玩者在自己瀏覽器調參，Claude 讀不到那個分頁；重新整理就全沒）：
@@ -188,30 +134,18 @@ description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃
   - **不標**：同一個動作的中間過程、跟上一個關鍵格看起來一樣的瞬間、全畫面遮罩的轉場
   - **重複的動作每次都標**（第一擊、第二擊各自的命中），截圖後再決定企劃要不要全放
   - `caption` 就是分鏡圖上的標籤與企劃的細拆描述，**寫「這一刻畫面上在演什麼」**，一句話；點名部位或物件、用看得見的動作，不寫「感覺」「氛圍」（`動態描述規範.md` 第二節第 2 條）
-- **關鍵格時間點要準（產 HTML 時就做，事後補很難）**——不處理時截到的關鍵格會晚 100–400ms，組員改完這四點偏差約 ±20ms：
-  1. **自製虛擬時鐘每幀的 dt 不設上限**（不要寫 `Math.min(dt, 50)` 這類截斷）：CSS 動畫與 WAAPI 照真實時間走，時鐘被截斷就落後，beat 跟畫面對不上
-  2. **所有圖片啟動時先 `await img.decode()`**，全部解碼完才開放捕獲按鈕與 `DEMO_API.play`：第一次解碼大圖會卡一幀（例：布幕合起時中間留一條縫）
-  3. **emoji 粒子預先畫成 sprite**（啟動時用 offscreen canvas 每種 fillText 一次），每幀只 `drawImage`：每幀幾十次 `fillText` 在無頭瀏覽器會卡幾百 ms
-  4. **beat 不要跟全螢幕白閃同一刻**：發在白閃之前，或白閃退掉之後，不然截到一片白
+- **關鍵格時間點要準（產 HTML 時就做，事後補很難）**：寫表演程式時讀 `references/capture-timing.md`（四個地雷：虛擬時鐘 dt、`img.decode()`、emoji sprite、beat 避開白閃）
 - **表演動作要是 Spine 做得到的**（Boss 是全 2D Spine）：不轉身、不做斜線或弧線的旋轉衝刺、不做流暢跳躍、飾物不繞到身後、會轉的光環是平面正圓。完整對照表見 `boss-design/boss設計法則.md` 第四節。demo 裡做得出不代表美術做得出
 - 表演張力階梯要拉開：低級快進快出、高級要有 anticipation 停頓與全屏效果，讓權重手感差異體感明顯
 
 ### 5. 驗證與交付
 
 - 產出後自己先開瀏覽器過一次：每級（拆解型：每個結局＋幾個邊界倍數）強制播一遍確認無 JS error、模擬 ×1000 分布合理、拆解型組不出率跟步驟 1.5 預檢對得上
-- **Claude 預覽視窗被隱藏時 rAF 會被節流**，乾等表演跑完很久、時間也不準：驗證改用「手動推進虛擬時鐘」快轉——`DEMO_API` 多給一個 `advance(ms)`（把虛擬時鐘往前推 ms，跑完這段該發生的分段與 beat），用它把整段表演跑完再 assert 結果（DOM 狀態、console 無錯），不要開著乾等
+- **Claude 預覽視窗被隱藏時 rAF 會被節流**，乾等表演跑完很久、時間也不準：驗證時讀 `references/capture-timing.md` 第二節，用 `DEMO_API.advance(ms)` 快轉後 assert，不要開著乾等
 - 交給使用者試玩 → 後續調參迭代走 `playtest-loop`
 - 輸出位置：使用者指定的專案資料夾；未指定 → `Desktop\<boss名>-reward-demo\`
 
-**分享版打包**（要把 demo 傳給別人試玩時）：
-
-- 新檔名帶**版號＋日期**（例：`<boss名>_demo_v3_20261008.html`），**不覆蓋舊版**——試玩者的回饋要對得回是哪一版
-- 附**試玩說明**（`試玩說明.md`），至少寫：
-  1. 怎麼開（雙擊用 Chrome／Edge 開，不需要網路）
-  2. 每顆按鈕與面板區塊的用途（捕獲、強制播、指定最終倍數、暫停／下一分鏡／結束、模擬、匯出／匯入設定）
-  3. **哪些是暫定值**（預設模板補的、企劃矛盾先照分鏡值的、佔位素材）
-  4. 回饋怎麼給：調完按「匯出設定」把 JSON 傳回，或貼「變更區段 Markdown」
-- HTML＋試玩說明一起壓成 zip（檔名同樣帶版號＋日期）
+**分享版打包**（要把 demo 傳給別人試玩時）：讀 `references/share-build.md`（版號＋日期檔名、試玩說明必寫項、zip）。
 
 ### 6. 定稿後：擷取分鏡圖、寫回企劃
 
@@ -219,65 +153,11 @@ description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃
 
 **截圖前先檢查**（沒做就先回步驟 4 補，不然關鍵格會晚 100–400ms）：虛擬時鐘 dt 沒有上限、圖片全部 `decode()` 過、emoji 粒子走 sprite、beat 沒跟全螢幕白閃同一刻；舞台裡沒有測試資訊（都在 `demo-ui` 狀態列）。截完 Read 分鏡圖，看關鍵格是不是那個瞬間——晚了一拍（命中前／爆開後）就回頭查這四點，不要靠改 caption 掩蓋。開發途中要驗證 beat 順序，用步驟 5 的 `advance(ms)` 快轉，不要開預覽視窗乾等
 
-1. **截圖**：每種表演強制播一次，在每個 `demo:beat` 那一刻暫停截舞台；拆解型每個結局各播一次（用「指定最終倍數」挑該結局的代表值）
-
-   ```sh
-   python ~/.claude/skills/boss-demo/scripts/capture_storyboard.py capture <demo資料夾> <輸出資料夾> \
-     [--scenarios <id,...>]
-   ```
-
-   - demo 宣告了 `beats: true` 就自動走關鍵格模式，同時記下每格在分鏡內的時間點
-2. **組成分鏡圖＋企劃草稿**
-
-   ```sh
-   python ~/.claude/skills/boss-demo/scripts/capture_storyboard.py compose <輸出資料夾> --scenario <id> [--pick 1,2,4,…]
-   ```
-
-   - 預設**全部關鍵格都入圖**，標籤直接用 `caption`，不寫秒數（秒數在企劃文字與 demo 裡）
-   - Read 分鏡圖檢查；企劃不需要全放時（例如重複的「噴金幣」只留一次）用 `--pick` 去掉
-   - 企劃草稿**照 `動態描述規範.md` 的格式**：一個分鏡一步、秒數寫句尾、`〔圖N〕` 對回分鏡圖格號；同一分鏡多個關鍵格列成子項，共用該分鏡秒數。後面接規範要求的待補欄位（觸發時機、階段差異、同步點、圖層、表演期間碰撞／倒數、詳見 4.x）：
-
-     ```
-     1. 觸發時機：〔待補〕
-     2. 分鏡：
-         1. 分鏡1：舉杖——雙眼發光、高舉權杖，1.5秒〔圖1〕
-         2. 分鏡2：第一擊，2秒〔圖2–3〕
-             1. 閃電擊中右側 2 罐
-             2. 罐子爆開噴金幣
-     3. 階段差異：〔待補〕 …
-     ```
-
-   - 版面依格數自動排：≤3 格一列、4 格 2×2、5–9 格三欄、更多四欄
-
-**舊 demo 沒有關鍵格時的備援**（例：戰神賽特 demo）：用 `--shim` 注入 `DEMO_API`（範例：`scripts/shims/seth-reward-demo.js`）、`--hide` 隱藏沒加 `demo-ui` 的按鈕、`--skip-phases` 排除轉場；capture 會改成每個分鏡在 35%／75% 處各截一張當候選，接著：
-
-1. **刪掉太接近的，剩下的組成分鏡圖**：**不限格數**，把跟鄰格太像、看不出差別的候選刪掉，每個看得出變化的瞬間都留
-
-   ```sh
-   python ~/.claude/skills/boss-demo/scripts/capture_storyboard.py compose <輸出資料夾> \
-     --scenario <id> --pick 1,3,5,6,7,9,11,12,14 \
-     --captions "被捕獲：雙眼發光、高舉權杖放出閃電|轉場至海底神殿，石塊從上方墜落|…"
-   ```
-
-   - 一定要 Read `候選_<表演名>.png`（全部候選的編號總覽）自己挑。不給 `--pick` 時的自動去重只是起點，實測會把「罐子被擊中」這種小範圍變化誤刪
-   - **要刪的**：跟前一格幾乎一樣的（同一分鏡的兩個時間點沒變化）、重複的動作（第二次噴金幣跟第一次一樣就留一次）、還在過渡中的（結算數字還在跳，留跳完的那張）
-   - **要留的**：攻擊命中、爆開、特寫、表情轉變、場景切換——每個看得出變化的瞬間
-   - **分鏡圖上的標籤寫「這格在演什麼」**（`--captions`，用 `|` 分隔），**不寫秒數**——秒數寫在企劃文字與 demo 裡
-   - 版面依格數自動排：≤3 格一列、4 格 2×2、5–9 格三欄、更多四欄
-   - 產出：`分鏡_<表演名>.png`、`分鏡_<表演名>_企劃草稿.md`（格式同上；每格一步：描述＋秒數，下一行註記涵蓋哪些 demo 分段，貼企劃前刪；同一分鏡留了多張時平分該分鏡的秒數，總秒數對得上 demo）
-**之後兩種模式共用：**
-
-3. **寫企劃段落**：以 `分鏡_<表演名>_企劃草稿.md` 為骨架，**照 `動態描述規範.md` 寫**——關鍵格模式的描述與秒數已經在草稿裡，看圖確認後改成「主體＋可見動作＋特效＋位置」（caption 是看圖的短句，不夠美術直接做）；備援模式要依截圖補描述。秒數用 demo 定稿值。〔待補〕欄位逐一填掉或刪掉，交付前跑規範第六節自查。每段標【貼到企劃 X.X.X】，跟「變更區段 Markdown」合在一起交給使用者
-4. **寫回 Notion**：預設由使用者手動貼回（分鏡圖一起上傳）。**不自己改 live 企劃**，除非使用者明確要求
+**操作步驟（截圖 → 組分鏡圖＋企劃草稿 → 寫企劃段落 → 寫回 Notion，含舊 demo 沒有關鍵格時的備援）：讀 `references/storyboard-capture.md`。**
 
 ## 預設四級模板（企劃缺漏時補用）
 
-| 獎級 | weight | 表演 | phases（ms） |
-|---|---|---|---|
-| 小獎 | 55 | boss 翻肚＋金幣小爆 | 登場 300 / 爆分 800 / 結算 400 |
-| 中獎 | 30 | 金幣噴泉＋獎級橫幅 | 登場 600 / 爆分 1600 / 結算 800 |
-| 大獎 | 12 | 全屏閃光＋boss 特寫拉近＋倍率跳數 | 登場 1200 / 爆分 2600 / 結算 1200 |
-| 特獎 | 3 | Jackpot：暗場→聚光→連環爆分→結算 | 暗場 1000 / 聚光 1500 / 連環爆分 4000 / 結算 1500 |
+企劃缺漏要補預設值時讀 `references/default-tiers.md`（小／中／大／特四級的 weight、表演、phases ms）。
 
 ## 銜接
 
@@ -290,6 +170,4 @@ description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃
 
 ## 貼回企劃（2026-10-02 起）
 
-定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**（第十一節，腳本 `plan-dept14-writer/scripts/paste_images.py`；落點總表 `plan-dept14-writer/references/image-slots.md`）。PM 給目標頁網址 → `list` 找右欄與卡位 → 報清單取得同意 → 貼 → 回讀。本 skill 產出的落點：
-
-- 分鏡 → Boss 頁 `3.3 Boss動態 > 3.3.x <表演名>`：**分鏡細拆文字（照 `動態描述規範.md`）寫在同一個小標題的左欄，分鏡圖整張一張貼右欄，不切圖**（Tim 2026-10-02），caption《<表演名>分鏡示意圖》。舊頁面是一分鏡一張圖，新寫的照這條
+定稿後要放進 Notion 企劃時，交給 `plan-dept14-writer` 的**貼圖模式**：流程與本 skill 產出的落點讀 `references/storyboard-capture.md` 末節〈貼回企劃〉。

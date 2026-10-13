@@ -2,6 +2,12 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.40.0 (2026-10-13)
+
+- **boss-demo／boss-design 拆檔**（主任指示：v3.32.0 收建議後本體過胖）。規則一條不少——拆前存基準檔，拆後逐行比對「找不到的行＝0」；本體只留主流程，少用段落搬到各自 `references/`，在動作發生的那一步留一行「做 X 時讀哪份」
+  - `boss-demo/SKILL.md` 28,829 → 17,681 bytes（−38.7%）。搬出：`split-mode.md`（最終倍數拆解型整套）、`capture-timing.md`（關鍵格時間點四地雷＋`advance(ms)`）、`share-build.md`（分享版打包）、`storyboard-capture.md`（步驟 6 截圖／compose／寫回操作＋貼回企劃落點）、`zero-design.md`（步驟 0 從零設計）、`default-tiers.md`（預設四級表）
+  - `boss-design/SKILL.md` 20,604 → 15,072 bytes（−26.8%）。搬出：`mode-c.md`、`mini-plan-template.md`（B4／C 共用）、`transparent-png.md`、`cutin.md`、`proposal-deck.md`、`notion-paste.md`。〈前置需求〉〈定位表〉〈包裝表演玩法〉是每次都要守的規則，保留在本體
+  - 平常叫用只讀本體，省 27–39%；走到選做分支多讀 1–5k。`test_fit_canvas.py` 5 項仍全過
 ## v3.39.2 (2026-10-12)
 
 - **imagen 風格參考圖改放網芳**（Tim 指示，多台電腦與組員共用）：`kit-assets\imagen\styles\<slug>\`，kit 內只記路徑。已歸檔動物插圖風 3 張、手繪童書風 3 張；手繪奇幻風、極簡團子風標「尚未歸檔」。SKILL.md〈風格庫〉加歸檔規則，各風格檔 H1 下加「參考圖：」一行
@@ -80,8 +86,7 @@
 - **新增共用規範對照表** `plan-dept14-writer/references/shared-specs.md`：範本只管結構，倒數格式、按鈕樣式、小紅點、大廳 Dialog 順序、儲值觸發優先序、Boss 計捕獲數、稀有度、Buff 號碼這類跨企劃規則散在各線的規範庫，寫企劃時常漏看。
   - 盤點四個庫、逐頁實讀：一部〈合約／機制資料庫〉20 頁（娛樂城比照神幣）、魚樂園〈共用規範之書〉7 頁＋〈記錄總表之書〉6 頁、娛樂城〈記錄總表之書〉5 頁（機台專用）。鬥地主、超級捕魚天的同名庫是空殼，不列。
   - 每頁列「觸發詞 → 影響哪一章」，只放 page id，不抄內文，每次現讀。
-  - 接線：`plan-dept14-writer` 第一節第 9 條（新建、調整都做）、連動檢查 k、交付清單 14；`plan-doc-qa` 新增第十二類「共用規範對照」；`art-request-sheet` 拆列時共用規格照規範頁。
-- ⚙️ **升級動作**：`git pull` 即生效，無設定變更
+  - 接線：`plan-dept14-writer` 第一節第 9 條（新建、調整都做）、連動檢查 k、交付清單 14；`plan-doc-qa` 新增第十二類「共用規範對照」；`art-request-sheet` 拆列時共用規格照規範頁。- ⚙️ **升級動作**：`git pull` 即生效，無設定變更
 
 ## v3.33.1 (2026-10-08)
 
