@@ -388,6 +388,15 @@ def image_block(file_id: str, caption: str = "") -> dict[str, Any]:
     return {"object": "block", "type": "image", "image": {"type": "file_upload", "file_upload": {"id": file_id}, "caption": rt(caption)}}
 
 
+def code_block(source: str, language: str = "mermaid", caption: str = "") -> dict[str, Any]:
+    """Code block; the default language renders a mermaid diagram in Notion.
+
+    Notion shows code + preview side by side by default and the API cannot
+    change that display mode (the PM switches it to preview by hand).
+    """
+    return {"object": "block", "type": "code", "code": {"rich_text": rt(source), "language": language, "caption": rt(caption)}}
+
+
 def column_list(*columns: list[dict[str, Any]]) -> dict[str, Any]:
     def col(kids: list[dict[str, Any]]) -> dict[str, Any]:
         return {"object": "block", "type": "column", "column": {"children": kids}}
