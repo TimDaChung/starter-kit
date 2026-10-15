@@ -31,6 +31,7 @@
 - **月度健檢**：`~/.claude/starter-skill-map.md` 頂部記「上次 starter 健檢：<日期>」，超過 30 天 Claude 要主動提議跑「starter 健檢」，跑完更新日期
 - **異常與建議都走 SOP**：kit 的 skill／腳本出異常 → 走 `issue-triage` 回報模式產出標準回報轉給維護者；**沒壞但覺得某支 skill 不順手、想改流程／觸發詞／輸出格式／加功能** → 走 `issue-triage` 建議模式（四欄輕量建議單，不用重現步驟）轉給維護者。兩者都不自行修改 junction 內的 kit 檔案——改了會跟下次升級打架，而且意見悶在自己機器上維護者收不到
 - **用 kit 踩雷就收尾附單**：使用 kit skill 的任務收尾時，若本次發生「使用者糾正了 skill 產出／kit 腳本報錯或要繞路／SKILL.md 與實況不符」任一項，交付訊息最後附一張 `issue-triage` 的 A 或 C 單草稿並問要不要轉給維護者；沒發生就不提。平常累積的感覺，用「kit 使用回顧」一次批次整理
+- **已載入的 skill 規則不會跟著 kit 升級**：SKILL.md 是在 session 裡第一次用到時讀進來的，之後 `git pull` 換了檔案，這個 session 記得的還是舊版。跨天的長 session、或 session 中途升級過 kit，引用某條 skill 規則前先重讀該 SKILL.md 現行檔，或直接 `/clear` 重開（案例：2026-10-15 一個 10/08 開到 10/15 的 session 引用了 v3.30.0 已拿掉的 line-notes 規則寫建議單）
 
 ---
 

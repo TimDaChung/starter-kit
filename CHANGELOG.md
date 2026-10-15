@@ -13,6 +13,8 @@
 - **魚樂園企劃慣例收進 Notion〈共用規範之書〉、表格表頭照範本**（組員建議，部分採納）：不恢復 `line-notes.md`（v3.30.0 已改以 Notion 為權威）。新頁〈魚樂園企劃撰寫慣例〉收全線用詞（射擊／注額／Boss）與 Boss 企劃的機制通規、公版段落、Spine 動態限制，`shared-specs.md` 加觸發列。**表格方向與章節順序不收**——範本本來就帶：實讀劍魔、俱樂部討伐副本兩份實例，「畫面呈現章的表一律首欄當表頭」與實例不符（狀態表都是首列），通則是「欄位名在哪邊就開哪邊」；章節順序以劍魔為準。writer 原本對表頭沒有任何規定、`table()` 也開不了首欄，這才是回報者自訂規則的原因：第九節新增第 9 條「表格表頭照範本」、`notion_rest.table()` 加 `row_header`，plan-doc-qa 結構檢查加表頭項。「demo 試玩調整指令不是規格」各線通用，寫進 writer 第九節第 8 條
 - check-lists 魚樂園誤報（組員回報）：已於 v3.44.0 修，回報的兩個假設與實測一致
 - **新增 `plan-dept14-writer/scripts/md2notion.py`：Markdown 企劃寫進 Notion 範本複本**（組員建議＋提供腳本，採納並通用化）：巢狀清單（先建上層再補子層）、清單底下的表格、有圖小節自動左文右圖、mermaid＋《圖說》、紅藍字與連結、`TODO` 圖位轉紅字待補。收進 kit 時改的：拿掉寫死的起始章與流程圖標籤過濾（改 `--start`）；表頭不再依章號猜，預設首列、表格前一行 `<!-- 表頭:首欄 -->` 照範本切換；上傳輪詢改用 `upload_file` 內建的；預設只預覽、`--write` 才寫；**新增 `--section` 局部更新**——只換該小節內容，標題 block 保留、先插後刪。測試頁實跑：整份寫入結構全對，`--section` 後整頁只有該小節的區塊 id 變動。圖位對齊 writer 第五節第 4 條：四部圖名走 alt→caption、一部圖名寫在圖上一行（跟圖一起進右欄）、`TODO` 圖位用 alt 原文當紅字卡位（照範本用語，不寫死「待補」）。新增 `test_md2notion.py`；writer 第八節第 1 條指向本工具
+- **已載入的 skill 規則不會跟著 kit 升級**（組員自查根因）：建議單 5 引用了 v3.30.0 已拿掉的 `line-notes.md`，原因是那個 session 從 10/08 開到 10/15，SKILL.md 在第一次用到時讀進 context，之後 `git pull` 不會刷新。`CLAUDE.starter.md` meta 規則段新增一條（跨天或中途升級過的 session，引用規則前先重讀現行 SKILL.md 或 `/clear`）；starter-setup 升級結算表提醒改成「升級完建議 /clear 重開」
+- **全批改動經兩輪獨立審查後修正**（Fable 5.1 重審）：writer 八.1「一律用 --section」與八.2.3／地雷表「小修一律 PATCH」互撞 → 改為整節重寫才用 `--section`、小修照 PATCH；八.5 與八.2.3 殘留「API 清單顯示成數字」舊句；十.1「（或頁面既有寫法）」與四.5「一律固定寫法」相反；流程圖例外補進 `flowchart.md` 第 1 條（權威檔）；截分鏡「晚一拍」三處分流統一（beat 位置→副本、四個計時地雷→定稿 demo、空白格→副本預熱）；shared-specs 加「規範頁新增要同步加列」、慣例列拿掉公版段落（劍魔實例本來就有）；v3.18.5 被推翻的條目補刪除線
 - ⚙️ **升級動作**：`git pull` 即生效，無設定變更
 
 ## v3.44.0 (2026-10-15)
@@ -370,9 +372,9 @@
 3. `claude mcp list` 沒有已連線的 `claude.ai Google Sheets` → 提醒一行「要用 art-request-sheet 請到 https://claude.ai/settings/connectors 連 Google Sheets」，不代連
 ## v3.18.5 (2026-10-05)
 
-- **`plan-dept14-writer` API 回寫後檢查巢狀編號格式**（組員回報）：API 新增的 `numbered_list_item` 沒有 `list_format`，每一層都顯示成數字（應為 1.→a.→i.），而 `list_format` 是唯讀欄位——`Notion-Version: 2025-09-03` 讀得到，新建與更新帶它都回 400（回報者 2026-10-05 實測三種寫法）。kit 原本寫「API 不回傳 list_format、驗不出來」，那是因為 `notion_rest.py` 固定用 2022-06-28 版，已更正
+- ~~**`plan-dept14-writer` API 回寫後檢查巢狀編號格式**（組員回報）：API 新增的 `numbered_list_item` 沒有 `list_format`，每一層都顯示成數字（應為 1.→a.→i.），而 `list_format` 是唯讀欄位——`Notion-Version: 2025-09-03` 讀得到，新建與更新帶它都回 400（回報者 2026-10-05 實測三種寫法）。kit 原本寫「API 不回傳 list_format、驗不出來」，那是因為 `notion_rest.py` 固定用 2022-06-28 版，已更正~~（已於 v3.44.0 推翻：REST 寫入的清單本來就顯示 1.→a.→i.，「每層都是數字」是 Notion MCP 寫入或接在手動格式底下造成的；check-lists 改為選跑）
   - `notion_rest.py` 新增唯讀的 `Notion.check_list_format()` 與 CLI `python notion_rest.py check-lists <網址>`：只在檢查時用 2025-09-03 版讀取，不動全域 `VER` 與寫入路徑；依層級比對 1.→a.→i.（直接掛在「2.1 …」這類編號標題下的第一層算 a.），列出要改的清單第一項
-  - SKILL.md 第八節第 5、7 條與 `notion-access.md` 護欄 3、地雷表：回寫後必跑檢查，交付訊息一律附「需手動改編號格式」清單，不可說已修好
+  - ~~SKILL.md 第八節第 5、7 條與 `notion-access.md` 護欄 3、地雷表：回寫後必跑檢查，交付訊息一律附「需手動改編號格式」清單，不可說已修好~~（已於 v3.44.0 推翻，交付不附手改清單）
   - 一起採納回報附帶的建議：**有連結的文字標藍**寫進第六節點色規則、第九節與第十節檢查清單；`rt()` 新增 `link` 參數，帶連結時預設藍字
 - ⚙️ **升級動作**：`git pull` 即生效，無設定變更。回報者本機為了繞過寫進 CLAUDE.md／memory 的暫時規則，kit 已涵蓋，可以移除
 

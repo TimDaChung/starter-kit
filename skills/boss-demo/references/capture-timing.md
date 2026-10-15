@@ -6,7 +6,7 @@
 
 - **關鍵格時間點要準（產 HTML 時就做，事後補很難）**——不處理時截到的關鍵格會晚 100–400ms，組員改完這四點偏差約 ±20ms：
   1. **自製虛擬時鐘每幀的 dt 不設上限**（不要寫 `Math.min(dt, 50)` 這類截斷）：CSS 動畫與 WAAPI 照真實時間走，時鐘被截斷就落後，beat 跟畫面對不上
-  2. **所有圖片啟動時先 `await img.decode()`**，全部解碼完才開放捕獲按鈕與 `DEMO_API.play`：第一次解碼大圖會卡一幀（例：布幕合起時中間留一條縫）。**中途才換上的圖也要算**（cut-in、背景切換、JS 換 `src`、CSS 背景），漏掉的那格會截成空白；定稿 demo 漏了，截圖副本補預熱（`storyboard-capture.md` 第 1 步）
+  2. **所有圖片啟動時先 `await img.decode()`**，全部解碼完才開放捕獲按鈕與 `DEMO_API.play`：第一次解碼大圖會卡一幀（例：布幕合起時中間留一條縫）。**中途才換上的圖也要算**（cut-in、背景切換、JS 換 `src`、CSS 背景），漏掉的那格會截成空白；中途換上的圖在截圖副本一律預熱（`storyboard-capture.md` 第 1 步），定稿 demo 啟動時的 decode 仍要做
   3. **emoji 粒子預先畫成 sprite**（啟動時用 offscreen canvas 每種 fillText 一次），每幀只 `drawImage`：每幀幾十次 `fillText` 在無頭瀏覽器會卡幾百 ms
   4. **beat 不要跟全螢幕白閃同一刻**：發在白閃之前，或白閃退掉之後，不然截到一片白
 

@@ -196,7 +196,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
   1. CLAUDE.md「資料分析」段 12 行只在統計任務用到 → 可搬成 skill,省 12 行
   2. 換版:你的 my-imagen vs kit imagen → 建議 C(kit 版為底 + 你的 2 條客製寫進 CLAUDE.md);理由:kit 版觸發詞多 3 組、有 magenta 去背流程且會升級
   3. 換版:你的 CLAUDE.md「絕不推 main」vs starter「協作 repo 不直推」→ 建議換 starter 的;理由:更具體,solo repo 不受限
-提醒:agents 新裝要重開 Claude Code;生圖前先確認 image-studio 已裝且憑證未過期
+提醒:agents 新裝要重開 Claude Code;本 session 已載入的 skill 規則仍是舊版,升級完建議 /clear 重開;生圖前先確認 image-studio 已裝且憑證未過期
 ```
 
 結算表後補一句選配指引（已裝 secretary 的人跳過）：
@@ -213,7 +213,7 @@ https://github.com/TimDaChung/secretary-kit」
    - **pull 失敗且訊息是歷史分歧**（`divergent branches`、`Not possible to fast-forward`、`non-fast-forward`、`refusing to merge unrelated histories`、`Need to specify how to reconcile`）：維護者改寫過 kit 歷史（例：v3.19.0 清掉誤推的機密範例），本機沒有任何該保留的東西——kit 檔案本來就不准在本機改（見 CLAUDE.starter「異常與建議都走 SOP」）。先 `git -C %USERPROFILE%\starter-kit status --porcelain`：**乾淨 → 直接 `git -C %USERPROFILE%\starter-kit fetch origin` ＋ `git -C %USERPROFILE%\starter-kit reset --hard origin/main` 接回升級線**，不問，結算表註明「kit 歷史已改寫，已重新對齊 origin/main」；**有本機修改 → 停**，列出 diff 摘要，請使用者走 issue-triage 建議模式把修改回報後再對齊（使用者說「直接蓋掉」才 reset）
 2. 摘要 CHANGELOG 新增段落
 3. **執行 CHANGELOG「⚙️ 升級動作」**（有標才有,多數版本沒有）:各版本下的「⚙️ 升級動作」區塊 = pull 完精靈自動執行的清單。規則:(a) 只跑比 `~/.claude/starter-kit-version.txt`（一行版號）記錄新的版本,由舊到新逐版跑,跑完寫回最新版號;檔案不存在（舊裝機首次）→ 全部版本的動作都檢查一遍——**升級動作一律寫成冪等**（「缺才補」句型,重跑無害） (b) 純補檔/補設定的直接做;**要使用者選擇的（開新功能、要憑證/scope）問一句才做,不擅自開** (c) 失敗不硬解,顯示錯誤請使用者找 Tim (d) 動到憑證、執行外部程式的動作（例:Notion 憑證安裝、image-studio 首裝）在 auto mode 下會被擋,且不能繞過——**跑之前先講**,請使用者 Shift+Tab 切到預設模式、逐步批准,跑完再切回;不要先說「會自動跑」,被擋了才改口
-4. 重跑第 1 到 6 節：junction 裝的自動生效；新出現的、以及使用者先前沒裝的 skills/agents 直接補裝（`starter-skip.md` 內的除外）；CLAUDE.starter.md 新增的規則直接併；agents 有 diff 進最終健檢。**其中第 3 節第 6 步「更新 skill map」是升級收尾必跑項，不可因「重跑 1–6 節」帶過而漏掉**：把 `~/.claude/starter-skill-map.md` 對到本次裝完的實況（新裝的補行、kit 移除的刪行、日期改今天），結算表要列出 map 新增／移除了哪幾行（前科：2026-10-01 維護者本機的 map 停在 9/17，升級 v3.15／v3.16 時只補了現況段落、沒走正式更新）
+4. 重跑第 1 到 6 節：junction 裝的自動生效（檔案層面；**這個 session 已經讀過的 SKILL.md 內容不會刷新**，結算表末尾提醒 `/clear` 重開）；新出現的、以及使用者先前沒裝的 skills/agents 直接補裝（`starter-skip.md` 內的除外）；CLAUDE.starter.md 新增的規則直接併；agents 有 diff 進最終健檢。**其中第 3 節第 6 步「更新 skill map」是升級收尾必跑項，不可因「重跑 1–6 節」帶過而漏掉**：把 `~/.claude/starter-skill-map.md` 對到本次裝完的實況（新裝的補行、kit 移除的刪行、日期改今天），結算表要列出 map 新增／移除了哪幾行（前科：2026-10-01 維護者本機的 map 停在 9/17，升級 v3.15／v3.16 時只補了現況段落、沒走正式更新）
 5. **kit 已移除或更名的 skill**（junction 指向 kit 內但目標已消失）→ **直接刪除失效 junction，不問**（它已無任何功能，刪除零風險），並查 CHANGELOG 判斷去向，在結算表交代清楚（例：plan-dept1-writer → v2.4.0 更名 plan-dept14-writer，新版已裝；generate2dsprite-chibi → v1.3.0 併入 generate2dsprite）。**只自動刪失效 junction**；實體資料夾（非 junction，zip 備援安裝）分兩種：名稱在 CHANGELOG 更名／併入紀錄中、且內容與 kit 舊版同源（diff 只有 kit 後續更新）→ 視同「舊版」處理：備份到 `skills-backup/`（已版控則跳過備份，見鐵則）後刪除舊名資料夾、裝上新名（不問，結算表列出）——否則新舊兩支會並存搶觸發詞；內容有使用者自改 → 不動，進最終健檢換版評估
 6. **同步 gitignore 排除區**（只在 `~/.claude` 是 git repo 時才跑，不是就整步跳過）：排除行是裝機當下依現況寫入的（第 3 節第 7 步），kit skill 新增或更名後不會自己更新，該 skill 落在白名單 `!/skills/` 內又沒有排除行，junction 內容就被重複追蹤一份
    - **對帳**：比對 `~/.claude/.gitignore` 的排除區與 `~/.claude/skills/` 實際的 junction 清單——缺的補上、指向已不存在 kit skill 的移除（例：v2.4.0 更名後補 `plan-dept14-writer`、移除 `plan-dept1-writer`）
