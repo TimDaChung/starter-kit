@@ -4,7 +4,7 @@
 
 ## v3.46.0 (2026-10-15)
 
-- **新增 `giftbag-banner-swap`：魚樂園禮包換圖上線操作**（Tim 指示，流程來自企劃四部 2026-10-15 的操作說明）：網頁對稿交付的 `banner.zip` → 改成企劃第 5 章「Banner 圖檔名稱」（企劃沒寫就照 `YYMM_giftbag_<主題>.zip` 發想、給 PM 看過並回寫企劃）→ 複製到 `FH_common/HD` 與 `FH_common/HDR` 兩個上傳網芳（同一檔，對稿組確認）→ 三方 sha256 核對 → 開後台同步頁，**按同步前問一次**。`scripts/swap_banner.py` 預設只預覽、`--write` 才複製、目標已存在不覆蓋（代表這月已傳過，先問 PM）、對稿資料夾一律不動；網芳與同步頁位址集中在 `scripts/paths.json`。假資料夾端到端實跑通過，5 個單元測試；真網芳只確認目錄存在，未實際上傳。README、功能說明、CLAUDE.starter 企劃列、starter-setup 依賴表同步
+- **新增 `giftbag-banner-swap`：魚樂園禮包換圖上線操作**（Tim 指示，流程來自企劃四部 2026-10-15 的操作說明）：入口只有對稿網芳路徑：`scripts/find_banner_name.py` 從路徑拆版號與禮包名 → 版本或更新之書 → 活動之書篩「上線版號」→ 第 5 章含禮包名的那節 → 讀「Banner圖檔名稱」（每一跳印出來；真路徑實跑 v8.7 → 賽特賓果樂 5.1 → `2611_giftbag_Setekh.zip` 正確）；讀到的要核對是本月的（複本常留舊檔名），舊的或空白才照 `YYMM_giftbag_<主題>.zip` 發想、給 PM 看過並回寫企劃→ 複製到 `FH_common/HD` 與 `FH_common/HDR` 兩個上傳網芳（同一檔，對稿組確認）→ 三方 sha256 核對 → 開後台同步頁，**按同步前問一次**。`scripts/swap_banner.py` 預設只預覽、`--write` 才複製、目標已存在不覆蓋（代表這月已傳過，先問 PM）、對稿資料夾一律不動；網芳與同步頁位址集中在 `scripts/paths.json`。假資料夾端到端實跑通過，10 個單元測試（含假 Notion）；真路徑 dry run 走通（該檔 Leo 已手動上傳，兩處都標 EXISTS），未實際寫入。README、功能說明、CLAUDE.starter 企劃列、starter-setup 依賴表同步
 - ⚙️ **升級動作**：`git pull` 後新 skill 由精靈補裝（junction）；無設定變更
 
 ## v3.45.0 (2026-10-15)

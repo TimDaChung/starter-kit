@@ -93,13 +93,18 @@ def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser(description="Giftbag banner: review folder -> renamed copies in HD and HDR shares.")
     ap.add_argument("source", help="review folder (contains banner.zip) or the zip itself")
-    ap.add_argument("name", help="target file name, YYMM_giftbag_<theme>.zip")
+    ap.add_argument("name", nargs="?", help="target file name, YYMM_giftbag_<theme>.zip; "
+                    "omit to read it from the plan found via the folder path (find_banner_name.py)")
     ap.add_argument("--write", action="store_true", help="actually copy (default: preview)")
     ap.add_argument("--force", action="store_true", help="overwrite existing targets")
     ap.add_argument("--hd", help="override HD upload folder")
     ap.add_argument("--hdr", help="override HDR upload folder")
     a = ap.parse_args()
 
+    if not a.name:
+        from find_banner_name import find  # Notion lookup only when needed
+        a.name = find(a.source)
+        print(f"name taken from the plan: {a.name}  (check it is this month's, not last month's leftover)")
     problems = check_name(a.name)
     if problems and not NAME_RE.match(a.name):
         raise SystemExit(problems[0])
