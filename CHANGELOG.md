@@ -2,6 +2,11 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.47.0 (2026-10-15)
+
+- **有配套 demo 的企劃，demo 檔附進企劃**（Tim 指示，範例：魚類之書〈齊天大聖〉1.2 玩法大綱）：寫法固定——玩法大綱最後一條「試玩 demo：見附檔《<名稱>demo》…搭配本企劃閱讀」＋三個子項（怎麼開／怎麼操作／哪些是暫定）＋單檔 HTML 的檔案區塊（caption《<名稱>demo》）。writer 第九節新增第 10 條；boss-demo 步驟 5 寫回 Notion 加「定稿 demo 檔也要附」；product-planning 模式 B 加第 6 條（順手修掉重複的第 4 條編號）。`notion_rest.upload_file()` 原本只認圖片、其他副檔名一律當 jpeg 送，現改 `UPLOAD_TYPES`（html／zip／pdf／mp4，未知型別 octet-stream），新增 `file_block()`；補測試
+- ⚙️ **升級動作**：`git pull` 即生效，無設定變更
+
 ## v3.46.0 (2026-10-15)
 
 - **新增 `giftbag-banner-swap`：魚樂園禮包換圖上線操作**（Tim 指示，流程來自企劃四部 2026-10-15 的操作說明）：入口只有對稿網芳路徑：`scripts/find_banner_name.py` 從路徑拆版號與禮包名 → 版本或更新之書 → 活動之書篩「上線版號」→ 第 5 章含禮包名的那節 → 讀「Banner圖檔名稱」（每一跳印出來；真路徑實跑 v8.7 → 賽特賓果樂 5.1 → `2611_giftbag_Setekh.zip` 正確）；讀到的要核對是本月的（複本常留舊檔名），舊的或空白才照 `YYMM_giftbag_<主題>.zip` 發想、給 PM 看過並回寫企劃→ 複製到 `FH_common/HD` 與 `FH_common/HDR` 兩個上傳網芳（同一檔，對稿組確認）→ 三方 sha256 核對 → 開後台同步頁，**按同步前問一次**。`scripts/swap_banner.py` 預設只預覽、`--write` 才複製、目標已存在不覆蓋（代表這月已傳過，先問 PM）、對稿資料夾一律不動；網芳與同步頁位址集中在 `scripts/paths.json`。假資料夾端到端實跑通過，9 個單元測試（含假 Notion）；真路徑 dry run 走通（該檔對稿負責人已手動上傳，兩處都標 EXISTS），未實際寫入。README、功能說明、CLAUDE.starter 企劃列、starter-setup 依賴表同步

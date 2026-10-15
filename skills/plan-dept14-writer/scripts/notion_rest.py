@@ -51,6 +51,9 @@ VER = "2022-06-28"
 # read-only: create and update both reject it (400, tested 2026-10-05). Used for checks only.
 LIST_FORMAT_VER = "2025-09-03"
 LIST_FORMATS = ("numbers", "letters", "roman")
+# upload content types: images for image blocks, html/zip/pdf for file blocks (demo files attached to plans)
+UPLOAD_TYPES = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "gif": "image/gif", "webp": "image/webp",
+                "html": "text/html", "htm": "text/html", "zip": "application/zip", "pdf": "application/pdf", "mp4": "video/mp4"}
 TIMEOUT = 75
 WRITE_METHODS = ("POST", "PATCH", "PUT", "DELETE")
 LINE_DEPT = {"神幣": "一部", "娛樂城": "四部", "鬥地主": "四部", "魚樂園": "四部"}
@@ -198,7 +201,7 @@ class Notion:
 
     # ---- files
     def upload_image(self, blob: bytes, ext: str, name: str) -> str:
-        ctype = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "gif": "image/gif", "webp": "image/webp"}.get(ext.lower(), "image/jpeg")
+        ctype = UPLOAD_TYPES.get(ext.lower(), "application/octet-stream")
         fu = self.call("POST", "/file_uploads", {"mode": "single_part", "filename": f"{name}.{ext}", "content_type": ctype})
         boundary = "----np" + uuid.uuid4().hex
         body = (f"--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"{name}.{ext}\"\r\n"
@@ -406,6 +409,14 @@ def table(rows: list[list[Any]], header: bool = True, row_header: bool = False) 
 
 def image_block(file_id: str, caption: str = "") -> dict[str, Any]:
     return {"object": "block", "type": "image", "image": {"type": "file_upload", "file_upload": {"id": file_id}, "caption": rt(caption)}}
+
+
+def file_block(file_id: str, caption: str = "", name: str | None = None) -> dict[str, Any]:
+    """Downloadable file block (e.g. a single-file HTML demo attached under 玩法大綱)."""
+    b: dict[str, Any] = {"object": "block", "type": "file", "file": {"type": "file_upload", "file_upload": {"id": file_id}, "caption": rt(caption)}}
+    if name:
+        b["file"]["name"] = name
+    return b
 
 
 def code_block(source: str, language: str = "mermaid", caption: str = "") -> dict[str, Any]:
