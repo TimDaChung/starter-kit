@@ -21,7 +21,7 @@
 **被糾正過的事，寫回這份檔案。**
 同一類錯誤被指正時，在對應段落加一條具體規則（含當時的實際案例一句話）。這份檔案的價值不在起手內容，在它會隨著你的使用越長越準。
 
-**唯一例外：kit skill 的產出被糾正，不寫這裡、不寫 memory。** 自己改自己只有自己不再犯；Claude 會在收尾自動記一筆到 `~/.claude/starter-feedback.md`，下次「starter 升級」整理送回 kit，修一次全組不再犯。這份檔案只留個人習慣與 kit 無關的規則（Tim 2026-10-15）。
+**唯一例外：kit 的東西被糾正，回 kit、不只改自己。** 兩種情況：(1) kit skill 的產出被糾正 → 不寫這裡、不寫 memory，Claude 收尾自動記一筆到 `~/.claude/starter-feedback.md`；(2) 被糾正的是**這份檔案裡來自 `CLAUDE.starter.md` 的規則**（Claude 先到 `%USERPROFILE%\starter-kit\CLAUDE.starter.md` 找同一句，找得到就是）→ 可以先改這裡止血，但**一樣要記一筆**（skill 欄寫 `CLAUDE.starter`），下次「starter 升級」整理送回 kit，修一次全組的 CLAUDE.md 一起準。只有個人習慣、與 kit 無關的規則才只改這裡不記（Tim 2026-10-15）。
 
 配套三條，讓這份檔案跟整套設定持續變準：
 
