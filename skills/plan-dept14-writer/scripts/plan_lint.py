@@ -29,7 +29,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 HEADING_NUM = re.compile(r"^\s*(\d+(?:\.\d+)*)(?:\.([A-Z]))?\.?(?=\s|$|[^\d.A-Za-z])")
 REF = re.compile(r"見\s*\**\s*(\d+(?:\.(?:\d+|[A-Z]))*)\.?")
 PLACEHOLDER = "後補"
-ARROW = re.compile(r"\s*(?:--\s+([^|>]+?)\s+-->|(-\.->|-->|==>|-\.-|---)\s*(?:\|([^|]*)\|)?)\s*")
+# Labelled forms: A -- x --> B (solid), A -. x .-> B (dotted), A == x ==> B (thick); or A -->|x| B.
+ARROW = re.compile(r"\s*(?:--\s+([^|>]+?)\s+-->|-\.\s+([^|>]+?)\s+\.->|==\s+([^|>]+?)\s+==>"
+                   r"|(-\.->|-->|==>|-\.-|---)\s*(?:\|([^|]*)\|)?)\s*")
+ARROW_GROUPS = 5
 NODE = re.compile(r"^([A-Za-z0-9_]+)\s*(.*)$", re.S)
 SHAPES = [("([", "])"), ("[[", "]]"), ("{{", "}}"), ("((", "))"), ("{", "}"), ("(", ")"), ("[", "]")]
 SKIP_LINE = re.compile(r"^\s*(%%|flowchart|graph|class |classDef|linkStyle|style |subgraph|end\s*$|click )")
@@ -113,14 +116,16 @@ def parse_mermaid(src: str) -> dict[str, Any]:
         if not line.strip() or SKIP_LINE.match(line):
             continue
         parts = ARROW.split(line)
-        # split yields: seg, (long_label, arrow, pipe_label), seg, ...
-        segs = parts[0::4]
+        # split yields: seg, (solid_label, dotted_label, thick_label, arrow, pipe_label), seg, ...
+        step = ARROW_GROUPS + 1
+        segs = parts[0::step]
         ids = [node(s) for s in segs]
         for i in range(len(segs) - 1):
-            long_label, arrow, pipe_label = parts[4 * i + 1: 4 * i + 4]
+            solid, dotted, thick, arrow, pipe = parts[step * i + 1: step * i + step]
             a, b = ids[i], ids[i + 1]
             if a and b:
-                edges.append((a, (pipe_label or long_label or "").strip(), b, bool(arrow and "." in arrow)))
+                label = (pipe or solid or dotted or thick or "").strip()
+                edges.append((a, label, b, bool(dotted) or bool(arrow and "." in arrow)))
     return {"nodes": nodes, "edges": edges}
 
 

@@ -80,6 +80,21 @@ def test_parse_mermaid_nodes_and_edges() -> None:
     assert ("D4", "是", "A4", False) in chart["edges"]
 
 
+def test_parse_mermaid_labelled_dotted_and_thick() -> None:
+    # Reported 2026-10-15: "M -. 是 .-> F" was not parsed, so M showed only one exit.
+    chart = pl.parse_mermaid("""
+flowchart TD
+    M{"是否重來？"} -->|否| E([結束])
+    M -. 是 .-> F(重新開始)
+    F == 強制 ==> G[結算]
+""")
+    assert ("M", "是", "F", True) in chart["edges"]
+    assert ("F", "強制", "G", False) in chart["edges"]
+    rows, warns = pl.decision_report(chart)
+    assert [e["label"] for e in rows[0]["exits"]] == ["否", "是"]
+    assert not warns
+
+
 def test_decision_report_lists_exits_and_warns() -> None:
     rows, warns = pl.decision_report(pl.parse_mermaid(SAMPLE_FLOW))
     d4 = next(r for r in rows if r["id"] == "D4")

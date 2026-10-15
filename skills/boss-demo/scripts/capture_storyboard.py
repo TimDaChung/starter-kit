@@ -36,6 +36,8 @@ Usage:
 The demo directory is served over a local HTTP server (file:// breaks on
 non-ASCII paths and blocks some assets).
 """
+from __future__ import annotations
+
 import argparse
 import functools
 import http.server
@@ -261,6 +263,84 @@ def contact_sheet(images: list[Image.Image], shots: list[dict], phases: list[dic
     sheet.save(out)
 
 
+# Chinese line-breaking (kinsoku): these never start a line / never end a line.
+NO_LINE_START = set("，。、！？；：」』）》〉】〕”’…—,.!?;:)]}%")
+NO_LINE_END = set("「『（《〈【〔“‘([{")
+LABEL_BG, LABEL_FG, SHEET_BG = (255, 196, 0), (0, 0, 0), (24, 24, 24)
+
+
+def _tokens(text: str) -> list[str]:
+    """Split into breakable units: an ASCII word/number stays whole, every other char is its own unit."""
+    return re.findall(r"[A-Za-z0-9.%+\-×x]+|\s|.", text)
+
+
+def wrap_text(text: str, font: ImageFont.FreeTypeFont, max_width: float) -> list[str]:
+    """Greedy wrap to max_width pixels.
+
+    A closing punctuation mark never starts a line: the previous unit moves down
+    with it (or, if that would leave the line empty, the mark hangs past the edge).
+    An opening mark never ends a line: it moves down to the next one.
+    """
+    lines: list[list[str]] = [[]]
+    for tok in _tokens(text):
+        line = lines[-1]
+        if not line and tok.isspace():
+            continue
+        if not line or font.getlength("".join(line) + tok) <= max_width:
+            line.append(tok)
+            continue
+        if tok.isspace():
+            lines.append([])
+            continue
+        if tok[0] in NO_LINE_START:
+            if len(line) > 1 and line[-1][0] not in NO_LINE_START:
+                lines.append([line.pop(), tok])
+            else:
+                line.append(tok)  # hang the punctuation
+            continue
+        carry = []
+        while len(line) > 1 and line[-1][0] in NO_LINE_END:
+            carry.insert(0, line.pop())
+        while line and line[-1].isspace():
+            line.pop()
+        lines.append(carry + [tok])
+    return ["".join(line).rstrip() for line in lines if "".join(line).strip()] or [""]
+
+
+def layout_sheet(frames: list[Image.Image], labels: list[str], cols: int, cell_w: int,
+                 font: ImageFont.FreeTypeFont | None = None) -> tuple[Image.Image, list[tuple[int, int, int, int]]]:
+    """Stitch frames into a grid; each cell gets its own label band ABOVE the frame.
+
+    Labels wrap to the cell width; a row's band height is its tallest label so frames
+    in a row stay aligned. Returns the sheet and each frame's (x0, y0, x1, y1) box.
+    """
+    cell_h = round(cell_w * frames[0].height / frames[0].width)
+    gap = round(cell_w * 0.02)
+    font = font or load_font(round(cell_h * 0.06))
+    pad = max(4, round(cell_h * 0.025))
+    asc, desc = font.getmetrics()
+    line_h = round((asc + desc) * 1.15)
+    wrapped = [wrap_text(label, font, cell_w - pad * 2) for label in labels]
+    rows = -(-len(frames) // cols)
+    bands = [max(len(w) for w in wrapped[r * cols:(r + 1) * cols]) * line_h + pad * 2 for r in range(rows)]
+    height = gap + sum(band + cell_h + gap for band in bands)
+    sheet = Image.new("RGB", (cols * cell_w + (cols + 1) * gap, height), SHEET_BG)
+    draw = ImageDraw.Draw(sheet)
+    boxes = []
+    y = gap
+    for r in range(rows):
+        for c, j in enumerate(range(r * cols, min((r + 1) * cols, len(frames)))):
+            x = gap + c * (cell_w + gap)
+            draw.rectangle((x, y, x + cell_w - 1, y + bands[r] - 1), fill=LABEL_BG)
+            for k, line in enumerate(wrapped[j]):
+                draw.text((x + pad, y + pad + k * line_h), line, font=font, fill=LABEL_FG)
+            fy = y + bands[r]
+            sheet.paste(frames[j].convert("RGB").resize((cell_w, cell_h), Image.LANCZOS), (x, fy))
+            boxes.append((x, fy, x + cell_w, fy + cell_h))
+        y += bands[r] + cell_h + gap
+    return sheet, boxes
+
+
 def cmd_compose(args: argparse.Namespace) -> None:
     out_dir = pathlib.Path(args.out_dir).resolve()
     data = json.loads((out_dir / "candidates.json").read_text(encoding="utf-8"))[args.scenario]
@@ -296,21 +376,8 @@ def cmd_compose(args: argparse.Namespace) -> None:
         spans.append((first, max(end, start + 1), ms))
 
     cols, rows = grid(len(picked))
-    cell_w = args.cell_width
-    cell_h = round(cell_w * images[0].height / images[0].width)
-    gap = round(cell_w * 0.02)
-    sheet = Image.new("RGB", (cols * cell_w + (cols + 1) * gap, rows * cell_h + (rows + 1) * gap), (24, 24, 24))
-    draw = ImageDraw.Draw(sheet)
-    font = load_font(round(cell_h * 0.06))
-    pad = round(cell_h * 0.025)
-    for j, i in enumerate(picked):
-        row, col = divmod(j, cols)
-        x, y = gap + col * (cell_w + gap), gap + row * (cell_h + gap)
-        sheet.paste(images[i].convert("RGB").resize((cell_w, cell_h), Image.LANCZOS), (x, y))
-        text = f"圖{j + 1}  {captions[j]}" if captions else f"圖{j + 1}"
-        box = draw.textbbox((x + pad * 2, y + pad * 2), text, font=font)
-        draw.rectangle((x + pad, y + pad, box[2] + pad, box[3] + pad), fill=(255, 196, 0))
-        draw.text((x + pad * 2, y + pad * 2), text, font=font, fill=(0, 0, 0))
+    labels = [f"圖{j + 1}  {captions[j]}" if captions else f"圖{j + 1}" for j in range(len(picked))]
+    sheet, _ = layout_sheet([images[i] for i in picked], labels, cols, args.cell_width)
     sheet_path = out_dir / f"分鏡_{data['name']}.png"
     sheet.save(sheet_path)
 

@@ -203,8 +203,22 @@ class Notion:
         boundary = "----np" + uuid.uuid4().hex
         body = (f"--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"{name}.{ext}\"\r\n"
                 f"Content-Type: {ctype}\r\n\r\n").encode() + blob + f"\r\n--{boundary}--\r\n".encode()
-        self.call("POST", f"/file_uploads/{fu['id']}/send", raw=body, headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
+        sent = self.call("POST", f"/file_uploads/{fu['id']}/send", raw=body, headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
+        self.wait_uploaded(fu["id"], sent.get("status"))
         return fu["id"]
+
+    def wait_uploaded(self, file_id: str, status: str | None = None, timeout: float = 10.0,
+                      interval: float = 0.5) -> None:
+        """Block until the upload is usable. Referencing it earlier (a burst of uploads, then one
+        append) fails with 404 "Confirm the status of the file upload is uploaded"."""
+        deadline = time.monotonic() + timeout
+        while status != "uploaded":
+            if status in ("failed", "expired"):
+                raise RuntimeError(f"file_upload {file_id} is {status}")
+            if time.monotonic() >= deadline:
+                raise RuntimeError(f"file_upload {file_id} still {status!r} after {timeout:.0f}s")
+            time.sleep(interval)
+            status = self.call("GET", f"/file_uploads/{file_id}").get("status")
 
     def upload_file(self, path: str | Path, name: str | None = None) -> str:
         p = Path(path)
