@@ -237,46 +237,49 @@ class Notion:
                 yield from self.walk(b["id"], depth + 1, max_depth)
 
     def check_list_format(self, block_id: str) -> list[dict[str, Any]]:
-        """Read-only check of numbered-list display formats against the house style 1.->a.->i.
+        """Read-only check: numbered lists whose display is not Notion's default 1.->a.->i.
 
-        API-created lists carry no list_format and render as plain numbers at every level, and
-        the API cannot set it. Returns the first item of every list that will look wrong:
-        [{"id", "text" (first 20 chars), "level", "have", "want"}]. A list directly under a
-        numbered heading ("2.1 ...") is treated as level 1 (a.), which is how the dept templates
-        number sections; follow the page's own siblings if they disagree.
+        Rendering rules (tested in the Notion UI 2026-10-15):
+          - a list with no list_format (every API-created list) inherits the nearest ancestor
+            list that has one; with none above it, it follows depth: 1. -> a. -> i. -> 1.
+          - so an explicit format, even one that matches its own depth, can push every
+            unformatted sub-list below it off the default (explicit "numbers" on top -> 1/1/1)
+        The API cannot set or clear list_format (400), so the fix is manual: List format ->
+        Default on the reported list. Returns one entry per list to reset:
+        [{"id", "text" (first 20 chars), "level", "have", "wrong" (levels shown wrong)}].
         """
-        numbered = re.compile(r"\s*\d+(\.\d+)*[.\s]")
         passthrough = ("column_list", "column", "synced_block", "toggle")
-        issues: list[dict[str, Any]] = []
+        issues: dict[str, dict[str, Any]] = {}
 
-        def visit(bid: str, list_level: int | None, under_numbered: bool) -> None:
-            # list_level: level of lists found here when inside a list item; None = plain container
-            prev_type, cur = None, 0
+        def visit(bid: str, list_level: int, source: dict[str, Any] | None) -> None:
+            # list_level: nesting depth of numbered lists found directly here (0 = top level)
+            # source: the nearest ancestor list with an explicit list_format, if any
+            prev_type, here = None, source
             for b in self.children(bid, version=LIST_FORMAT_VER):
                 t = b["type"]
                 payload = b.get(t, {})
-                if t.startswith("heading_"):
-                    under_numbered = bool(numbered.match(plain(payload.get("rich_text"))))
                 if t == "numbered_list_item" and prev_type != "numbered_list_item":
-                    cur = list_level if list_level is not None else (1 if under_numbered else 0)
-                    want = LIST_FORMATS[cur % 3]
                     have = payload.get("list_format")
-                    if (have or "numbers") != want:
-                        issues.append({"id": b["id"], "text": plain(payload.get("rich_text"))[:20],
-                                       "level": cur, "have": have or "(none = numbers)", "want": want})
+                    here = ({"id": b["id"], "text": plain(payload.get("rich_text"))[:20],
+                             "level": list_level, "have": have} if have else source)
+                    shown = here["have"] if here else LIST_FORMATS[list_level % 3]
+                    if shown != LIST_FORMATS[list_level % 3]:
+                        entry = issues.setdefault(here["id"], {**here, "wrong": []})
+                        if list_level not in entry["wrong"]:
+                            entry["wrong"].append(list_level)
+                elif t != "numbered_list_item":
+                    here = source
                 if b.get("has_children"):
                     if t == "numbered_list_item":
-                        visit(b["id"], cur + 1, under_numbered)
-                    elif t.startswith("heading_"):
-                        visit(b["id"], None, under_numbered)
+                        visit(b["id"], list_level + 1, here)
                     elif t in passthrough:
-                        visit(b["id"], list_level, under_numbered)
+                        visit(b["id"], list_level, source)
                     else:
-                        visit(b["id"], None, False)
+                        visit(b["id"], 0, None)
                 prev_type = t
 
-        visit(block_id, None, False)
-        return issues
+        visit(block_id, 0, None)
+        return list(issues.values())
 
     def append(self, block_id: str, blocks: list[dict[str, Any]], after: str | None = None,
                log: Callable[[str], Any] | None = None) -> list[dict[str, Any]]:
@@ -424,11 +427,11 @@ def _cli() -> None:
                 raise
     else:
         raise SystemExit("404 with every dept credential: the page is not connected to the integration.")
-    fmt = {"numbers": "1.", "letters": "a.", "roman": "i."}
     if not issues:
-        print("OK: every numbered list follows 1.->a.->i.")
+        print("OK: every numbered list shows Notion's default 1.->a.->i.")
     for x in issues:
-        print(f"{x['id']}  level {x['level']}  now {x['have']}  -> set to {fmt[x['want']]}  「{x['text']}」")
+        print(f"{x['id']}  level {x['level']}  set to {x['have']} (wrong at levels {x['wrong']})"
+              f"  -> List format: Default  「{x['text']}」")
 
 
 if __name__ == "__main__":

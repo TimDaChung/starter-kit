@@ -3,14 +3,15 @@
 Read-only. Checks that do not depend on model attention, so every run gives the same answer:
   1. heading numbering: gaps and duplicates per parent (4.1, 4.2, 4.4 -> 4.3 missing)
   2. cross references: "見 3.9.1" / "見 **2.3.B.6**" must resolve to a heading or a numbered item
-  3. list display format 1.->a.->i. (same as notion_rest.py check-lists)
+  3. (opt-in, --lists) lists not shown as Notion's default 1.->a.->i. (same as notion_rest.py
+     check-lists); API-written lists already are, so only manually formatted pages hit this
   4. 「後補」 placeholders with their section
   5. mermaid flowcharts: every decision node with its exits, for the semantic check against the
      rule chapter (done by the reviewer, not here); flags decisions with < 2 exits or unlabeled exits
 
 A synced block starts a new numbering scope (a sub-plan embedded in a version page restarts at 1.).
 
-Usage: python plan_lint.py <url or id> [--json out.json] [--no-lists]
+Usage: python plan_lint.py <url or id> [--json out.json] [--lists]
 """
 
 from __future__ import annotations
@@ -269,7 +270,7 @@ def resolve(ref: tuple[str, ...], scope: Scope, api: Any) -> bool:
 
 
 # ------------------------------------------------------------------ CLI
-def lint(url: str, lists: bool = True) -> dict[str, Any]:
+def lint(url: str, lists: bool = False) -> dict[str, Any]:
     from notion_rest import Notion, dept_from_id, find_token, page_id_from
 
     pid = page_id_from(url)
@@ -300,8 +301,8 @@ def lint(url: str, lists: bool = True) -> dict[str, Any]:
             rows, warns = decision_report(parse_mermaid(src))
             out["charts"].append({"scope": sc.name, "section": sec, "decisions": rows, "warnings": warns})
     if lists:
-        fmt = {"numbers": "1.", "letters": "a.", "roman": "i."}
-        out["lists"] = [f"level {x['level']} 現在 {x['have']} → 應為 {fmt[x['want']]}「{x['text']}」"
+        out["lists"] = [f"第 {x['level'] + 1} 層設成 {x['have']}，第 {'、'.join(str(n + 1) for n in x['wrong'])} 層顯示不對"
+                        f" → 清單格式改 Default「{x['text']}」"
                         for x in api.check_list_format(pid)]
     return out
 
@@ -326,7 +327,7 @@ def render(out: dict[str, Any]) -> str:
         lines.extend(f"- ⚠️ {w_}" for w_ in c["warnings"])
     lines.append("")
     if out["lists"]:
-        block("清單編號樣式（API 改不了，需手動）", out["lists"], "")
+        block("清單顯示不是 1.→a.→i.（API 改不了，要在 Notion 把清單格式改 Default）", out["lists"], "")
     if out["errors"]:
         block("讀取錯誤", out["errors"], "")
     return "\n".join(lines)
@@ -337,9 +338,10 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Read-only deterministic lint for a dept plan page.")
     ap.add_argument("url")
     ap.add_argument("--json", help="also write the raw result to this file")
-    ap.add_argument("--no-lists", action="store_true", help="skip the list display-format check")
+    ap.add_argument("--lists", action="store_true", help="also check numbered lists are shown as Notion's default 1.->a.->i.")
+    ap.add_argument("--no-lists", action="store_true", help=argparse.SUPPRESS)  # kept for old notes; default is off
     args = ap.parse_args()
-    out = lint(args.url, lists=not args.no_lists)
+    out = lint(args.url, lists=args.lists and not args.no_lists)
     if args.json:
         Path(args.json).write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
     print(render(out))
