@@ -4,7 +4,7 @@
 
 ## v3.45.0 (2026-10-15)
 
-收一批組員回報與建議（7 張，5 張照修、1 張已於 v3.44.0 修、1 張待收檔）：
+收一批組員回報與建議（7 張，6 張照修或採納、1 張已於 v3.44.0 修）：
 
 - **boss-demo `capture_storyboard.py compose` 分鏡標籤換行＋移到圖上方**（組員回報）：長 caption 原本單行、超出格寬被裁，而且疊在畫面左上角蓋到關鍵畫面。新增 `wrap_text()` 依格寬斷行（收尾標點不落行首、開頭標點不留行尾、英數字不拆），`layout_sheet()` 每格上方各一條標籤帶，同列取最高對齊；新增 `test_capture_storyboard.py`（含逐像素確認圖片沒被蓋到）
 - **boss-demo 步驟 6「截分鏡」SOP 補強**（組員建議，全部採納）：`storyboard-capture.md` 新增第 1 步——先照企劃文字列截圖清單、beat 只加在截圖用副本（定稿 demo 不動）、截圖前全部圖片 decode 預熱、整段套 easing 的狀態靠觀察放 beat；組成時逐格對照企劃、流程相同的表演只出一輪。`capture-timing.md` 地雷 2 補「中途才換上的圖也要預熱」。分工：副本只放截圖 beat 與預熱，demo 本身的計時地雷照舊回步驟 4 修
@@ -12,7 +12,7 @@
 - **`notion_rest.upload_file` 等到上傳狀態 uploaded 才回傳**（組員回報）：連續上傳後立刻 append 會 404「Confirm the status of the file upload is uploaded」。新增 `wait_uploaded()` 輪詢 `GET /file_uploads/{id}`（最多 10 秒，failed／expired 直接報錯），新增 `test_notion_rest.py`；實際上傳一張圖 0.9 秒到 uploaded。連傳十多張的原狀況未重現，修法照回報建議
 - **魚樂園企劃慣例收進 Notion〈共用規範之書〉、表格表頭照範本**（組員建議，部分採納）：不恢復 `line-notes.md`（v3.30.0 已改以 Notion 為權威）。新頁〈魚樂園企劃撰寫慣例〉收全線用詞（射擊／注額／Boss）與 Boss 企劃的機制通規、公版段落、Spine 動態限制，`shared-specs.md` 加觸發列。**表格方向與章節順序不收**——範本本來就帶：實讀劍魔、俱樂部討伐副本兩份實例，「畫面呈現章的表一律首欄當表頭」與實例不符（狀態表都是首列），通則是「欄位名在哪邊就開哪邊」；章節順序以劍魔為準。writer 原本對表頭沒有任何規定、`table()` 也開不了首欄，這才是回報者自訂規則的原因：第九節新增第 9 條「表格表頭照範本」、`notion_rest.table()` 加 `row_header`，plan-doc-qa 結構檢查加表頭項。「demo 試玩調整指令不是規格」各線通用，寫進 writer 第九節第 8 條
 - check-lists 魚樂園誤報（組員回報）：已於 v3.44.0 修，回報的兩個假設與實測一致
-- md2notion 整頁寫入工具（組員建議）：方向採納，待回報者提供原始腳本後審內容再收
+- **新增 `plan-dept14-writer/scripts/md2notion.py`：Markdown 企劃寫進 Notion 範本複本**（組員建議＋提供腳本，採納並通用化）：巢狀清單（先建上層再補子層）、清單底下的表格、有圖小節自動左文右圖、mermaid＋《圖說》、紅藍字與連結、`TODO` 圖位轉紅字待補。收進 kit 時改的：拿掉寫死的起始章與流程圖標籤過濾（改 `--start`）；表頭不再依章號猜，預設首列、表格前一行 `<!-- 表頭:首欄 -->` 照範本切換；上傳輪詢改用 `upload_file` 內建的；預設只預覽、`--write` 才寫；**新增 `--section` 局部更新**——只換該小節內容，標題 block 保留、先插後刪。測試頁實跑：整份寫入結構全對，`--section` 後整頁只有該小節的區塊 id 變動。新增 `test_md2notion.py`；writer 第八節第 1 條指向本工具
 - ⚙️ **升級動作**：`git pull` 即生效，無設定變更
 
 ## v3.44.0 (2026-10-15)
