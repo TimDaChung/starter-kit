@@ -447,7 +447,7 @@ def _cli() -> None:
     if not issues:
         print("OK: every numbered list shows Notion's default 1.->a.->i.")
     for x in issues:
-        print(f"{x['id']}  level {x['level']}  set to {x['have']} (wrong at levels {x['wrong']})"
+        print(f"{x['id']}  第 {x['level'] + 1} 層設成 {x['have']}（第 {'、'.join(str(w + 1) for w in x['wrong'])} 層顯示不對）"
               f"  -> List format: Default  「{x['text']}」")
 
 

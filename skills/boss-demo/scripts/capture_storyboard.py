@@ -39,7 +39,6 @@ non-ASCII paths and blocks some assets).
 from __future__ import annotations
 
 import argparse
-import functools
 import http.server
 import json
 import re

@@ -115,3 +115,4 @@ def test_dept1_figure_title_goes_with_image_and_todo_keeps_template_wording() ->
     todo = w.to_block(right[2])
     assert m.plain(todo["paragraph"]["rich_text"]) == "【待補】"
     assert todo["paragraph"]["rich_text"][0]["annotations"]["color"] == "red"
+

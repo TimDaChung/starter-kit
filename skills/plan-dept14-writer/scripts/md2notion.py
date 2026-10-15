@@ -98,6 +98,8 @@ def parse(lines: list[str]) -> list[Node]:
         if s.startswith("<!--"):
             i += 1
             continue
+        if not s.startswith("|"):
+            hint = ""
         if s.startswith("```"):
             lang = s[3:].strip() or "plain text"
             src, i = [], i + 1
@@ -110,7 +112,11 @@ def parse(lines: list[str]) -> list[Node]:
                 j += 1
             cap = ""
             if j < len(lines) and re.fullmatch(r"《.*》", lines[j].strip()):
-                cap, i = lines[j].strip(), j + 1
+                k = j + 1
+                while k < len(lines) and not lines[k].strip():
+                    k += 1
+                if not (k < len(lines) and re.match(r"!\[.*?\]\(.*?\)", lines[k].strip())):  # dept-1 figure title → image
+                    cap, i = lines[j].strip(), j + 1
             place({"object": "block", "type": "code",
                    "code": {"rich_text": rt("\n".join(src)), "language": lang, "caption": rt(cap)}}, ind)
             continue
@@ -140,8 +146,8 @@ def parse(lines: list[str]) -> list[Node]:
             continue
         mi = re.fullmatch(r"!\[(.*?)\]\((.*?)\)", s)
         if mi:
-            out.append({"_image": mi.group(2), "_cap": mi.group(1)})
-            stack, i = [], i + 1
+            out.append({"_image": mi.group(2), "_cap": mi.group(1)})  # group_columns moves it; keep list nesting
+            i += 1
             j = i  # skip a caption line that only repeats the alt text
             while j < len(lines) and not lines[j].strip():
                 j += 1
@@ -189,8 +195,8 @@ def group_columns(nodes: list[Node]) -> list[Node]:
             k += 1
         if not groups:
             res.extend(sec)
-        elif not text:
-            res.append({"_columns": groups})
+        elif not text:  # nothing for a left column: stack the images (column_list needs >= 2 columns)
+            res.extend(x for g in groups for x in g)
         else:
             res.append({"_columns": [text, [x for g in groups for x in g]]})
 
@@ -244,6 +250,15 @@ def start_index(nodes: list[Node], start: str | None) -> int:
     return next((k for k, n in enumerate(nodes) if n.get("type") == "heading_1"), 0)
 
 
+def image_paths(nodes: list[Node]) -> list[str]:
+    out: list[str] = []
+    for n in nodes:
+        for x in ([n] if "_image" in n else [y for col in n.get("_columns", []) for y in col]):
+            if "_image" in x and x["_image"].strip().upper() != "TODO":
+                out.append(x["_image"])
+    return out
+
+
 def describe(n: Node) -> str:
     if "_columns" in n:
         return f"columns ×{len(n['_columns'])}"
@@ -284,6 +299,8 @@ class Writer:
                 payload.append(strip(self.to_block(n)))
                 pending.append(("kids", n.get("_kids")))
         created = self.api.append(parent, payload, after=after) if payload else []
+        if len(created) != len(payload):
+            raise RuntimeError(f"appended {len(payload)} blocks but the API returned {len(created)}")
         for (kind, data), c in zip(pending, created):
             if kind == "kids" and data:
                 self.write(c["id"], data)
@@ -306,18 +323,27 @@ def main() -> None:
     ap.add_argument("--write", action="store_true", help="actually write (default: preview only)")
     args = ap.parse_args()
 
+    if args.section and (args.clear_old or args.start):
+        ap.error("--section cannot be combined with --clear-old / --start")
     md = Path(args.md)
-    nodes = group_columns(parse(md.read_text(encoding="utf-8").splitlines()))
+    nodes = group_columns(parse(md.read_text(encoding="utf-8-sig").splitlines()))
+    missing = [p for p in image_paths(nodes) if not (md.parent / p).is_file()]
+    if missing:
+        raise SystemExit("image file(s) not found next to the .md: " + ", ".join(missing))
     pid = page_id_from(args.page)
     api, _ = open_page(pid)
     page = api.children(pid)
     w = Writer(api, md.parent)
 
     if args.section:
-        plans = []
+        plans: list[tuple[str, str, list[Node], list[str]]] = []
+        spans: list[tuple[int, int]] = []
         for title in args.section:
             ms, me = section_span(nodes, title)
             ps, pe = section_span(page, title)
+            if any(ps < e and s < pe for s, e in spans):
+                raise SystemExit(f"section {title!r} overlaps another --section target; pass the outer one only")
+            spans.append((ps, pe))
             plans.append((title, page[ps]["id"], nodes[ms + 1:me], [b["id"] for b in page[ps + 1:pe]]))
             print(f"[{title}] replace {pe - ps - 1} blocks on the page with {me - ms - 1} from the file:")
             for n in nodes[ms + 1:me]:
