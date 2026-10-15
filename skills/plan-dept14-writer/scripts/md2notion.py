@@ -17,7 +17,10 @@ Markdown understood:
   | a | b |                    table; header row by default. Put <!-- 表頭:首欄 --> (or
                                首列 / 無) on the line before to match the template's table
   ```mermaid ... ```           code block; a following 《caption》 line becomes its caption
-  ![《圖名》](path.png)         image (path relative to the .md); path TODO -> red 《圖名》待補
+  ![《圖名》](path.png)         image; alt becomes the caption (dept 4). Dept 1 puts 《n.圖名》 on its own
+                               line right above the image and leaves alt empty: that line goes to
+                               the image column too. Path TODO -> the alt text as a red placeholder,
+                               worded as the template does (【待補】 / 圖片放置區 / 圖後補)
   > text                       quote
   ---                          divider
   <span color="red">x</span>  **bold**  [text](url)   inline colour / bold / link (blue)
@@ -169,15 +172,27 @@ def group_columns(nodes: list[Node]) -> list[Node]:
     res: list[Node] = []
     sec: list[Node] = []
 
+    def is_fig_title(n: Node) -> bool:
+        return n.get("type") == "paragraph" and bool(re.fullmatch(r"《.*》", plain(n["paragraph"]["rich_text"])))
+
     def flush() -> None:
-        imgs = [n for n in sec if "_image" in n]
-        text = [n for n in sec if "_image" not in n]
-        if not imgs:
+        groups: list[list[Node]] = []  # each: [image] or [《title》 paragraph, image]
+        text: list[Node] = []
+        k = 0
+        while k < len(sec):
+            n = sec[k]
+            if is_fig_title(n) and k + 1 < len(sec) and "_image" in sec[k + 1]:
+                groups.append([n, sec[k + 1]])
+                k += 2
+                continue
+            (groups.append([n]) if "_image" in n else text.append(n))
+            k += 1
+        if not groups:
             res.extend(sec)
         elif not text:
-            res.append({"_columns": [[im] for im in imgs]})
+            res.append({"_columns": groups})
         else:
-            res.append({"_columns": [text, imgs]})
+            res.append({"_columns": [text, [x for g in groups for x in g]]})
 
     for n in nodes:
         if n.get("type", "").startswith("heading_") or n.get("type") == "divider":
@@ -248,7 +263,7 @@ class Writer:
         if "_image" not in n:
             return n
         if n["_image"].strip().upper() == "TODO":
-            return {"object": "block", "type": "paragraph", "paragraph": {"rich_text": rt(f"{n['_cap']}待補", color="red")}}
+            return {"object": "block", "type": "paragraph", "paragraph": {"rich_text": rt(n["_cap"] or "圖後補", color="red")}}
         p = (self.base / n["_image"]).resolve()
         if p not in self.uploads:
             self.uploads[p] = self.api.upload_file(p)  # waits until status == uploaded

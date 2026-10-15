@@ -99,3 +99,19 @@ def test_section_span_stops_at_same_level_and_keeps_divider() -> None:
 def test_section_span_requires_unique_heading() -> None:
     with pytest.raises(SystemExit, match="0 matching"):
         m.section_span(nodes(), "9. 不存在")
+
+
+def test_dept1_figure_title_goes_with_image_and_todo_keeps_template_wording() -> None:
+    ns = m.group_columns(m.parse("""## 2.1. 入口
+1. 入口按鈕
+《1.活動入口》
+![](a.png)
+![【待補】](TODO)
+""".splitlines()))
+    text, right = ns[1]["_columns"]
+    assert [m.plain(x["numbered_list_item"]["rich_text"]) for x in text] == ["入口按鈕"]
+    assert m.plain(right[0]["paragraph"]["rich_text"]) == "《1.活動入口》" and right[1]["_image"] == "a.png"
+    w = m.Writer(api=None, base=m.Path("."))  # type: ignore[arg-type]
+    todo = w.to_block(right[2])
+    assert m.plain(todo["paragraph"]["rich_text"]) == "【待補】"
+    assert todo["paragraph"]["rich_text"][0]["annotations"]["color"] == "red"
