@@ -62,6 +62,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 | playtest-loop | agents dialogue-writer、game-balance-auditor | 收割後的文筆 / 數值修正轉派 |
 | plan-dept14-writer | plan-doc-qa | 產出後的一致性複查 |
 | plan-doc-qa | plan-dept14-writer | `references/notion-access.md`（Notion 憑證取用、首裝／換新與紀律，兩支共用） |
+| giftbag-banner-swap | plan-dept14-writer | 檔名取自企劃第 5 章「Banner 圖檔名稱」，讀企劃用 `scripts/notion_rest.py`（部門 proxy） |
 | cannon-parts、cannon-storyboard | cannon-wing | 定稿圖當參考；cannon-parts 另用 `scripts/recolor.py` |
 | boss-design、boss-props、boss-scene、cannon-wing、cannon-parts、cannon-storyboard、pet-evolution、pet-parts、weapon-design、weapon-parts | art-request-sheet | `scripts/fetch_plan.py`（讀 Notion 企劃＋`--list` 列候選；`pet-evolution/scripts/fetch_plan.py` 只是轉接） |
 | pet-evolution、art-request-sheet、avatar-proposal、plan-doc-qa（所有讀寫 Notion 的 skill） | plan-dept14-writer | `scripts/notion_rest.py`（Notion proxy 共用模組）；它再吃 kit 根目錄 `references/scripts/notion_credentials.py`（本機憑證管理，不是 skill、不用裝，在 clone 裡即可） |
