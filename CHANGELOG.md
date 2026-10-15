@@ -2,6 +2,17 @@
 
 > **怎麼讀**：本檔是版本歷史，含後來被推翻的決定。**現行規則一律以各 skill 的 `SKILL.md` 為準**；已被後續版本推翻的條目會就地標成 ~~刪除線~~ 並附「已於 vX.Y.Z 推翻」。
 
+## v3.48.0 (2026-10-15)
+
+收組員第二批 5 張建議單（#8–#12）。維護者指示：先看哪些其實是通用的——結果 4 張通用、只有兩小塊 Boss 專屬，落點照此分：
+
+- **demo 內建「截圖模式」，取代外部修補副本**（組員建議 #8，通用）：`boss-demo/SKILL.md` 步驟 4 新增契約〈截圖模式與 `CAPTURE_POINTS`〉，開頭明寫適用於任何要截分鏡進企劃的單檔 HTML demo（game-prototype／game-develop 核心紀律指過來）——每段動畫用設定表宣告截圖點 `{ segmentId: [[ratio, caption], …] }`，ratio 是該段當下實際時長的比例（改秒數不漂移）、只在 `DEMO_API.capture(true)` 時發 `demo:beat`、進截圖模式先把所有圖（含中途換上的）decode 完；程式事件瞬間仍寫 inline beat，兩者分工不重標。`capture_storyboard.py` 截圖前自動呼叫 `capture(true)`（舊 demo 沒有就略過，`--no-capture-mode` 關閉）；`storyboard-capture.md`「截圖副本＋字串替換」降為舊 demo 備援
+- **md2notion 局部更新加兩種模式＋手改偵測**（組員建議 #9、#10，通用）：`--section X --only table` 只換該節表格（表數要一樣）、`--section X --append` 在節尾加內容不刪；要刪的區塊只要最後編輯者是人（不是 writer bot）就列出停下，確認後 `--force`——比對「誰改的」比比對格式可靠（表頭設定、顏色、清單格式都涵蓋）。換圖已有 `paste_images.py replace`。#9 附帶的上傳型別與 `wait_uploaded` 已於 v3.45／v3.47 做
+  - 修一個 v3.45.0 審查引入的回歸：Notion 用 `after` 插入時回應會帶上插入點後的既有區塊，「回傳數＝送出數」的保護誤判、插了新內容卻沒刪舊的；根因在 `notion_rest.append` 拿回應最後一筆當下一批 `after`（超過 100 個區塊會接到頁尾）。改成只取前 N 筆，補假 API 測試；三種模式在測試頁實跑乾淨
+- **跨 session 交接格式**（組員建議 #11，通用）：新增 kit 根目錄 `references/跨-session-交接.md`——決定先寫進規格正本標日期、交接清單分「上游要做／做完回下游要做」（明列不准動的東西）、貼給對方 session 的一段話、上游改完更新正本、下游接手前先驗收。生圖線共用流程 §六、writer 四.11、game-prototype／game-develop 核心紀律、boss-demo〈回頭修改上游／下游〉各一條指過去；boss-demo 另定「boss-demo session 不動企劃頁」
+- **demo 附檔與分享版同步**（組員建議 #12）：附 demo 已於 v3.47.0 通用化（writer 九.10）；本版補——九.10 子項註明附檔版本與日期、writer 十.15「demo 附檔是最新分享版」；boss-demo 新增 `demo紀錄.md` 慣例（企劃頁、版號日期、最近分享版、企劃上附的版本），`share-build.md` 打包時讀它，附的不是這版就問「要換成這版嗎」、換由 writer 執行；分享版檔名沿用 `<boss名>_demo_vN_YYYYMMDD.html`，頁內加 `BUILD = { version, date }` 鏡像
+- ⚙️ **升級動作**：`git pull` 即生效；既有 demo 沒有 `CAPTURE_POINTS`，截分鏡自動走舊備援，不用改
+
 ## v3.47.0 (2026-10-15)
 
 - **有配套 demo 的企劃，demo 檔附進企劃**（Tim 指示，範例：魚類之書〈齊天大聖〉1.2 玩法大綱）：寫法固定——玩法大綱最後一條「試玩 demo：見附檔《<名稱>demo》…搭配本企劃閱讀」＋三個子項（怎麼開／怎麼操作／哪些是暫定）＋單檔 HTML 的檔案區塊（caption《<名稱>demo》）。writer 第九節新增第 10 條；boss-demo 步驟 5 寫回 Notion 加「定稿 demo 檔也要附」；product-planning 模式 B 加第 6 條（順手修掉重複的第 4 條編號）。`notion_rest.upload_file()` 原本只認圖片、其他副檔名一律當 jpeg 送，現改 `UPLOAD_TYPES`（html／zip／pdf／mp4，未知型別 octet-stream），新增 `file_block()`；補測試

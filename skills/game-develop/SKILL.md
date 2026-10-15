@@ -61,6 +61,7 @@ allowed-tools:
 7. **section-by-section 整合**：Phase 4 每次 Edit 針對 single section，多 section 改動拆多次 Edit
 
 ---
+- **跨 session 回頭改上游／接續下游**（原型→開發→反寫企劃常跨天做）：照 `references/跨-session-交接.md`（kit 根目錄）——決定先進 `GAME_SPEC.md` 標日期、交接清單分兩段、接手前先驗收；demo 要截分鏡進企劃時，截圖點照 `boss-demo/SKILL.md` 的「截圖模式／CAPTURE_POINTS」契約內建在 demo 裡，不用外部修補
 
 ## Phase 結構（彈性順序，建議從 0 起）
 

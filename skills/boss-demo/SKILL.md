@@ -92,7 +92,7 @@ description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃
   ```js
   // tiers mode
   const CONFIG = { mode: 'tiers', tiers: [ { id, name, weight, multiplier,
-    phases: [ { name, duration_ms } ] } ] };
+    phases: [ { id, name, duration_ms } ] } ] };   // phase id 全 demo 唯一（例 big_hit1），CAPTURE_POINTS 用它當 key
   // split mode: see references/split-mode.md section 3
   ```
 - **捕獲按鈕**：獎級權重型 → weighted roll 獎級 → 播該級表演；最終倍數拆解型 → weighted roll 最終倍數 → 查結局判定表 → 拆成各段倍數 → 依序演。表演中鎖按鈕
@@ -114,7 +114,7 @@ description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃
 - **播放控制**：暫停（凍結分鏡進度與狀態列倒數）／下一分鏡（跳段）／**結束**（停掉剩餘分鏡，直接跳到結算結果，顯示該次倍數）
 - **不做耗時 log**：引擎 sleep 即設定值，實測必然貼設定，記錄無資訊量（首發做過後由使用者裁掉）；秒數判讀靠狀態列倒數＋時長總覽
 - UI 文案繁中；code（變數/註解/log）一律英文
-- **分鏡擷取介面（必做，步驟 6 要用）**：
+- **分鏡擷取介面（必做，步驟 6 要用）**。**本契約適用於任何要截分鏡進企劃的單檔 HTML demo**（`game-prototype`／`game-develop` 產的 demo 也照這節實作，用語以 segment／caption／`DEMO_API` 為準，不綁 Boss 表演）：
   ```js
   window.DEMO_API = {
     beats: true,                 // 宣告這個 demo 會發 demo:beat
@@ -122,18 +122,34 @@ description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃
     play(id),                    // 強制播，回傳 Promise，表演結束時 resolve
     pause(), resume(),
     advance(ms),                 // 選配：手動推進虛擬時鐘（預覽視窗 rAF 被節流時快轉驗證用，見步驟 5）
+    capture(on),                 // 截圖模式開關，回傳 Promise（見下方 CAPTURE_POINTS）
   };
-  // 每個分鏡開始時發出（name 用企劃的分鏡名稱，例：「分鏡2 第一擊」）：
+  // 每個分段（segment；本 skill 的分鏡）開始時發出（name 用企劃的分鏡名稱，例：「分鏡2 第一擊」）：
   window.dispatchEvent(new CustomEvent('demo:phase', { detail: { name, ms } }));
-  // 分鏡內每個值得入鏡的瞬間，由表演程式在那一刻發出：
+  // 分段內每個值得入鏡的瞬間，由表演程式在那一刻發出：
   window.dispatchEvent(new CustomEvent('demo:beat', { detail: { caption: '閃電擊中右側 2 罐' } }));
   ```
   舞台元素的 id 一律是 `stage`，裡面只有正式畫面元素；舞台下方狀態列與其他測試用元素一律加 `class="demo-ui"`（截圖時自動隱藏，萬一放進舞台也不會入鏡）
+- **截圖模式（capture mode）與 `CAPTURE_POINTS`（必做）**——企劃要的關鍵瞬間宣告在 demo 本身，不再另做截圖副本去字串替換插 beat（demo 一改副本腳本就對不上）：
+  ```js
+  // 每個 segment 一列：[該段「實際」時長的比例 0–1, 這一格畫面在演什麼（繁中）]
+  const CAPTURE_POINTS = {
+    big_hit1: [[0.35, '閃電擊中右側 2 罐'], [0.8, '罐子爆開噴金幣']],
+    big_settle: [[1, '結算數字跳完定格']],
+  };
+  ```
+  - key 是 segment 的 `id`（CONFIG 每個 phase 的 `id`，全 demo 唯一）；ratio 是**該段當下實際時長**的比例——segment 開始時由動畫驅動器讀當時的 `duration_ms`（面板改過秒數也照改後的算）排程 `ratio × duration_ms`，秒數再怎麼調都不漂移；`ratio: 1` 代表段尾最後一幀，在切到下一段之前發
+  - 排程走 demo 的**虛擬時鐘**（跟表演同一個），`pause()` 凍結、`advance(ms)` 跟著快轉；到點時發 `demo:beat`（`detail.caption` 用表內文字），事件格式與表演程式自己發的 beat 完全相同
+  - **只在截圖模式開啟時才發**：`DEMO_API.capture(true)` 開、`capture(false)` 關；試玩時這張表完全不作用，試玩者看不出差別
+  - **`capture(true)` 要先把所有圖片 `decode()` 完才 resolve**——含啟動時就在畫面上的，**也含中途才換上的**（cut-in、背景切換、JS 換 `src`、CSS 背景；圖片都是 JS const 內嵌，收成一份清單逐一 `new Image()` ＋ `await decode()`），resolve 前 `play()` 不得開始；這就是 `capture-timing.md` 地雷 2 在截圖模式下的做法，啟動時的 decode 仍照地雷 2 做
+  - **整段套緩動（WAAPI options `easing`）的 segment，ratio 指的是經過時間比例，不是 keyframe `offset`**；「完全合起」「回彈到位」這類狀態用觀察定：截一次 → Read 圖 → 調 ratio → 再截，定了寫進表
+  - 跟表演程式裡的 inline `demo:beat` 分工：**由程式事件決定的瞬間**（命中、爆開、數字跳完——那一刻在 code 裡就有 hook）照下一條寫在表演程式裡；**只能用時間比例抓的瞬間**（標題回彈到位、布幕完全合起、cut-in 進場）寫 `CAPTURE_POINTS`。同一瞬間只標一邊，不重標；企劃不要的格 compose 時用 `--pick` 去掉，不回頭改程式
+  - `capture_storyboard.py capture` 載入 demo 後會自動呼叫 `capture(true)`（沒有這個函式的舊 demo 直接略過）
 - **關鍵格（`demo:beat`）要在寫表演程式時就標好**——表演是自己寫的，哪一刻發生什麼最清楚，不要事後再猜。標的原則：
   - **要標**：每個看得出變化的瞬間——攻擊出手、命中、爆開、噴金幣、特寫高峰、表情轉變、場景切換、結算數字跳完
   - **不標**：同一個動作的中間過程、跟上一個關鍵格看起來一樣的瞬間、全畫面遮罩的轉場
   - **重複的動作每次都標**（第一擊、第二擊各自的命中），截圖後再決定企劃要不要全放
-  - `caption` 就是分鏡圖上的標籤與企劃的細拆描述，**寫「這一刻畫面上在演什麼」**，一句話；點名部位或物件、用看得見的動作，不寫「感覺」「氛圍」（`動態描述規範.md` 第二節第 2 條）
+  - `caption` 就是分鏡圖上的標籤與企劃的細拆描述，**寫「這一刻畫面上在演什麼」**，一句話；點名部位或物件、用看得見的動作，不寫「感覺」「氛圍」（`動態描述規範.md` 第二節第 2 條）；`CAPTURE_POINTS` 的 caption 同一條規範
 - **關鍵格時間點要準（產 HTML 時就做，事後補很難）**：寫表演程式時讀 `references/capture-timing.md`（四個地雷：虛擬時鐘 dt、`img.decode()`、emoji sprite、beat 避開白閃）
 - **表演動作要是 Spine 做得到的**（Boss 是全 2D Spine）：不轉身、不做斜線或弧線的旋轉衝刺、不做流暢跳躍、飾物不繞到身後、會轉的光環是平面正圓。完整對照表見 `boss-design/boss設計法則.md` 第四節。demo 裡做得出不代表美術做得出
 - 表演張力階梯要拉開：低級快進快出、高級要有 anticipation 停頓與全屏效果，讓權重手感差異體感明顯
@@ -144,16 +160,24 @@ description: "捕魚機 boss 捕獲表演驗證 demo 產生器。讀 boss 企劃
 - **Claude 預覽視窗被隱藏時 rAF 會被節流**，乾等表演跑完很久、時間也不準：驗證時讀 `references/capture-timing.md` 第二節，用 `DEMO_API.advance(ms)` 快轉後 assert，不要開著乾等
 - 交給使用者試玩 → 後續調參迭代走 `playtest-loop`
 - 輸出位置：使用者指定的專案資料夾；未指定 → `Desktop\<boss名>-reward-demo\`
+- **專案資料夾放一份 `demo紀錄.md`**（第一次產出就建，之後每次改版更新）：企劃頁連結或檔案路徑（無企劃模式寫 mini 企劃檔名）、目前版號與日期、最近一次分享版檔名、**企劃上目前附的是哪一版**（沒附寫「未附」）。分享版打包與回頭修改都靠它判斷要不要提醒換附檔
 
-**分享版打包**（要把 demo 傳給別人試玩時）：讀 `references/share-build.md`（版號＋日期檔名、試玩說明必寫項、zip）。
+**分享版打包**（要把 demo 傳給別人試玩時）：讀 `references/share-build.md`（版號＋日期檔名、頁內版本標示、試玩說明必寫項、zip、企劃附檔要不要換）。
 
 ### 6. 定稿後：擷取分鏡圖、寫回企劃
 
 **表演的分鏡圖從 demo 截，不另外生圖。** 動畫太複雜，先在 demo 裡把節奏和畫面調到定稿，再截圖，分鏡就是實際的樣子。使用者說「demo 定稿了」「要寫企劃了」「截分鏡」時做這步。
 
-**截圖前先檢查**（沒做就先回步驟 4 補，不然關鍵格會晚 100–400ms）：虛擬時鐘 dt 沒有上限、圖片全部 `decode()` 過、emoji 粒子走 sprite、beat 沒跟全螢幕白閃同一刻；舞台裡沒有測試資訊（都在 `demo-ui` 狀態列）。截完 Read 分鏡圖，看關鍵格是不是那個瞬間——晚了一拍（命中前／爆開後）就回頭查這四點（beat 位置問題在截圖副本調，見 `storyboard-capture.md` 第 1、3 步），不要靠改 caption 掩蓋。開發途中要驗證 beat 順序，用步驟 5 的 `advance(ms)` 快轉，不要開預覽視窗乾等
+**截圖前先檢查**（沒做就先回步驟 4 補，不然關鍵格會晚 100–400ms）：虛擬時鐘 dt 沒有上限、圖片全部 `decode()` 過、emoji 粒子走 sprite、beat 沒跟全螢幕白閃同一刻；舞台裡沒有測試資訊（都在 `demo-ui` 狀態列）。截完 Read 分鏡圖，看關鍵格是不是那個瞬間——晚了一拍（命中前／爆開後）就回頭查這四點（beat 位置問題改 `CAPTURE_POINTS` 的 ratio；沒有 `CAPTURE_POINTS` 的舊 demo 才在截圖副本調，見 `storyboard-capture.md` 第 1、3 步），不要靠改 caption 掩蓋。開發途中要驗證 beat 順序，用步驟 5 的 `advance(ms)` 快轉，不要開預覽視窗乾等
 
 **操作步驟（截圖 → 組分鏡圖＋企劃草稿 → 寫企劃段落 → 寫回 Notion，含舊 demo 沒有關鍵格時的備援）：讀 `references/storyboard-capture.md`。**
+
+### 回頭修改上游／下游（企劃審查把改動退回來時）
+
+- 跨 session 的交接規則（決定先寫進規格正本並標日期、交接清單分「上游要做」／「做完回下游要做」、上游做完更新規格正本、下游接手前先驗檔案時間／關鍵字／看圖）一律照 kit `references/跨-session-交接.md`；這裡只寫 boss-demo 自己的部分。boss-demo 的規格正本＝企劃頁（有企劃模式）或 mini 企劃 md（無企劃模式），`demo紀錄.md` 只記版本與附檔狀態，不是正本
+- 本 skill 的上游是 `boss-design`（外觀）、下游是 `plan-dept14-writer`（企劃頁）。**boss-demo 的 session 不動企劃頁**——分鏡文字、附檔換版都是 writer 的事，這裡只產出要貼的東西並列進交接清單
+- 外觀被退回上游重做時，demo 等新定稿圖到了再換素材（照步驟 2 的 build 流程重建），不自己改圖湊
+- **demo 改完才算做完的三件事**：更新 `demo紀錄.md`（版號、日期、改了什麼）與 mini 企劃／變更區段 Markdown → 重打分享版（`references/share-build.md`）→ 受影響的分鏡重截。三件都做完才把「做完回下游要做」的清單交回去
 
 ## 預設四級模板（企劃缺漏時補用）
 

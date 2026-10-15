@@ -2,20 +2,22 @@
 
 > 從 `SKILL.md` 步驟 6 拆出：原則與截圖前檢查仍在 `SKILL.md`；分鏡文字的寫法照 `../動態描述規範.md`，這裡不重複。
 
-1. **先列截圖清單，再做截圖用副本**：demo 現有的 `demo:beat` 是為了播放標的，不一定是企劃要的關鍵瞬間
-   - 照企劃文字逐步列出要截的瞬間（例：炸開的那一刻、標題飛入後回彈到位、cut-in 進場 vs 標題壓下各一張），跟 demo 現有 beat 對照，缺的補、多的刪
-   - 補 beat 一律在**截圖專用副本**（另存一份 demo 資料夾）裡做，**定稿 demo 不動**。做法：寫一支小腳本讀定稿 HTML，用字串替換插入／移除 `demo:beat`、包上下面的預熱，輸出成副本，之後只對副本跑 capture；定稿 demo 改版時重跑腳本即可
-   - **預熱解碼**：副本啟動時把所有會用到的圖片（含中途才換上的 cut-in、背景切換圖、CSS 背景）全部 `new Image()` ＋ `await decode()` 完，才開放 `DEMO_API.play`——大圖第一次換上會延遲，不預熱時 cut-in 那格截出來是空白
-   - **整段套緩動的動畫，beat 要靠觀察放**：WAAPI 在 options 設 `easing`（整段套用）時，keyframe 的 `offset` 不等於時間比例，「完全合起」這類狀態不能用 offset 換算秒數；在副本裡逐步調 beat 時間、截圖確認真的到位再定
-   - demo 的計時地雷（`capture-timing.md` 四點）是 demo 本身的 bug，照 `SKILL.md` 步驟 6 回步驟 4 修定稿 demo；副本只放截圖用的 beat 與預熱
-2. **截圖**：對副本每種表演強制播一次，在每個 `demo:beat` 那一刻暫停截舞台；拆解型每個結局各播一次（用「指定最終倍數」挑該結局的代表值）
+1. **先列截圖清單，再把缺的關鍵瞬間補進 `CAPTURE_POINTS`**：demo 表演程式裡的 inline `demo:beat` 是為了播放標的，不一定是企劃要的關鍵瞬間
+   - 照企劃文字逐步列出要截的瞬間（例：炸開的那一刻、標題飛入後回彈到位、cut-in 進場 vs 標題壓下各一張），跟 demo 現有 beat（inline ＋ `CAPTURE_POINTS`）對照
+   - **缺的補進定稿 demo 的 `CAPTURE_POINTS`**（契約見 `SKILL.md` 步驟 4〈截圖模式〉）：只在截圖模式才發、試玩不受影響，所以直接改定稿 demo，**不另做副本**；照既有規則改 template 再 build，不直接編成品檔。**多的不刪**——企劃不要的格在第 3 步用 `--pick` 去掉
+   - **整段套緩動的動畫，ratio 要靠觀察放**：WAAPI 在 options 設 `easing`（整段套用）時，keyframe 的 `offset` 不等於時間比例，「完全合起」這類狀態不能用 offset 換算；先猜一個 ratio → 截 → Read 圖 → 調 → 再截，到位才寫定
+   - **預熱解碼**由 `DEMO_API.capture(true)` 負責（全部圖片含中途換上的 decode 完才開放 `play`），capture 腳本載入 demo 後會自動呼叫；cut-in 那格截出來空白＝那張圖沒進 `capture(true)` 的清單，回定稿 demo 補
+   - demo 的計時地雷（`capture-timing.md` 四點）是 demo 本身的 bug，照 `SKILL.md` 步驟 6 回步驟 4 修定稿 demo
+   - **備援（只給沒有 `CAPTURE_POINTS` 的舊 demo）：截圖專用副本**——另存一份 demo 資料夾，寫一支小腳本讀定稿 HTML，用字串替換插入／移除 `demo:beat`、包上預熱（啟動時把所有會用到的圖片 `new Image()` ＋ `await decode()` 完才開放 `DEMO_API.play`），輸出成副本，之後只對副本跑 capture，**定稿 demo 不動**；demo 一改字串就對不上、要重跑腳本，這是它被降為備援的原因。有機會改到舊 demo 時順手補 `CAPTURE_POINTS` 與 `capture(on)`，之後就不用副本
+2. **截圖**：對定稿 demo（備援：對副本）每種表演強制播一次，在每個 `demo:beat` 那一刻暫停截舞台；拆解型每個結局各播一次（用「指定最終倍數」挑該結局的代表值）
 
    ```sh
-   python ~/.claude/skills/boss-demo/scripts/capture_storyboard.py capture <截圖副本資料夾> <輸出資料夾> \
-     [--scenarios <id,...>]
+   python ~/.claude/skills/boss-demo/scripts/capture_storyboard.py capture <demo 資料夾> <輸出資料夾> \
+     [--scenarios <id,...>] [--no-capture-mode]
    ```
 
    - demo 宣告了 `beats: true` 就自動走關鍵格模式，同時記下每格在分鏡內的時間點
+   - demo 有 `DEMO_API.capture` 就自動先 `await capture(true)`（開 `CAPTURE_POINTS`＋預熱）再播，沒有就略過；`--no-capture-mode` 只在要排查「是不是 `CAPTURE_POINTS` 害的」時用
    - **流程相同的表演只截一輪**：只差文字顏色、數字等、分鏡流程一樣的（例：一般字 vs 金字）用 `--scenarios` 挑一個，不重複出圖
 3. **組成分鏡圖＋企劃草稿**
 
@@ -24,7 +26,7 @@
    ```
 
    - 預設**全部關鍵格都入圖**，標籤直接用 `caption`，不寫秒數（秒數在企劃文字與 demo 裡）
-   - Read 分鏡圖，**逐格對照第 1 步的截圖清單與企劃文字**：該瞬間有沒有截到（晚一拍先分辨原因：beat 時間點不對、含整段 easing 的狀態 → 回副本調 beat；四個計時地雷（dt 截斷、啟動時沒 decode、emoji fillText、beat 撞白閃）→ 回步驟 4 修定稿 demo；空白格 → 副本補預熱，中途換上的圖在副本一律預熱）；企劃不需要全放時（例如重複的「噴金幣」只留一次）用 `--pick` 去掉
+   - Read 分鏡圖，**逐格對照第 1 步的截圖清單與企劃文字**：該瞬間有沒有截到（晚一拍先分辨原因：beat 時間點不對、含整段 easing 的狀態 → 調 `CAPTURE_POINTS` 的 ratio（備援副本：調副本的 beat）；四個計時地雷（dt 截斷、啟動時沒 decode、emoji fillText、beat 撞白閃）→ 回步驟 4 修定稿 demo；空白格 → 那張圖沒進 `capture(true)` 的預熱清單，補上（備援副本：副本補預熱））；企劃不需要全放時（例如重複的「噴金幣」只留一次）用 `--pick` 去掉
    - 標籤放在每格圖片**上方**的色帶裡、依格寬自動換行（句首不放「，。、！？」等標點），不蓋到畫面；同一列色帶等高，caption 長也不會被截掉
    - 企劃草稿**照 `動態描述規範.md` 的格式**：一個分鏡一步、秒數寫句尾、`〔圖N〕` 對回分鏡圖格號；同一分鏡多個關鍵格列成子項，共用該分鏡秒數。後面接規範要求的待補欄位（觸發時機、階段差異、同步點、圖層、表演期間碰撞／倒數、詳見 4.x）：
 
@@ -59,7 +61,7 @@
 **之後兩種模式共用：**
 
 4. **寫企劃段落**：以 `分鏡_<表演名>_企劃草稿.md` 為骨架，**照 `動態描述規範.md` 寫**——關鍵格模式的描述與秒數已經在草稿裡，看圖確認後改成「主體＋可見動作＋特效＋位置」（caption 是看圖的短句，不夠美術直接做）；備援模式要依截圖補描述。秒數用 demo 定稿值。〔待補〕欄位逐一填掉或刪掉，交付前跑規範第六節自查。每段標【貼到企劃 X.X.X】，跟「變更區段 Markdown」合在一起交給使用者
-5. **寫回 Notion**：預設由使用者手動貼回（分鏡圖一起上傳）。**定稿 demo 檔本身也要附進企劃 1.2 玩法大綱**（寫法照 `plan-dept14-writer` 第九節第 10 條：一條「試玩 demo」＋三個子項＋檔案區塊）；定稿前不附，附了就是對外版本。**不自己改 live 企劃**，除非使用者明確要求
+5. **寫回 Notion**：預設由使用者手動貼回（分鏡圖一起上傳）。**定稿 demo 檔本身也要附進企劃 1.2 玩法大綱**（寫法照 `plan-dept14-writer` 第九節第 10 條：一條「試玩 demo」＋三個子項＋檔案區塊）；定稿前不附，附了就是對外版本；附完把 `demo紀錄.md` 的「企劃上目前附的版本」改成這版（之後改版打分享版時靠它提醒換附檔，見 `share-build.md`）。**不自己改 live 企劃**，除非使用者明確要求
 
 ## 貼回企劃（2026-10-02 起）：Notion 落點
 

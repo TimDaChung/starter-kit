@@ -43,3 +43,23 @@ def test_image_paths_skips_todo() -> None:
 def test_dotted_pipe_label_still_parses() -> None:
     chart = pl.parse_mermaid("flowchart TD\n    H(結束) -.->|回頭| M{x}")
     assert ("H", "回頭", "M", True) in chart["edges"]
+
+
+def test_human_edited_flags_blocks_not_last_edited_by_bot() -> None:
+    bot, pm = "bot-1", "person-9"
+    blocks = [
+        {"id": "a", "type": "paragraph", "paragraph": {"rich_text": [{"plain_text": "由 bot 寫"}]}, "last_edited_by": {"id": bot}},
+        {"id": "b", "type": "table", "table": {}, "last_edited_by": {"id": pm}},
+        {"id": "c", "type": "paragraph", "paragraph": {"rich_text": [{"plain_text": "PM 改過"}]}, "last_edited_by": {"id": pm}},
+    ]
+    hits = m.human_edited(blocks, bot)
+    assert [b["id"] for b in hits] == ["b", "c"]
+    assert m.describe_block(hits[1]) == "paragraph PM 改過" and m.describe_block(hits[0]) == "table"
+
+
+def test_only_table_filter_keeps_top_level_tables_in_section() -> None:
+    ns = m.group_columns(m.parse(["## 3.1. 入口", "1. 元件", "| a | b |", "|---|---|", "| 1 | 2 |",
+                                  "    | c | d |", "    |---|---|", "    | 3 | 4 |", "## 3.2. 主介面"]))
+    s, e = m.section_span(ns, "3.1. 入口")
+    tables = [n for n in ns[s + 1:e] if n.get("type") == "table"]
+    assert len(tables) == 1  # the indented table is nested under the list item, not top level

@@ -92,3 +92,23 @@ def test_file_block_and_upload_types() -> None:
     assert b["file"]["file_upload"] == {"id": "fu9"} and b["file"]["name"] == "demo.html"
     assert b["file"]["caption"][0]["text"]["content"] == "《齊天大聖彩金表演demo》"  # rt() output has no plain_text
     assert nr.UPLOAD_TYPES["html"] == "text/html" and nr.UPLOAD_TYPES["png"] == "image/png"
+
+
+class FakeAppend(nr.Notion):
+    """PATCH /children that, like Notion, echoes trailing siblings when `after` is used."""
+    def __init__(self) -> None:
+        self.calls: list[dict[str, Any]] = []
+
+    def call(self, method: str, path: str, body: Any = None, **kw: Any) -> dict[str, Any]:
+        self.calls.append(body)
+        made = [{"id": f"new{len(self.calls)}-{i}"} for i in range(len(body["children"]))]
+        trailing = [{"id": "old-x"}, {"id": "old-y"}] if "after" in body else []
+        return {"results": made + trailing}
+
+
+def test_append_with_after_keeps_only_inserted_blocks_and_chains_after() -> None:
+    api = FakeAppend()
+    blocks = [{"object": "block", "type": "paragraph", "paragraph": {"rich_text": nr.rt(str(i))}} for i in range(150)]
+    res = api.append("page", blocks, after="h1")
+    assert len(res) == 150 and res[-1]["id"] == "new2-49"
+    assert api.calls[0]["after"] == "h1" and api.calls[1]["after"] == "new1-99"  # second chunk follows the last inserted block

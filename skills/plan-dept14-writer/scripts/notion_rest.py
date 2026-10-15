@@ -308,9 +308,12 @@ class Notion:
             if after:
                 body["after"] = after
             r = self.call("PATCH", f"/blocks/{block_id}/children", body)
-            res += r["results"]
-            if after and r["results"]:
-                after = r["results"][-1]["id"]
+            # with `after`, Notion returns the inserted blocks followed by the existing siblings
+            # after them (observed 2026-10-15); keep only what we inserted
+            made = r["results"][:len(chunk)]
+            res += made
+            if after and made:
+                after = made[-1]["id"]
             if log:
                 log(f"  appended {len(chunk)} blocks")
         return res

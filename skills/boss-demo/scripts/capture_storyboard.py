@@ -23,14 +23,19 @@ mode each step's seconds = total duration of the phases it stands for (from its
 phase up to the next kept frame's phase), which adds up to the demo total.
 
 The demo must expose the capture contract (see SKILL.md, 「分鏡擷取介面」):
-    window.DEMO_API = { scenarios: [{id, name}], play(id) -> Promise, pause(), resume() }
+    window.DEMO_API = { scenarios: [{id, name}], play(id) -> Promise, pause(), resume(),
+                        capture(on) -> Promise }   // capture(on) is optional (newer demos)
     window.dispatchEvent(new CustomEvent('demo:phase', {detail: {name, ms}}))  // at each phase start
+When the demo has DEMO_API.capture, it is awaited with true before the first play
+so the demo's CAPTURE_POINTS beats fire and every image is decoded; demos
+without it are driven exactly as before (--no-capture-mode skips the call).
 Older demos can be driven with --shim <js> (injected after load). Elements with
 class "demo-ui" are hidden while capturing; --hide adds more selectors.
 
 Usage:
     python capture_storyboard.py capture <demo_dir> <out_dir> [--scenarios 0,1] [--at 0.35,0.75]
                                  [--shim shim.js] [--hide "#btnrow"] [--skip-phases 轉場]
+                                 [--no-capture-mode]
     python capture_storyboard.py compose <out_dir> --scenario 0 [--pick 1,3,5,6] [--captions "a|b|c|d"]
 
 The demo directory is served over a local HTTP server (file:// breaks on
@@ -165,6 +170,25 @@ def plan_section(name: str, total_ms: float, steps: list[Step], sheet_name: str)
 
 # ---------- capture ----------
 
+# Turns the demo's capture mode on when it offers one: CAPTURE_POINTS beats start
+# firing and the demo decodes every image (including ones swapped in mid-way)
+# before resolving. Resolves to false when the demo has no such function.
+ENABLE_CAPTURE_JS = """
+async () => {
+  if (typeof window.DEMO_API.capture !== 'function') return false;
+  await window.DEMO_API.capture(true);
+  return true;
+}
+"""
+
+
+def enable_capture_mode(page, wanted: bool) -> bool:
+    """Call DEMO_API.capture(true) if wanted and the demo has it; return whether it was turned on."""
+    if not wanted:
+        return False
+    return bool(page.evaluate(ENABLE_CAPTURE_JS))
+
+
 def capture_scenario(page, scenario: dict, frames_dir: pathlib.Path, skip: list[str]) -> tuple[list[dict], list[dict]]:
     shots: list[dict] = []
     page.evaluate("id => { window.__cap.phases = []; window.__done = false;"
@@ -210,6 +234,8 @@ def cmd_capture(args: argparse.Namespace) -> None:
             if args.mode == "beats" and not has_beats:
                 raise SystemExit("--mode beats but the demo does not declare DEMO_API.beats = true")
             print(f"mode: {'beats (demo-marked key frames)' if use_beats else 'ratios ' + args.at}")
+            capture_on = enable_capture_mode(page, not args.no_capture_mode)
+            print(f"capture mode: {'on (DEMO_API.capture)' if capture_on else 'off (demo has none or --no-capture-mode)'}")
             page.evaluate(HOOK_JS, {"ratios": ratios, "useBeats": use_beats})
             wanted = [s for s in args.scenarios.split(",") if s]
             for scenario in page.evaluate("window.DEMO_API.scenarios"):
@@ -418,6 +444,8 @@ def main() -> None:
     cap.add_argument("--shim", default="")
     cap.add_argument("--hide", default="", help="extra CSS selectors hidden during capture")
     cap.add_argument("--skip-phases", default="", help="phases whose name contains any of these words are not captured")
+    cap.add_argument("--no-capture-mode", action="store_true",
+                     help="do not call DEMO_API.capture(true) before playing (CAPTURE_POINTS beats stay off)")
     com = sub.add_parser("compose")
     com.add_argument("out_dir")
     com.add_argument("--scenario", required=True)

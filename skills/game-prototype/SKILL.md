@@ -52,6 +52,7 @@ allowed-tools:
 7. **section marker 強制**：HTML 內必須有 8 個 `<!-- === SECTION: NAME === -->` 標記（見 Phase 2）
 
 ---
+- **跨 session 回頭改上游／接續下游**（原型→開發→反寫企劃常跨天做）：照 `references/跨-session-交接.md`（kit 根目錄）——決定先進 `GAME_SPEC.md` 標日期、交接清單分兩段、接手前先驗收
 
 ## Phase 0：玩法澄清
 

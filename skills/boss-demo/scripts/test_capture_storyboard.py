@@ -51,6 +51,32 @@ def test_ascii_word_not_split(font: ImageFont.FreeTypeFont) -> None:
     assert any("x1000" in line for line in lines)
 
 
+class _FakePage:
+    """Stands in for a Playwright page: records evaluate() calls and returns a canned value."""
+
+    def __init__(self, result: bool) -> None:
+        self.result = result
+        self.calls: list[str] = []
+
+    def evaluate(self, js: str) -> bool:
+        self.calls.append(js)
+        return self.result
+
+
+def test_capture_mode_skipped_when_not_wanted() -> None:
+    page = _FakePage(result=True)
+    assert cs.enable_capture_mode(page, wanted=False) is False
+    assert page.calls == []  # nothing evaluated: old demos and --no-capture-mode are untouched
+
+
+@pytest.mark.parametrize("demo_has_capture", [True, False])
+def test_capture_mode_reports_what_the_demo_answered(demo_has_capture: bool) -> None:
+    page = _FakePage(result=demo_has_capture)
+    assert cs.enable_capture_mode(page, wanted=True) is demo_has_capture
+    assert page.calls == [cs.ENABLE_CAPTURE_JS]
+    assert "DEMO_API.capture(true)" in cs.ENABLE_CAPTURE_JS
+
+
 def _frames(n: int) -> list[Image.Image]:
     colors = [(200, 40, 40), (40, 200, 40), (40, 40, 200), (200, 200, 40), (40, 200, 200)]
     return [Image.new("RGB", (320, 180), colors[k % len(colors)]) for k in range(n)]

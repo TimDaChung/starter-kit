@@ -259,6 +259,18 @@ def image_paths(nodes: list[Node]) -> list[str]:
     return out
 
 
+def human_edited(blocks: list[Node], bot_id: str) -> list[Node]:
+    """Blocks whose last editor is not the writer integration: a person touched them in Notion."""
+    return [b for b in blocks if (b.get("last_edited_by") or {}).get("id") not in (None, bot_id)]
+
+
+def describe_block(b: Node) -> str:
+    t = b["type"]
+    x = b.get(t, {})
+    text = plain(x.get("rich_text")) if isinstance(x, dict) else ""
+    return f"{t} {text[:30]}".rstrip()
+
+
 def describe(n: Node) -> str:
     if "_columns" in n:
         return f"columns ×{len(n['_columns'])}"
@@ -317,7 +329,10 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Markdown plan -> Notion page (dry run unless --write).")
     ap.add_argument("md")
     ap.add_argument("page")
-    ap.add_argument("--section", action="append", default=[], help="replace only this section (heading text)")
+    ap.add_argument("--section", action="append", default=[], help="work on this section only (heading text); default replaces its content")
+    ap.add_argument("--append", action="store_true", help="with --section: add the file's section content at the end of the page section, delete nothing")
+    ap.add_argument("--only", choices=["table"], help="with --section: swap only these blocks (top level in the section, same count), keep everything else")
+    ap.add_argument("--force", action="store_true", help="also replace blocks a person edited by hand (default: list them and stop)")
     ap.add_argument("--start", help="whole-file mode: first heading to write (default: first H1)")
     ap.add_argument("--clear-old", action="store_true", help="whole-file mode: delete the page's previous blocks")
     ap.add_argument("--write", action="store_true", help="actually write (default: preview only)")
@@ -325,6 +340,10 @@ def main() -> None:
 
     if args.section and (args.clear_old or args.start):
         ap.error("--section cannot be combined with --clear-old / --start")
+    if (args.append or args.only) and not args.section:
+        ap.error("--append / --only need --section")
+    if args.append and args.only:
+        ap.error("--append and --only are exclusive")
     md = Path(args.md)
     nodes = group_columns(parse(md.read_text(encoding="utf-8-sig").splitlines()))
     missing = [p for p in image_paths(nodes) if not (md.parent / p).is_file()]
@@ -336,7 +355,7 @@ def main() -> None:
     w = Writer(api, md.parent)
 
     if args.section:
-        plans: list[tuple[str, str, list[Node], list[str]]] = []
+        plans: list[tuple[str, str, list[Node], list[Node]]] = []  # (title, insert-after id, new nodes, old blocks to delete)
         spans: list[tuple[int, int]] = []
         for title in args.section:
             ms, me = section_span(nodes, title)
@@ -344,17 +363,36 @@ def main() -> None:
             if any(ps < e and s < pe for s, e in spans):
                 raise SystemExit(f"section {title!r} overlaps another --section target; pass the outer one only")
             spans.append((ps, pe))
-            plans.append((title, page[ps]["id"], nodes[ms + 1:me], [b["id"] for b in page[ps + 1:pe]]))
-            print(f"[{title}] replace {pe - ps - 1} blocks on the page with {me - ms - 1} from the file:")
-            for n in nodes[ms + 1:me]:
+            new, old = nodes[ms + 1:me], page[ps + 1:pe]
+            if args.only == "table":
+                new = [n for n in new if n.get("type") == "table"]
+                old = [b for b in old if b["type"] == "table"]
+                if len(new) != len(old):
+                    raise SystemExit(f"[{title}] {len(old)} table(s) on the page vs {len(new)} in the file; --only table needs the same count")
+                plans += [(title, b["id"], [n], [b]) for n, b in zip(new, old)]  # each new table goes right after the old one
+                print(f"[{title}] swap {len(old)} table(s), keep the rest")
+            elif args.append:
+                plans.append((title, (old[-1] if old else page[ps])["id"], new, []))
+                print(f"[{title}] append {len(new)} block(s) after the section's last block:")
+            else:
+                plans.append((title, page[ps]["id"], new, old))
+                print(f"[{title}] replace {len(old)} blocks on the page with {len(new)} from the file:")
+            for n in new:
                 print("   +", describe(n))
+        touched = human_edited([b for *_, old in plans for b in old], api.call("GET", "/users/me")["id"])
+        if touched:
+            print("blocks last edited by a person, not the writer bot (PM hand edits?):")
+            for b in touched:
+                print("   !", describe_block(b))
+            if not args.force:
+                raise SystemExit("stopped: confirm with the PM what to keep, then rerun with --force to replace them")
         if not args.write:
             print("dry run: add --write to apply")
             return
-        for title, heading_id, new, old in plans:
-            w.write(pid, new, after=heading_id)  # insert first, so a failure never leaves a hole
-            for bid in old:
-                api.call("DELETE", f"/blocks/{bid}")
+        for title, after_id, new, old in plans:
+            w.write(pid, new, after=after_id)  # insert first, so a failure never leaves a hole
+            for b in old:
+                api.call("DELETE", f"/blocks/{b['id']}")
             print(f"[{title}] done")
     else:
         body = nodes[start_index(nodes, args.start):]
