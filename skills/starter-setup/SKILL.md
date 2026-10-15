@@ -181,6 +181,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 ```
 🩺 開場健檢:CLAUDE.md 96 行 / skills 0 / agents 0 / secretary 無
 📝 kit 回饋:3 筆 → 2 張單(plan-dept14-writer 建議 ×1、boss-demo 異常 ×1) → 要一起私訊給主任嗎?
+🧹 已進 kit 的本機規則:2 條(CLAUDE.md 文件產出段「建議行動不可為空」→ v3.15.0 已收;memory feedback_plan_rules.md → v3.45.0 已收) → 要刪嗎?
 🧰 環境:Python 3.13 ✔ / Pillow ✔ / Playwright ✔(本次裝) / chrome-devtools MCP ✘(你說先不裝→playtest-loop 退手貼模式)
 🎨 生圖引擎 image-studio:✘ 未裝 → 所有生圖 skill(imagen 系列 / generate2dsprite / generate2dmap / cannon-* / boss-design、props、scene / pet-*)完全不能用,沒有替代線,照 references/image-studio-共用須知.md 第二節〈首裝流程〉安裝(imagen-banner 的驗收模式只吃 Pillow,仍可用)
    (已裝但憑證快到期時改成這行)⏳ 生圖引擎憑證:17 天後(2026-10-05)到期;新一季憑證要等舊的失效才發,撞到 401 時 Claude 會照共用須知第二節自己換
@@ -223,12 +224,14 @@ https://github.com/TimDaChung/secretary-kit」
    - **只處理 junction（kit 來源）的路徑，使用者自有 skill 一律不碰**——自有 skill 本來就該進版控
    - 歸屬：補排除行與 `git rm --cached` 都不動使用者的檔案內容、不動自有資產，屬**安全動作直接做**（同「新增不問」），結算表交代補／移了幾行、幾支脫離追蹤
 7. **整理回饋筆記，問一次要不要送**（升級收尾必做）：讀 `~/.claude/starter-feedback.md`（沒有就建一份只有標題與「上次送出：（尚未）」的空檔）；「上次送出」之後有筆記 → 照 `issue-triage` D 模式的精簡版整理成【異常回報】／【建議】單（只用筆記，不掃對話紀錄；同一支 skill 的多筆併一張；skill 欄是 `CLAUDE.starter` 的併成一張「CLAUDE.starter 規則建議」，附使用者本機已改的寫法當提案），結算表末尾列「📝 kit 回饋：N 筆 → M 張單」並**問一次**「要一起私訊給主任嗎？」——要就走 D 的第 7 步（鎖定收件者、私訊、讀回驗證、更新水位線）；不要就把單子留在對話裡請他自己轉，水位線一樣更新。沒有筆記就只列「📝 kit 回饋：0 筆」不問。這是組員意見回到 kit 的主要管道：每天升級、每天送，一次幾筆（Tim 2026-10-15）
+8. **清掉已進 kit 的本機止血規則**（升級與健檢都跑）：筆記檔裡標「已送出」的每一行，看送出日之後的 CHANGELOG 有沒有該 skill（或 `CLAUDE.starter`）的「組員回報／組員建議」條目——有 → 列出那行的「本機已寫」位置（CLAUDE.md 某段、memory 某檔）與對應的 CHANGELOG 條目，**問一次**「kit 已修，這幾條本機規則要刪嗎？」（刪改必問；使用者說刪才刪，並把筆記那行一起刪）；沒有 → 留著繼續擋。這樣本機 CLAUDE.md／memory 不會越積越多，也不會在 kit 修好前就失去止血（Tim 2026-10-15）
 
 ## 健檢（「starter 健檢」/「新手包健檢」）
 
 只跑第 1 節與第 5 節，不裝任何東西。給已裝完一陣子的人定期整理用；CLAUDE.starter 的月度健檢規則（超過 30 天主動提議）指的就是這個口令。
 
 ---
+- 加跑升級流程第 8 步「清掉已進 kit 的本機止血規則」：比對筆記檔已送出行與 CHANGELOG，列出可刪的本機規則，問過才刪
 
 ## 鐵則
 

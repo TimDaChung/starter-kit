@@ -5,8 +5,9 @@
 ## v3.49.0 (2026-10-15)
 
 - **組員意見回到 kit 的管道改成「自動記筆記 → 升級時送出」**（Tim 拍板）。原本三層都要人動手：糾正寫回自己的 CLAUDE.md（只救自己）、收尾自檢要每次點頭轉單、使用回顧要有人想到跑 30 天。改成：
-  - **kit 的東西被糾正，回 kit、不只改自己**：kit skill 的產出被糾正 → 不寫自己的 CLAUDE.md、不寫 memory；被糾正的是 CLAUDE.md 裡來自 `CLAUDE.starter.md` 的規則（到 kit 找得到同一句）→ 可先改本機止血，但一樣記筆記、skill 欄寫 `CLAUDE.starter`，升級時併成「CLAUDE.starter 規則建議」送回——Claude 收尾時不問、直接追加一行到 `~/.claude/starter-feedback.md`（日期｜skill｜發生什麼｜能避免的規則）；只有腳本壞到做不下去才當場出單。`CLAUDE.starter.md` meta 規則加這條唯一例外，「踩雷附單」改寫
-  - **「starter 升級」收尾新增第 7 步**：讀筆記檔「上次送出」之後的行，整理成單（同一支 skill 併一張），結算表列「📝 kit 回饋：N 筆 → M 張單」並問一次要不要私訊給主任；送出後更新水位線、刪已送的行。每天升級、每天送，一次幾筆
+  - **kit 的東西被糾正，照常寫回自己的 CLAUDE.md／memory 止血，另外記一筆回 kit**：kit skill 的產出被糾正、或被糾正的是 CLAUDE.md 裡來自 `CLAUDE.starter.md` 的規則（到 kit 找得到同一句，skill 欄寫 `CLAUDE.starter`，升級時併成「CLAUDE.starter 規則建議」）——Claude 收尾時不問、直接追加一行到 `~/.claude/starter-feedback.md`（日期｜skill｜發生什麼｜能避免的規則）；只有腳本壞到做不下去才當場出單。`CLAUDE.starter.md` meta 規則加這條唯一例外，「踩雷附單」改寫
+  - **「starter 升級」收尾新增第 7 步**：讀筆記檔「上次送出」之後的行，整理成單（同一支 skill 併一張），結算表列「📝 kit 回饋：N 筆 → M 張單」並問一次要不要私訊給主任；送出後更新水位線、行標「已送出」留著。每天升級、每天送，一次幾筆
+  - **升級與健檢新增第 8 步「清掉已進 kit 的本機止血規則」**：已送出的筆記若在 CHANGELOG 找得到對應修正，列出它「本機已寫」的 CLAUDE.md 段落／memory 檔，問一次要不要刪；沒修好前留著繼續擋。本機規則不會越積越多，也不會在 kit 修好前失去止血（Tim 拍板）
   - **「kit 使用回顧」改成只看上次送出之後**（沒水位線就近 7 天，不再 30 天）：先讀筆記檔，再跑 `usage_scan.py` 補 Claude 當下漏記的；`usage_scan.py` 新增 `--since`、`--note`（自動讀水位線），預設 7 天；補測試
 - ⚙️ **升級動作**：`git pull` 後精靈第一次跑升級會自動建 `~/.claude/starter-feedback.md`；若你之前照舊規則把 kit skill 的糾正寫進了自己的 CLAUDE.md，可以搬到筆記檔讓它回流 kit（選做）
 

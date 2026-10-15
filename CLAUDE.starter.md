@@ -21,7 +21,7 @@
 **被糾正過的事，寫回這份檔案。**
 同一類錯誤被指正時，在對應段落加一條具體規則（含當時的實際案例一句話）。這份檔案的價值不在起手內容，在它會隨著你的使用越長越準。
 
-**唯一例外：kit 的東西被糾正，回 kit、不只改自己。** 兩種情況：(1) kit skill 的產出被糾正 → 不寫這裡、不寫 memory，Claude 收尾自動記一筆到 `~/.claude/starter-feedback.md`；(2) 被糾正的是**這份檔案裡來自 `CLAUDE.starter.md` 的規則**（Claude 先到 `%USERPROFILE%\starter-kit\CLAUDE.starter.md` 找同一句，找得到就是）→ 可以先改這裡止血，但**一樣要記一筆**（skill 欄寫 `CLAUDE.starter`），下次「starter 升級」整理送回 kit，修一次全組的 CLAUDE.md 一起準。只有個人習慣、與 kit 無關的規則才只改這裡不記（Tim 2026-10-15）。
+**kit 的東西被糾正，寫回這裡之外還要記一筆回 kit。** 兩種情況：(1) kit skill 的產出被糾正；(2) 被糾正的是這份檔案裡來自 `CLAUDE.starter.md` 的規則（Claude 先到 `%USERPROFILE%\starter-kit\CLAUDE.starter.md` 找同一句，找得到就是）。兩種都照常寫回這裡或 memory 止血，**另外** Claude 收尾自動記一筆到 `~/.claude/starter-feedback.md`，下次「starter 升級」整理送回 kit；kit 修好後升級／健檢會比對哪些本機規則已經進 kit，問你要不要刪，不會越積越多（Tim 2026-10-15）。
 
 配套三條，讓這份檔案跟整套設定持續變準：
 
@@ -32,7 +32,7 @@
 - **工具地圖**：`~/.claude/starter-skill-map.md` 是「工作情境 → 該用哪支 skill／agent」的對照表（由 starter 精靈產生與更新）。**派工或挑工具前先查這張**，不要憑印象猜
 - **月度健檢**：`~/.claude/starter-skill-map.md` 頂部記「上次 starter 健檢：<日期>」，超過 30 天 Claude 要主動提議跑「starter 健檢」，跑完更新日期
 - **異常與建議都走 SOP**：kit 的 skill／腳本出異常 → 走 `issue-triage` 回報模式產出標準回報轉給維護者；**沒壞但覺得某支 skill 不順手、想改流程／觸發詞／輸出格式／加功能** → 走 `issue-triage` 建議模式（四欄輕量建議單，不用重現步驟）轉給維護者。兩者都不自行修改 junction 內的 kit 檔案——改了會跟下次升級打架，而且意見悶在自己機器上維護者收不到
-- **用 kit 踩雷就自動記筆記，升級時送出**：使用 kit skill 的任務收尾時，若本次發生「使用者糾正了 skill 產出／kit 腳本報錯或要繞路／SKILL.md 與實況不符」任一項，Claude 不問、直接追加一行到 `~/.claude/starter-feedback.md`（格式在 `issue-triage`〈收尾自檢〉）；只有腳本壞到做不下去才當場出單。每次「starter 升級」精靈會整理這些筆記成單，問一次要不要私訊給主任；想一次掃更完整就說「kit 使用回顧」（只看上次送出之後）
+- **用 kit 踩雷就自動記筆記，升級時送出**：使用 kit skill 的任務收尾時，若本次發生「使用者糾正了 skill 產出／kit 腳本報錯或要繞路／SKILL.md 與實況不符」任一項，Claude 照常寫回 CLAUDE.md／memory 止血，並且不問、直接追加一行到 `~/.claude/starter-feedback.md`（格式在 `issue-triage`〈收尾自檢〉）；只有腳本壞到做不下去才當場出單。每次「starter 升級」精靈會整理這些筆記成單，問一次要不要私訊給主任；修進 kit 之後再問要不要刪本機那條；想一次掃更完整就說「kit 使用回顧」（只看上次送出之後）
 - **已載入的 skill 規則不會跟著 kit 升級**：SKILL.md 是在 session 裡第一次用到時讀進來的，之後 `git pull` 換了檔案，這個 session 記得的還是舊版。跨天的長 session、或 session 中途升級過 kit，引用某條 skill 規則前先重讀該 SKILL.md 現行檔，或直接 `/clear` 重開（案例：2026-10-15 一個 10/08 開到 10/15 的 session 引用了 v3.30.0 已拿掉的 line-notes 規則寫建議單）
 
 ---
