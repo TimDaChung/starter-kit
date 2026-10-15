@@ -1,6 +1,6 @@
 # Claude Code Starter Kit
 
-給團隊的 Claude Code 起手包:一份會自己長大的全域設定 + 20 支實戰 skills + 3 支品管 agents。
+給團隊的 Claude Code 起手包:一份會自己長大的全域設定 + 34 支實戰 skills + 3 支品管 agents。
 不含 Slack 秘書——要秘書另裝 [secretary-kit](https://github.com/TimDaChung/secretary-kit)。
 
 ## 最快安裝法
