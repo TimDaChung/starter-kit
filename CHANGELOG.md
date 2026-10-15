@@ -10,7 +10,7 @@
 - **boss-demo 步驟 6「截分鏡」SOP 補強**（組員建議，全部採納）：`storyboard-capture.md` 新增第 1 步——先照企劃文字列截圖清單、beat 只加在截圖用副本（定稿 demo 不動）、截圖前全部圖片 decode 預熱、整段套 easing 的狀態靠觀察放 beat；組成時逐格對照企劃、流程相同的表演只出一輪。`capture-timing.md` 地雷 2 補「中途才換上的圖也要預熱」。分工：副本只放截圖 beat 與預熱，demo 本身的計時地雷照舊回步驟 4 修
 - **plan_lint 讀得到 `A -. 標籤 .-> B` 虛線寫法**（組員回報）：ARROW 正則只認 `-- 標籤 -->` 與 `-.->|標籤|`，虛線帶標籤的判斷節點被誤報少一個出口；一併支援粗線 `== 標籤 ==>`，補測試
 - **`notion_rest.upload_file` 等到上傳狀態 uploaded 才回傳**（組員回報）：連續上傳後立刻 append 會 404「Confirm the status of the file upload is uploaded」。新增 `wait_uploaded()` 輪詢 `GET /file_uploads/{id}`（最多 10 秒，failed／expired 直接報錯），新增 `test_notion_rest.py`；實際上傳一張圖 0.9 秒到 uploaded。連傳十多張的原狀況未重現，修法照回報建議
-- **魚樂園 Boss 企劃慣例收進 Notion〈共用規範之書〉**（組員建議，部分採納）：不恢復 `line-notes.md`（v3.30.0 已改以 Notion 為權威），8 條慣例（用詞、機制通規、表格方向、Boss 章節順序、公版段落、登場橫幅、Spine 限制）寫成新頁〈Boss企劃撰寫慣例〉，`shared-specs.md` 加觸發列；「demo 試玩調整指令不是規格」各線通用，改寫進 writer 第九節第 8 條
+- **魚樂園企劃慣例收進 Notion〈共用規範之書〉、表格表頭照範本**（組員建議，部分採納）：不恢復 `line-notes.md`（v3.30.0 已改以 Notion 為權威）。新頁〈魚樂園企劃撰寫慣例〉收全線用詞（射擊／注額／Boss）與 Boss 企劃的機制通規、公版段落、Spine 動態限制，`shared-specs.md` 加觸發列。**表格方向與章節順序不收**——範本本來就帶：實讀劍魔、俱樂部討伐副本兩份實例，「畫面呈現章的表一律首欄當表頭」與實例不符（狀態表都是首列），通則是「欄位名在哪邊就開哪邊」；章節順序以劍魔為準。writer 原本對表頭沒有任何規定、`table()` 也開不了首欄，這才是回報者自訂規則的原因：第九節新增第 9 條「表格表頭照範本」、`notion_rest.table()` 加 `row_header`，plan-doc-qa 結構檢查加表頭項。「demo 試玩調整指令不是規格」各線通用，寫進 writer 第九節第 8 條
 - check-lists 魚樂園誤報（組員回報）：已於 v3.44.0 修，回報的兩個假設與實測一致
 - md2notion 整頁寫入工具（組員建議）：方向採納，待回報者提供原始腳本後審內容再收
 - ⚙️ **升級動作**：`git pull` 即生效，無設定變更

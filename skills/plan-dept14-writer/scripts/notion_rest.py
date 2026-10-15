@@ -386,8 +386,11 @@ def divider() -> dict[str, Any]:
     return {"object": "block", "type": "divider", "divider": {}}
 
 
-def table(rows: list[list[Any]], header: bool = True) -> dict[str, Any]:
-    """rows: list of lists; a cell is a str or (str, {bold/color}) tuple."""
+def table(rows: list[list[Any]], header: bool = True, row_header: bool = False) -> dict[str, Any]:
+    """rows: list of lists; a cell is a str or (str, {bold/color}) tuple.
+
+    header = first row is the header (one record per row); row_header = first column is the
+    header (field names down the left). Copy both from the template's matching table."""
     width = max(len(r) for r in rows)
     children = []
     for r in rows:
@@ -398,7 +401,7 @@ def table(rows: list[list[Any]], header: bool = True) -> dict[str, Any]:
             else:
                 cells.append(rt(str(c)) if c != "" else [])
         children.append({"type": "table_row", "table_row": {"cells": cells}})
-    return {"object": "block", "type": "table", "table": {"table_width": width, "has_column_header": header, "has_row_header": False, "children": children}}
+    return {"object": "block", "type": "table", "table": {"table_width": width, "has_column_header": header, "has_row_header": row_header, "children": children}}
 
 
 def image_block(file_id: str, caption: str = "") -> dict[str, Any]:

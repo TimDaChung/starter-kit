@@ -37,3 +37,10 @@ def test_wait_uploaded_raises_on_failed_and_timeout() -> None:
         FakeUploads(["failed"]).wait_uploaded("fu1", "pending", interval=0)
     with pytest.raises(RuntimeError, match="after 0s"):
         FakeUploads(["pending"] * 5).wait_uploaded("fu1", "pending", timeout=0, interval=0)
+
+
+def test_table_header_flags() -> None:
+    rows = [["名稱", "x"], ["檔名", "y"]]
+    assert nr.table(rows)["table"]["has_column_header"] is True
+    t = nr.table(rows, header=False, row_header=True)["table"]
+    assert (t["has_column_header"], t["has_row_header"]) == (False, True)
