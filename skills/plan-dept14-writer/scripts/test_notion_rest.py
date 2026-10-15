@@ -90,5 +90,5 @@ def test_check_list_format_inherits_through_column_and_resets_after_paragraph() 
 def test_file_block_and_upload_types() -> None:
     b = nr.file_block("fu9", "《齊天大聖彩金表演demo》", name="demo.html")
     assert b["file"]["file_upload"] == {"id": "fu9"} and b["file"]["name"] == "demo.html"
-    assert nr.plain(b["file"]["caption"]) == "《齊天大聖彩金表演demo》"
+    assert b["file"]["caption"][0]["text"]["content"] == "《齊天大聖彩金表演demo》"  # rt() output has no plain_text
     assert nr.UPLOAD_TYPES["html"] == "text/html" and nr.UPLOAD_TYPES["png"] == "image/png"
