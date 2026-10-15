@@ -54,10 +54,10 @@ def page(pid: str, title: str, version_id: str | None = None) -> dict[str, Any]:
 
 def make_api() -> FakeApi:
     versions = [page("ver87", "v8.7"), page("ver86", "v8.6")]
-    activities = [page("actA", "賽特賓果樂", "ver87"), page("actB", "陣營戰S9", "ver87"), page("actC", "舊月活動", "ver86")]
+    activities = [page("actA", "範例賓果樂", "ver87"), page("actB", "陣營戰S9", "ver87"), page("actC", "舊月活動", "ver86")]
     tree = {
         "actA": [block("h5", "heading_1", "5. 儲值"), block("h51", "heading_2", "5.1. 賓果衝刺禮"),
-                 block("p1", "paragraph", "活動衝刺禮模組換包裝"), block("p2", "paragraph", "Banner圖檔名稱：2611_giftbag_Setekh.zip"),
+                 block("p1", "paragraph", "活動衝刺禮模組換包裝"), block("p2", "paragraph", "Banner圖檔名稱：2611_giftbag_bingo.zip"),
                  block("h52", "heading_2", "5.2. 活動更新禮包"), block("p3", "paragraph", "Banner：2403_permanen_activityupdate.png")],
         "actB": [block("h1", "heading_1", "1. 基本資訊"), block("p9", "paragraph", "沒有禮包")],
     }
@@ -67,8 +67,8 @@ def make_api() -> FakeApi:
 def test_find_reads_name_from_matching_section() -> None:
     logs: list[str] = []
     name = fb.find(r"X:\x\v8.7\v8.7魚樂園_賓果衝刺禮\對稿\1024x576_GAF", api=make_api(), log=logs.append)
-    assert name == "2611_giftbag_Setekh.zip"
-    assert any("賽特賓果樂 › 5.1. 賓果衝刺禮" in l for l in logs)
+    assert name == "2611_giftbag_bingo.zip"
+    assert any("範例賓果樂 › 5.1. 賓果衝刺禮" in l for l in logs)
 
 
 def test_find_stops_when_no_or_many_matches() -> None:
@@ -82,4 +82,4 @@ def test_name_under_other_section_is_not_taken() -> None:
     # 5.2's "Banner：…png" must not be read as the 5.1 name, and 5.1's name must not leak into 5.2
     api = make_api()
     assert fb.banner_name_in(api, "actA", "活動更新禮包") is None
-    assert fb.banner_name_in(api, "actA", "賓果衝刺禮") == ("5.1. 賓果衝刺禮", "2611_giftbag_Setekh.zip")
+    assert fb.banner_name_in(api, "actA", "賓果衝刺禮") == ("5.1. 賓果衝刺禮", "2611_giftbag_bingo.zip")
