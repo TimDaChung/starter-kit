@@ -15,7 +15,7 @@
 
 ## v3.47.0 (2026-10-15)
 
-- **有配套 demo 的企劃，demo 檔附進企劃**（Tim 指示，範例：魚類之書〈齊天大聖〉1.2 玩法大綱）：寫法固定——玩法大綱最後一條「試玩 demo：見附檔《<名稱>demo》…搭配本企劃閱讀」＋三個子項（怎麼開／怎麼操作／哪些是暫定）＋單檔 HTML 的檔案區塊（caption《<名稱>demo》）。writer 第九節新增第 10 條；boss-demo 步驟 5 寫回 Notion 加「定稿 demo 檔也要附」；product-planning 模式 B 加第 6 條（順手修掉重複的第 4 條編號）。`notion_rest.upload_file()` 原本只認圖片、其他副檔名一律當 jpeg 送，現改 `UPLOAD_TYPES`（html／zip／pdf／mp4，未知型別 octet-stream），新增 `file_block()`；補測試
+- **有配套 demo 的企劃，demo 檔附進企劃**（Tim 指示，範例：魚類之書最近一份 Boss 企劃的 1.2 玩法大綱）：寫法固定——玩法大綱最後一條「試玩 demo：見附檔《<名稱>demo》…搭配本企劃閱讀」＋三個子項（怎麼開／怎麼操作／哪些是暫定）＋單檔 HTML 的檔案區塊（caption《<名稱>demo》）。writer 第九節新增第 10 條；boss-demo 步驟 5 寫回 Notion 加「定稿 demo 檔也要附」；product-planning 模式 B 加第 6 條（順手修掉重複的第 4 條編號）。`notion_rest.upload_file()` 原本只認圖片、其他副檔名一律當 jpeg 送，現改 `UPLOAD_TYPES`（html／zip／pdf／mp4，未知型別 octet-stream），新增 `file_block()`；補測試
 - ⚙️ **升級動作**：`git pull` 即生效，無設定變更
 
 ## v3.46.0 (2026-10-15)
