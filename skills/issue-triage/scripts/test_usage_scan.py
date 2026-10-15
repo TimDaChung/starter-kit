@@ -63,3 +63,18 @@ def test_render_ranks_by_friction() -> None:
     out = us.render(stats, 30, 2, 8)
     assert out.index("| b |") < out.index("| a |")
     assert "## b" in out and "## a" not in out
+
+
+def test_watermark_and_since_cutoff(tmp_path: Path) -> None:
+    note = tmp_path / "starter-feedback.md"
+    assert us.watermark(note) is None
+    note.write_text("\n".join(["# kit 回饋筆記", "上次送出：2026-10-10", "- 2026-10-12 | x | y | z", ""]), encoding="utf-8")
+    assert us.watermark(note) == "2026-10-10"
+    root = tmp_path / "projects" / "p"
+    root.mkdir(parents=True)
+    old, new = root / "old.jsonl", root / "new.jsonl"
+    old.write_text("{}", encoding="utf-8"), new.write_text("{}", encoding="utf-8")
+    import os, time
+    os.utime(old, (time.time() - 20 * 86400,) * 2)
+    assert [p.name for p in us.transcripts(tmp_path / "projects", days=7)] == ["new.jsonl"]
+    assert len(list(us.transcripts(tmp_path / "projects", days=7, since="2000-01-01"))) == 2

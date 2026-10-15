@@ -8,7 +8,10 @@ Signals per kit skill (a skill is "active" from its Skill call or /command for W
   - corrections: user messages that push back ("不對", "改回", "又漏"...)
   - tool errors: tool results flagged is_error
 
-Usage: python usage_scan.py [--days 30] [--root ~/.claude/projects] [--kit ~/starter-kit] [--max 8]
+Usage: python usage_scan.py [--since YYYY-MM-DD | --days 7] [--note ~/.claude/starter-feedback.md]
+                            [--root ~/.claude/projects] [--kit ~/starter-kit] [--max 8]
+Default window: from the 上次送出 date in the feedback note (what was already sent to the
+maintainer is not rescanned); no note or never sent -> last 7 days.
 """
 
 from __future__ import annotations
@@ -106,15 +109,34 @@ def scan_file(path: Path, skills: set[str], stats: dict[str, SkillStats]) -> Non
                 active = None
 
 
-def transcripts(root: Path, days: int) -> Iterator[Path]:
-    cutoff = time.time() - days * 86400
+def watermark(note: Path) -> str | None:
+    """'上次送出：YYYY-MM-DD' from the feedback note's header, or None (never sent / no file)."""
+    if not note.is_file():
+        return None
+    for line in note.read_text(encoding="utf-8").splitlines()[:5]:
+        m = re.match(r"上次送出[:：]\s*(\d{4}-\d{2}-\d{2})", line.strip())
+        if m:
+            return m.group(1)
+    return None
+
+
+def cutoff_ts(days: int, since: str | None) -> float:
+    """Scan start as a timestamp: `since` (YYYY-MM-DD, inclusive) wins over `days`."""
+    if since:
+        return time.mktime(time.strptime(since, "%Y-%m-%d"))
+    return time.time() - days * 86400
+
+
+def transcripts(root: Path, days: int, since: str | None = None) -> Iterator[Path]:
+    cutoff = cutoff_ts(days, since)
     for p in root.glob("*/*.jsonl"):
         if p.stat().st_mtime >= cutoff:
             yield p
 
 
-def render(stats: dict[str, SkillStats], days: int, files: int, cap: int) -> str:
-    lines = [f"# kit 使用掃描（近 {days} 天，{files} 個 session）", "",
+def render(stats: dict[str, SkillStats], days: int, files: int, cap: int, since: str | None = None) -> str:
+    period = f"{since} 起" if since else f"近 {days} 天"
+    lines = [f"# kit 使用掃描（{period}，{files} 個 session）", "",
              "| skill | 使用次數 | 被糾正 | 工具錯誤 |", "|---|---|---|---|"]
     ranked = sorted(stats.items(), key=lambda kv: (-len(kv[1].corrections) - len(kv[1].errors), -kv[1].uses))
     for name, s in ranked:
@@ -137,17 +159,20 @@ def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8")
     home = Path.home()
     ap = argparse.ArgumentParser(description="Scan transcripts for friction while kit skills were in use.")
-    ap.add_argument("--days", type=int, default=30)
+    ap.add_argument("--days", type=int, default=7, help="scan window when no watermark / --since (default 7)")
+    ap.add_argument("--since", help="YYYY-MM-DD; default: 上次送出 from --note, else --days")
+    ap.add_argument("--note", type=Path, default=home / ".claude" / "starter-feedback.md", help="feedback note holding the 上次送出 watermark")
     ap.add_argument("--root", type=Path, default=home / ".claude" / "projects")
     ap.add_argument("--kit", type=Path, default=home / "starter-kit")
     ap.add_argument("--max", type=int, default=8, help="max snippets per skill and signal")
     args = ap.parse_args()
+    since = args.since or watermark(args.note)
     skills = kit_skills(args.kit)
     stats: dict[str, SkillStats] = defaultdict(SkillStats)
-    files = list(transcripts(args.root, args.days))
+    files = list(transcripts(args.root, args.days, since))
     for p in files:
         scan_file(p, skills, stats)
-    print(render(dict(stats), args.days, len(files), args.max))
+    print(render(dict(stats), args.days, len(files), args.max, since))
 
 
 if __name__ == "__main__":

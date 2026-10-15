@@ -180,6 +180,7 @@ description: Starter kit 健檢式安裝/升級精靈：盤點→直接裝缺的
 
 ```
 🩺 開場健檢:CLAUDE.md 96 行 / skills 0 / agents 0 / secretary 無
+📝 kit 回饋:3 筆 → 2 張單(plan-dept14-writer 建議 ×1、boss-demo 異常 ×1) → 要一起私訊給主任嗎?
 🧰 環境:Python 3.13 ✔ / Pillow ✔ / Playwright ✔(本次裝) / chrome-devtools MCP ✘(你說先不裝→playtest-loop 退手貼模式)
 🎨 生圖引擎 image-studio:✘ 未裝 → 所有生圖 skill(imagen 系列 / generate2dsprite / generate2dmap / cannon-* / boss-design、props、scene / pet-*)完全不能用,沒有替代線,照 references/image-studio-共用須知.md 第二節〈首裝流程〉安裝(imagen-banner 的驗收模式只吃 Pillow,仍可用)
    (已裝但憑證快到期時改成這行)⏳ 生圖引擎憑證:17 天後(2026-10-05)到期;新一季憑證要等舊的失效才發,撞到 401 時 Claude 會照共用須知第二節自己換
@@ -221,6 +222,7 @@ https://github.com/TimDaChung/secretary-kit」
    - **補排除行不足以停止追蹤**：gitignore 對「已經 add 進索引」的檔案無效。逐支 junction 跑 `git -C %USERPROFILE%\.claude ls-files "skills/<名>"`，有輸出＝已被追蹤 → `git -C %USERPROFILE%\.claude rm --cached -r --quiet skills/<名>`（只從索引移除，**不刪檔案**）
    - **只處理 junction（kit 來源）的路徑，使用者自有 skill 一律不碰**——自有 skill 本來就該進版控
    - 歸屬：補排除行與 `git rm --cached` 都不動使用者的檔案內容、不動自有資產，屬**安全動作直接做**（同「新增不問」），結算表交代補／移了幾行、幾支脫離追蹤
+7. **整理回饋筆記，問一次要不要送**（升級收尾必做）：讀 `~/.claude/starter-feedback.md`（沒有就建一份只有標題與「上次送出：（尚未）」的空檔）；「上次送出」之後有筆記 → 照 `issue-triage` D 模式的精簡版整理成【異常回報】／【建議】單（只用筆記，不掃對話紀錄；同一支 skill 的多筆併一張），結算表末尾列「📝 kit 回饋：N 筆 → M 張單」並**問一次**「要一起私訊給主任嗎？」——要就走 D 的第 7 步（鎖定收件者、私訊、讀回驗證、更新水位線）；不要就把單子留在對話裡請他自己轉，水位線一樣更新。沒有筆記就只列「📝 kit 回饋：0 筆」不問。這是組員意見回到 kit 的主要管道：每天升級、每天送，一次幾筆（Tim 2026-10-15）
 
 ## 健檢（「starter 健檢」/「新手包健檢」）
 
